@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASEdCtgNC.ui'
+## Form generated from reading UI file 'GUI_BASEDEUAts.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -845,7 +845,7 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_14.setStretch(0, 1)
 
-        self.verticalLayout_16.addWidget(self.frame_5, 0, Qt.AlignVCenter)
+        self.verticalLayout_16.addWidget(self.frame_5)
 
         self.frame_div_content_3 = QFrame(self.page_analysis)
         self.frame_div_content_3.setObjectName(u"frame_div_content_3")
@@ -911,13 +911,6 @@ class Ui_MainWindow(object):
 
         self.gridLayout_5.addWidget(self.dataDropdownMenu, 1, 3, 1, 1)
 
-        self.labelBoxMainArguements = QLabel(self.frame_div_content_3)
-        self.labelBoxMainArguements.setObjectName(u"labelBoxMainArguements")
-        self.labelBoxMainArguements.setFont(font1)
-        self.labelBoxMainArguements.setStyleSheet(u"")
-
-        self.gridLayout_5.addWidget(self.labelBoxMainArguements, 0, 0, 1, 4, Qt.AlignBottom)
-
         self.RMLSTcheckBox = QCheckBox(self.frame_div_content_3)
         self.RMLSTcheckBox.setObjectName(u"RMLSTcheckBox")
         self.RMLSTcheckBox.setAutoFillBackground(False)
@@ -925,7 +918,13 @@ class Ui_MainWindow(object):
 
         self.gridLayout_5.addWidget(self.RMLSTcheckBox, 1, 0, 1, 1)
 
-        self.gridLayout_5.setRowStretch(1, 3)
+        self.labelBoxMainArguements = QLabel(self.frame_div_content_3)
+        self.labelBoxMainArguements.setObjectName(u"labelBoxMainArguements")
+        self.labelBoxMainArguements.setFont(font1)
+        self.labelBoxMainArguements.setStyleSheet(u"")
+
+        self.gridLayout_5.addWidget(self.labelBoxMainArguements, 0, 0, 1, 4, Qt.AlignBottom)
+
 
         self.verticalLayout_16.addWidget(self.frame_div_content_3)
 
@@ -1205,7 +1204,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_16.addWidget(self.frame_div_content_4)
 
         self.verticalLayout_16.setStretch(0, 3)
-        self.verticalLayout_16.setStretch(1, 1)
         self.verticalLayout_16.setStretch(2, 1)
         self.verticalLayout_16.setStretch(3, 4)
         self.stackedWidget.addWidget(self.page_analysis)
@@ -1213,47 +1211,86 @@ class Ui_MainWindow(object):
         self.page_table.setObjectName(u"page_table")
         self.verticalLayout_20 = QVBoxLayout(self.page_table)
         self.verticalLayout_20.setObjectName(u"verticalLayout_20")
-        self.frame_div_content_8 = QFrame(self.page_table)
-        self.frame_div_content_8.setObjectName(u"frame_div_content_8")
-        self.frame_div_content_8.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_8.setMaximumSize(QSize(16777215, 110))
-        self.frame_div_content_8.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
+        self.frame_div_content_10 = QFrame(self.page_table)
+        self.frame_div_content_10.setObjectName(u"frame_div_content_10")
+        self.frame_div_content_10.setMinimumSize(QSize(0, 110))
+        self.frame_div_content_10.setMaximumSize(QSize(16777215, 110))
+        self.frame_div_content_10.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
 "border-radius: 5px;\n"
 "")
-        self.frame_div_content_8.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_8.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_18 = QVBoxLayout(self.frame_div_content_8)
-        self.verticalLayout_18.setSpacing(0)
-        self.verticalLayout_18.setObjectName(u"verticalLayout_18")
-        self.verticalLayout_18.setContentsMargins(0, 0, 0, 0)
-        self.label_5 = QLabel(self.frame_div_content_8)
-        self.label_5.setObjectName(u"label_5")
-        self.label_5.setFont(font9)
-        self.label_5.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_18.addWidget(self.label_5)
-
-        self.label_8 = QLabel(self.frame_div_content_8)
+        self.frame_div_content_10.setFrameShape(QFrame.NoFrame)
+        self.frame_div_content_10.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_8 = QVBoxLayout(self.frame_div_content_10)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.label_8 = QLabel(self.frame_div_content_10)
         self.label_8.setObjectName(u"label_8")
-        self.label_8.setFont(font7)
+        self.label_8.setFont(font9)
         self.label_8.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_18.addWidget(self.label_8)
+        self.verticalLayout_8.addWidget(self.label_8)
+
+        self.timeLabel = QLabel(self.frame_div_content_10)
+        self.timeLabel.setObjectName(u"timeLabel")
+        font11 = QFont()
+        font11.setPointSize(14)
+        self.timeLabel.setFont(font11)
+        self.timeLabel.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_8.addWidget(self.timeLabel)
+
+        self.runLabelError = QLabel(self.frame_div_content_10)
+        self.runLabelError.setObjectName(u"runLabelError")
+        palette2 = QPalette()
+        palette2.setBrush(QPalette.Active, QPalette.WindowText, brush15)
+        brush19 = QBrush(QColor(41, 45, 56, 255))
+        brush19.setStyle(Qt.SolidPattern)
+        palette2.setBrush(QPalette.Active, QPalette.Button, brush19)
+        palette2.setBrush(QPalette.Active, QPalette.Text, brush15)
+        palette2.setBrush(QPalette.Active, QPalette.ButtonText, brush15)
+        palette2.setBrush(QPalette.Active, QPalette.Base, brush19)
+        palette2.setBrush(QPalette.Active, QPalette.Window, brush19)
+        brush20 = QBrush(QColor(190, 9, 9, 128))
+        brush20.setStyle(Qt.NoBrush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette2.setBrush(QPalette.Active, QPalette.PlaceholderText, brush20)
+#endif
+        palette2.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
+        palette2.setBrush(QPalette.Inactive, QPalette.Button, brush19)
+        palette2.setBrush(QPalette.Inactive, QPalette.Text, brush15)
+        palette2.setBrush(QPalette.Inactive, QPalette.ButtonText, brush15)
+        palette2.setBrush(QPalette.Inactive, QPalette.Base, brush19)
+        palette2.setBrush(QPalette.Inactive, QPalette.Window, brush19)
+        brush21 = QBrush(QColor(190, 9, 9, 128))
+        brush21.setStyle(Qt.NoBrush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette2.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush21)
+#endif
+        palette2.setBrush(QPalette.Disabled, QPalette.WindowText, brush15)
+        palette2.setBrush(QPalette.Disabled, QPalette.Button, brush19)
+        palette2.setBrush(QPalette.Disabled, QPalette.Text, brush15)
+        palette2.setBrush(QPalette.Disabled, QPalette.ButtonText, brush15)
+        palette2.setBrush(QPalette.Disabled, QPalette.Base, brush19)
+        palette2.setBrush(QPalette.Disabled, QPalette.Window, brush19)
+        brush22 = QBrush(QColor(190, 9, 9, 128))
+        brush22.setStyle(Qt.NoBrush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette2.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush22)
+#endif
+        self.runLabelError.setPalette(palette2)
+        self.runLabelError.setFont(font10)
+        self.runLabelError.setStyleSheet(u"color:rgb(190, 9, 9);")
+        self.runLabelError.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_8.addWidget(self.runLabelError)
 
 
-        self.verticalLayout_20.addWidget(self.frame_div_content_8)
+        self.verticalLayout_20.addWidget(self.frame_div_content_10)
 
-        self.frame_6 = QFrame(self.page_table)
-        self.frame_6.setObjectName(u"frame_6")
-        self.frame_6.setFrameShape(QFrame.StyledPanel)
-        self.frame_6.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_19 = QVBoxLayout(self.frame_6)
-        self.verticalLayout_19.setObjectName(u"verticalLayout_19")
-        self.resultsBtn = QPushButton(self.frame_6)
-        self.resultsBtn.setObjectName(u"resultsBtn")
-        self.resultsBtn.setMinimumSize(QSize(150, 30))
-        self.resultsBtn.setFont(font10)
-        self.resultsBtn.setStyleSheet(u"QPushButton {\n"
+        self.runBtn = QPushButton(self.page_table)
+        self.runBtn.setObjectName(u"runBtn")
+        self.runBtn.setMinimumSize(QSize(150, 30))
+        self.runBtn.setFont(font10)
+        self.runBtn.setStyleSheet(u"QPushButton {\n"
 "	border: 2px solid rgb(52, 59, 72);\n"
 "	border-radius: 5px;	\n"
 "	background-color: rgb(52, 59, 72);\n"
@@ -1266,68 +1303,104 @@ class Ui_MainWindow(object):
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
 "}")
-        self.resultsBtn.setIcon(icon3)
+        icon4 = QIcon()
+        icon4.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.runBtn.setIcon(icon4)
 
-        self.verticalLayout_19.addWidget(self.resultsBtn, 0, Qt.AlignHCenter)
-
-        self.tableLabelError = QLabel(self.frame_6)
-        self.tableLabelError.setObjectName(u"tableLabelError")
-        palette2 = QPalette()
-        brush19 = QBrush(QColor(147, 0, 0, 255))
-        brush19.setStyle(Qt.SolidPattern)
-        palette2.setBrush(QPalette.Active, QPalette.WindowText, brush19)
-        palette2.setBrush(QPalette.Active, QPalette.Button, brush1)
-        palette2.setBrush(QPalette.Active, QPalette.Text, brush19)
-        palette2.setBrush(QPalette.Active, QPalette.ButtonText, brush19)
-        palette2.setBrush(QPalette.Active, QPalette.Base, brush1)
-        palette2.setBrush(QPalette.Active, QPalette.Window, brush1)
-        brush20 = QBrush(QColor(147, 0, 0, 128))
-        brush20.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Active, QPalette.PlaceholderText, brush20)
-#endif
-        palette2.setBrush(QPalette.Inactive, QPalette.WindowText, brush19)
-        palette2.setBrush(QPalette.Inactive, QPalette.Button, brush1)
-        palette2.setBrush(QPalette.Inactive, QPalette.Text, brush19)
-        palette2.setBrush(QPalette.Inactive, QPalette.ButtonText, brush19)
-        palette2.setBrush(QPalette.Inactive, QPalette.Base, brush1)
-        palette2.setBrush(QPalette.Inactive, QPalette.Window, brush1)
-        brush21 = QBrush(QColor(147, 0, 0, 128))
-        brush21.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush21)
-#endif
-        palette2.setBrush(QPalette.Disabled, QPalette.WindowText, brush19)
-        palette2.setBrush(QPalette.Disabled, QPalette.Button, brush1)
-        palette2.setBrush(QPalette.Disabled, QPalette.Text, brush19)
-        palette2.setBrush(QPalette.Disabled, QPalette.ButtonText, brush19)
-        palette2.setBrush(QPalette.Disabled, QPalette.Base, brush1)
-        palette2.setBrush(QPalette.Disabled, QPalette.Window, brush1)
-        brush22 = QBrush(QColor(147, 0, 0, 128))
-        brush22.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush22)
-#endif
-        self.tableLabelError.setPalette(palette2)
-        self.tableLabelError.setFont(font10)
-        self.tableLabelError.setStyleSheet(u"color:#930000;")
-        self.tableLabelError.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_19.addWidget(self.tableLabelError)
-
-        self.verticalLayout_19.setStretch(0, 1)
-
-        self.verticalLayout_20.addWidget(self.frame_6)
+        self.verticalLayout_20.addWidget(self.runBtn)
 
         self.frame_4 = QFrame(self.page_table)
         self.frame_4.setObjectName(u"frame_4")
         self.frame_4.setMinimumSize(QSize(0, 150))
         self.frame_4.setFrameShape(QFrame.StyledPanel)
         self.frame_4.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_13 = QHBoxLayout(self.frame_4)
-        self.horizontalLayout_13.setSpacing(0)
-        self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
-        self.horizontalLayout_13.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout = QGridLayout(self.frame_4)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.frame_div_content_8 = QFrame(self.frame_4)
+        self.frame_div_content_8.setObjectName(u"frame_div_content_8")
+        self.frame_div_content_8.setMinimumSize(QSize(721, 0))
+        self.frame_div_content_8.setMaximumSize(QSize(16777215, 50))
+        self.frame_div_content_8.setFont(font5)
+        self.frame_div_content_8.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
+"border-radius: 5px;\n"
+"")
+        self.frame_div_content_8.setFrameShape(QFrame.NoFrame)
+        self.frame_div_content_8.setFrameShadow(QFrame.Raised)
+        self.gridLayout_2 = QGridLayout(self.frame_div_content_8)
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.addIsolateBtn = QPushButton(self.frame_div_content_8)
+        self.addIsolateBtn.setObjectName(u"addIsolateBtn")
+        self.addIsolateBtn.setMinimumSize(QSize(120, 30))
+        self.addIsolateBtn.setMaximumSize(QSize(150, 16777215))
+        self.addIsolateBtn.setFont(font10)
+        self.addIsolateBtn.setLayoutDirection(Qt.LeftToRight)
+        self.addIsolateBtn.setAutoFillBackground(False)
+        self.addIsolateBtn.setStyleSheet(u"QPushButton {\n"
+"	border: 2px solid rgb(52, 59, 72);\n"
+"	border-radius: 5px;	\n"
+"	background-color: rgb(52, 59, 72);\n"
+"}\n"
+"QPushButton:hover {\n"
+"	background-color: rgb(57, 65, 80);\n"
+"	border: 2px solid rgb(61, 70, 86);\n"
+"}\n"
+"QPushButton:pressed {	\n"
+"	background-color: rgb(35, 40, 49);\n"
+"	border: 2px solid rgb(43, 50, 61);\n"
+"}")
+        icon5 = QIcon()
+        icon5.addFile(u":/16x16/icons/16x16/cil-3d.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.addIsolateBtn.setIcon(icon5)
+
+        self.gridLayout_2.addWidget(self.addIsolateBtn, 0, 1, 1, 1)
+
+        self.isolateInput = QLineEdit(self.frame_div_content_8)
+        self.isolateInput.setObjectName(u"isolateInput")
+        self.isolateInput.setMinimumSize(QSize(0, 30))
+        self.isolateInput.setStyleSheet(u"QLineEdit {\n"
+"	background-color: rgb(27, 29, 35);\n"
+"	border-radius: 5px;\n"
+"	border: 2px solid rgb(27, 29, 35);\n"
+"	padding-left: 10px;\n"
+"}\n"
+"QLineEdit:hover {\n"
+"	border: 2px solid rgb(64, 71, 88);\n"
+"}\n"
+"QLineEdit:focus {\n"
+"	border: 2px solid rgb(91, 101, 124);\n"
+"}")
+
+        self.gridLayout_2.addWidget(self.isolateInput, 0, 3, 1, 1)
+
+        self.deleteIsolateBtn = QPushButton(self.frame_div_content_8)
+        self.deleteIsolateBtn.setObjectName(u"deleteIsolateBtn")
+        self.deleteIsolateBtn.setMinimumSize(QSize(120, 30))
+        self.deleteIsolateBtn.setMaximumSize(QSize(150, 16777215))
+        self.deleteIsolateBtn.setFont(font10)
+        self.deleteIsolateBtn.setLayoutDirection(Qt.LeftToRight)
+        self.deleteIsolateBtn.setAutoFillBackground(False)
+        self.deleteIsolateBtn.setStyleSheet(u"QPushButton {\n"
+"	border: 2px solid rgb(76, 8, 10);\n"
+"	border-radius: 5px;	\n"
+"	background-color: rgb(94, 10, 12);\n"
+"}\n"
+"QPushButton:hover {\n"
+"	background-color: rgb(113, 12, 15);\n"
+"	border: 2px solid rgb(102, 12, 15);\n"
+"}\n"
+"QPushButton:pressed {	\n"
+"	background-color: rgb(35, 40, 49);\n"
+"	border: 2px solid rgb(43, 50, 61);\n"
+"}")
+        icon6 = QIcon()
+        icon6.addFile(u":/16x16/icons/16x16/cil-x-circle.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.deleteIsolateBtn.setIcon(icon6)
+
+        self.gridLayout_2.addWidget(self.deleteIsolateBtn, 0, 4, 1, 1)
+
+
+        self.gridLayout.addWidget(self.frame_div_content_8, 0, 0, 1, 1)
+
         self.resultsTableWidget = QTableWidget(self.frame_4)
         if (self.resultsTableWidget.columnCount() < 8):
             self.resultsTableWidget.setColumnCount(8)
@@ -1347,8 +1420,8 @@ class Ui_MainWindow(object):
         self.resultsTableWidget.setHorizontalHeaderItem(6, __qtablewidgetitem6)
         __qtablewidgetitem7 = QTableWidgetItem()
         self.resultsTableWidget.setHorizontalHeaderItem(7, __qtablewidgetitem7)
-        if (self.resultsTableWidget.rowCount() < 16):
-            self.resultsTableWidget.setRowCount(16)
+        if (self.resultsTableWidget.rowCount() < 4):
+            self.resultsTableWidget.setRowCount(4)
         __qtablewidgetitem8 = QTableWidgetItem()
         __qtablewidgetitem8.setFont(font2);
         self.resultsTableWidget.setVerticalHeaderItem(0, __qtablewidgetitem8)
@@ -1358,49 +1431,37 @@ class Ui_MainWindow(object):
         self.resultsTableWidget.setVerticalHeaderItem(2, __qtablewidgetitem10)
         __qtablewidgetitem11 = QTableWidgetItem()
         self.resultsTableWidget.setVerticalHeaderItem(3, __qtablewidgetitem11)
+        font12 = QFont()
+        font12.setPointSize(16)
         __qtablewidgetitem12 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(4, __qtablewidgetitem12)
+        __qtablewidgetitem12.setFont(font12);
+        self.resultsTableWidget.setItem(0, 0, __qtablewidgetitem12)
         __qtablewidgetitem13 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(5, __qtablewidgetitem13)
+        self.resultsTableWidget.setItem(0, 1, __qtablewidgetitem13)
         __qtablewidgetitem14 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(6, __qtablewidgetitem14)
+        self.resultsTableWidget.setItem(0, 2, __qtablewidgetitem14)
         __qtablewidgetitem15 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(7, __qtablewidgetitem15)
+        self.resultsTableWidget.setItem(0, 3, __qtablewidgetitem15)
         __qtablewidgetitem16 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(8, __qtablewidgetitem16)
+        self.resultsTableWidget.setItem(0, 4, __qtablewidgetitem16)
         __qtablewidgetitem17 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(9, __qtablewidgetitem17)
+        self.resultsTableWidget.setItem(0, 5, __qtablewidgetitem17)
         __qtablewidgetitem18 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(10, __qtablewidgetitem18)
+        self.resultsTableWidget.setItem(0, 6, __qtablewidgetitem18)
         __qtablewidgetitem19 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(11, __qtablewidgetitem19)
+        self.resultsTableWidget.setItem(0, 7, __qtablewidgetitem19)
         __qtablewidgetitem20 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(12, __qtablewidgetitem20)
+        self.resultsTableWidget.setItem(1, 0, __qtablewidgetitem20)
         __qtablewidgetitem21 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(13, __qtablewidgetitem21)
+        self.resultsTableWidget.setItem(2, 0, __qtablewidgetitem21)
         __qtablewidgetitem22 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(14, __qtablewidgetitem22)
-        __qtablewidgetitem23 = QTableWidgetItem()
-        self.resultsTableWidget.setVerticalHeaderItem(15, __qtablewidgetitem23)
-        __qtablewidgetitem24 = QTableWidgetItem()
-        self.resultsTableWidget.setItem(0, 0, __qtablewidgetitem24)
-        __qtablewidgetitem25 = QTableWidgetItem()
-        self.resultsTableWidget.setItem(0, 1, __qtablewidgetitem25)
-        __qtablewidgetitem26 = QTableWidgetItem()
-        self.resultsTableWidget.setItem(0, 2, __qtablewidgetitem26)
-        __qtablewidgetitem27 = QTableWidgetItem()
-        self.resultsTableWidget.setItem(0, 3, __qtablewidgetitem27)
-        __qtablewidgetitem28 = QTableWidgetItem()
-        self.resultsTableWidget.setItem(0, 4, __qtablewidgetitem28)
-        __qtablewidgetitem29 = QTableWidgetItem()
-        self.resultsTableWidget.setItem(0, 5, __qtablewidgetitem29)
-        __qtablewidgetitem30 = QTableWidgetItem()
-        self.resultsTableWidget.setItem(0, 6, __qtablewidgetitem30)
-        __qtablewidgetitem31 = QTableWidgetItem()
-        self.resultsTableWidget.setItem(0, 7, __qtablewidgetitem31)
+        self.resultsTableWidget.setItem(3, 0, __qtablewidgetitem22)
         self.resultsTableWidget.setObjectName(u"resultsTableWidget")
-        sizePolicy.setHeightForWidth(self.resultsTableWidget.sizePolicy().hasHeightForWidth())
-        self.resultsTableWidget.setSizePolicy(sizePolicy)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.resultsTableWidget.sizePolicy().hasHeightForWidth())
+        self.resultsTableWidget.setSizePolicy(sizePolicy5)
         palette3 = QPalette()
         palette3.setBrush(QPalette.Active, QPalette.WindowText, brush6)
         brush23 = QBrush(QColor(39, 44, 54, 255))
@@ -1494,8 +1555,11 @@ class Ui_MainWindow(object):
 "}\n"
 "")
         self.resultsTableWidget.setFrameShape(QFrame.NoFrame)
-        self.resultsTableWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.resultsTableWidget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.resultsTableWidget.setFrameShadow(QFrame.Sunken)
+        self.resultsTableWidget.setLineWidth(10)
+        self.resultsTableWidget.setMidLineWidth(0)
+        self.resultsTableWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.resultsTableWidget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContentsOnFirstShow)
         self.resultsTableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.resultsTableWidget.setAlternatingRowColors(False)
         self.resultsTableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -1512,161 +1576,18 @@ class Ui_MainWindow(object):
         self.resultsTableWidget.verticalHeader().setHighlightSections(False)
         self.resultsTableWidget.verticalHeader().setStretchLastSection(True)
 
-        self.horizontalLayout_13.addWidget(self.resultsTableWidget)
+        self.gridLayout.addWidget(self.resultsTableWidget, 1, 0, 1, 1)
+
+        self.label_4 = QLabel(self.frame_4)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setTextFormat(Qt.RichText)
+
+        self.gridLayout.addWidget(self.label_4, 2, 0, 1, 1)
 
 
         self.verticalLayout_20.addWidget(self.frame_4)
 
         self.stackedWidget.addWidget(self.page_table)
-        self.page_widgets = QWidget()
-        self.page_widgets.setObjectName(u"page_widgets")
-        self.verticalLayout_6 = QVBoxLayout(self.page_widgets)
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.frame = QFrame(self.page_widgets)
-        self.frame.setObjectName(u"frame")
-        self.frame.setStyleSheet(u"border-radius: 5px;")
-        self.frame.setFrameShape(QFrame.StyledPanel)
-        self.frame.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_32 = QVBoxLayout(self.frame)
-        self.verticalLayout_32.setObjectName(u"verticalLayout_32")
-        self.frame_2 = QFrame(self.frame)
-        self.frame_2.setObjectName(u"frame_2")
-        self.frame_2.setStyleSheet(u"border-radius: 5px;")
-        self.frame_2.setFrameShape(QFrame.StyledPanel)
-        self.frame_2.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_15 = QVBoxLayout(self.frame_2)
-        self.verticalLayout_15.setSpacing(0)
-        self.verticalLayout_15.setObjectName(u"verticalLayout_15")
-        self.verticalLayout_15.setContentsMargins(0, 0, 0, 0)
-        self.frame_div_content_9 = QFrame(self.frame_2)
-        self.frame_div_content_9.setObjectName(u"frame_div_content_9")
-        self.frame_div_content_9.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_9.setMaximumSize(QSize(16777215, 16777215))
-        self.frame_div_content_9.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
-"border-radius: 5px;\n"
-"")
-        self.frame_div_content_9.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_9.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_11 = QVBoxLayout(self.frame_div_content_9)
-        self.verticalLayout_11.setSpacing(0)
-        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
-        self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
-        self.frame_title_wid_2 = QFrame(self.frame_div_content_9)
-        self.frame_title_wid_2.setObjectName(u"frame_title_wid_2")
-        self.frame_title_wid_2.setMaximumSize(QSize(16777215, 35))
-        self.frame_title_wid_2.setStyleSheet(u"background-color: rgb(39, 44, 54);")
-        self.frame_title_wid_2.setFrameShape(QFrame.StyledPanel)
-        self.frame_title_wid_2.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_21 = QVBoxLayout(self.frame_title_wid_2)
-        self.verticalLayout_21.setObjectName(u"verticalLayout_21")
-        self.labelBoxBlenderInstalation_2 = QLabel(self.frame_title_wid_2)
-        self.labelBoxBlenderInstalation_2.setObjectName(u"labelBoxBlenderInstalation_2")
-        self.labelBoxBlenderInstalation_2.setFont(font1)
-        self.labelBoxBlenderInstalation_2.setStyleSheet(u"")
-
-        self.verticalLayout_21.addWidget(self.labelBoxBlenderInstalation_2)
-
-
-        self.verticalLayout_11.addWidget(self.frame_title_wid_2)
-
-        self.frame_content_wid_2 = QFrame(self.frame_div_content_9)
-        self.frame_content_wid_2.setObjectName(u"frame_content_wid_2")
-        self.frame_content_wid_2.setFrameShape(QFrame.NoFrame)
-        self.frame_content_wid_2.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_11 = QHBoxLayout(self.frame_content_wid_2)
-        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
-        self.label_9 = QLabel(self.frame_content_wid_2)
-        self.label_9.setObjectName(u"label_9")
-        font11 = QFont()
-        font11.setFamily(u"Sans Serif")
-        font11.setPointSize(8)
-        self.label_9.setFont(font11)
-        self.label_9.setTextFormat(Qt.AutoText)
-        self.label_9.setScaledContents(False)
-        self.label_9.setWordWrap(True)
-
-        self.horizontalLayout_11.addWidget(self.label_9)
-
-
-        self.verticalLayout_11.addWidget(self.frame_content_wid_2)
-
-
-        self.verticalLayout_15.addWidget(self.frame_div_content_9)
-
-
-        self.verticalLayout_32.addWidget(self.frame_2)
-
-        self.frame_3 = QFrame(self.frame)
-        self.frame_3.setObjectName(u"frame_3")
-        self.frame_3.setStyleSheet(u"border-radius: 5px;")
-        self.frame_3.setFrameShape(QFrame.StyledPanel)
-        self.frame_3.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_28 = QVBoxLayout(self.frame_3)
-        self.verticalLayout_28.setSpacing(0)
-        self.verticalLayout_28.setObjectName(u"verticalLayout_28")
-        self.verticalLayout_28.setContentsMargins(0, 0, 0, 0)
-        self.frame_div_content_12 = QFrame(self.frame_3)
-        self.frame_div_content_12.setObjectName(u"frame_div_content_12")
-        self.frame_div_content_12.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_12.setMaximumSize(QSize(16777215, 16777215))
-        self.frame_div_content_12.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
-"border-radius: 5px;\n"
-"")
-        self.frame_div_content_12.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_12.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_29 = QVBoxLayout(self.frame_div_content_12)
-        self.verticalLayout_29.setSpacing(0)
-        self.verticalLayout_29.setObjectName(u"verticalLayout_29")
-        self.verticalLayout_29.setContentsMargins(0, 0, 0, 0)
-        self.frame_title_wid_5 = QFrame(self.frame_div_content_12)
-        self.frame_title_wid_5.setObjectName(u"frame_title_wid_5")
-        self.frame_title_wid_5.setMaximumSize(QSize(16777215, 35))
-        self.frame_title_wid_5.setStyleSheet(u"background-color: rgb(39, 44, 54);")
-        self.frame_title_wid_5.setFrameShape(QFrame.StyledPanel)
-        self.frame_title_wid_5.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_30 = QVBoxLayout(self.frame_title_wid_5)
-        self.verticalLayout_30.setObjectName(u"verticalLayout_30")
-        self.labelBoxBlenderInstalation_5 = QLabel(self.frame_title_wid_5)
-        self.labelBoxBlenderInstalation_5.setObjectName(u"labelBoxBlenderInstalation_5")
-        self.labelBoxBlenderInstalation_5.setFont(font1)
-        self.labelBoxBlenderInstalation_5.setStyleSheet(u"")
-
-        self.verticalLayout_30.addWidget(self.labelBoxBlenderInstalation_5)
-
-
-        self.verticalLayout_29.addWidget(self.frame_title_wid_5)
-
-        self.frame_content_wid_5 = QFrame(self.frame_div_content_12)
-        self.frame_content_wid_5.setObjectName(u"frame_content_wid_5")
-        self.frame_content_wid_5.setFrameShape(QFrame.NoFrame)
-        self.frame_content_wid_5.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_15 = QHBoxLayout(self.frame_content_wid_5)
-        self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
-        self.label_12 = QLabel(self.frame_content_wid_5)
-        self.label_12.setObjectName(u"label_12")
-        font12 = QFont()
-        font12.setFamily(u"Segoe UI")
-        font12.setPointSize(8)
-        self.label_12.setFont(font12)
-        self.label_12.setTextFormat(Qt.AutoText)
-        self.label_12.setScaledContents(False)
-        self.label_12.setWordWrap(True)
-
-        self.horizontalLayout_15.addWidget(self.label_12)
-
-
-        self.verticalLayout_29.addWidget(self.frame_content_wid_5)
-
-
-        self.verticalLayout_28.addWidget(self.frame_div_content_12)
-
-
-        self.verticalLayout_32.addWidget(self.frame_3)
-
-
-        self.verticalLayout_6.addWidget(self.frame)
-
-        self.stackedWidget.addWidget(self.page_widgets)
 
         self.verticalLayout_9.addWidget(self.stackedWidget)
 
@@ -1743,7 +1664,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1768,41 +1689,98 @@ class Ui_MainWindow(object):
         self.label_top_info_1.setText(QCoreApplication.translate("MainWindow", u"C:\\Program Files\\Blender Foundation\\Blender 2.82", None))
         self.label_top_info_2.setText(QCoreApplication.translate("MainWindow", u"| HOME", None))
         self.label_user_icon.setText("")
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"WELCOME TO CONFINDR", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>This program is designed to find bacterial intra-species </p><p>contamination in raw Illumina data. It does this by looking </p><p>for multiple alleles of core, single copy genes.</p><p>Confindr must be installed for this app to work</p></body></html>", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>For complete instructions on installation,</p><p>please visit: https://olc-bioinformatics.github.io/ConFindr/</p></body></html>", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"WELCOME TO PORESIPPR", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>This program is designed to find specific genes in runs created from its </p><p>user over a specified time. PoreSippR must be installed for this app to work.</p></body></html>", None))
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>For complete instructions on installation,</p><p>please visit: https://olc-bioinformatics.github.io/PoreSippR-GUI/</p></body></html>", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"ANALYZATION STATION", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"Please select your folder of sequences you would like to analyze", None))
         self.sequenceBtn.setText(QCoreApplication.translate("MainWindow", u"Open Sequence Files", None))
         self.analyzeLabelError.setText("")
+#if QT_CONFIG(statustip)
+        self.baseCutoffInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Number of bases necessary to support a multiple allele call. Defaults to 2.", None))
+#endif // QT_CONFIG(statustip)
         self.baseCutoffInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Base Cutoff", None))
+#if QT_CONFIG(statustip)
+        self.FASTAcheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"If activated, will look for FASTA files instead of FASTQ for unpaired reads.", None))
+#endif // QT_CONFIG(statustip)
         self.FASTAcheckBox.setText(QCoreApplication.translate("MainWindow", u"FASTA", None))
         self.dataDropdownMenu.setItemText(0, QCoreApplication.translate("MainWindow", u"Illumina", None))
         self.dataDropdownMenu.setItemText(1, QCoreApplication.translate("MainWindow", u"Nanopore", None))
 
-        self.labelBoxMainArguements.setText(QCoreApplication.translate("MainWindow", u"MAIN ARGUEMENTS", None))
+#if QT_CONFIG(statustip)
+        self.dataDropdownMenu.setStatusTip(QCoreApplication.translate("MainWindow", u"Type of input data. Default is Illumina, but can be used for Nanopore too. No PacBio support (yet).", None))
+#endif // QT_CONFIG(statustip)
+#if QT_CONFIG(statustip)
+        self.RMLSTcheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"Activate to prefer using rMLST databases over core-gene derived databases. By default, ConFindr will use core-gene derived databases where available.", None))
+#endif // QT_CONFIG(statustip)
         self.RMLSTcheckBox.setText(QCoreApplication.translate("MainWindow", u"RMLST", None))
+        self.labelBoxMainArguements.setText(QCoreApplication.translate("MainWindow", u"MAIN ARGUEMENTS", None))
         self.verbosityDropdownMenu.setItemText(0, QCoreApplication.translate("MainWindow", u"Info", None))
         self.verbosityDropdownMenu.setItemText(1, QCoreApplication.translate("MainWindow", u"Debug", None))
         self.verbosityDropdownMenu.setItemText(2, QCoreApplication.translate("MainWindow", u"Warning", None))
 
+#if QT_CONFIG(statustip)
+        self.verbosityDropdownMenu.setStatusTip(QCoreApplication.translate("MainWindow", u"Amount of output you want printed to the screen. Defaults to info, which should be good for most users.", None))
+#endif // QT_CONFIG(statustip)
+#if QT_CONFIG(statustip)
+        self.keepCheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"By default, intermediate files are deleted. Activate this flag to keep intermediate files.", None))
+#endif // QT_CONFIG(statustip)
         self.keepCheckBox.setText(QCoreApplication.translate("MainWindow", u"Keep Files", None))
+#if QT_CONFIG(statustip)
+        self.versionCheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"Show program's version number and exit", None))
+#endif // QT_CONFIG(statustip)
         self.versionCheckBox.setText(QCoreApplication.translate("MainWindow", u"Version Display", None))
+#if QT_CONFIG(statustip)
+        self.crossDetailsCheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"Continue ConFindr analyses on samples with two or more genera identified. Default is False", None))
+#endif // QT_CONFIG(statustip)
         self.crossDetailsCheckBox.setText(QCoreApplication.translate("MainWindow", u"Cross Details", None))
+#if QT_CONFIG(statustip)
+        self.threadsInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Number of threads to run analysis with.", None))
+#endif // QT_CONFIG(statustip)
         self.threadsInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Threads", None))
+#if QT_CONFIG(statustip)
+        self.reverseInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Identifier for reverse reads.", None))
+#endif // QT_CONFIG(statustip)
         self.reverseInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Reverse ID", None))
+#if QT_CONFIG(statustip)
+        self.MMHInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Minimum number of matching hashes in a MASH screen in order for a genus to be considered present in a sample. Default is 150", None))
+#endif // QT_CONFIG(statustip)
         self.MMHInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"MMH", None))
+#if QT_CONFIG(statustip)
+        self.baseFractionInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Fraction of bases necessary to support a multiple allele call. Particularly useful when dealing with very high coverage samples. Default is 0.05.", None))
+#endif // QT_CONFIG(statustip)
         self.baseFractionInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"BFC", None))
+#if QT_CONFIG(statustip)
+        self.forwardInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Identifier for forward reads.", None))
+#endif // QT_CONFIG(statustip)
         self.forwardInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Forward ID", None))
+#if QT_CONFIG(statustip)
+        self.TMPInput.setStatusTip(QCoreApplication.translate("MainWindow", u"If your ConFindr databases are in a location you don't have write access to, you can enter this option to specify a temporary directory to put genus-specific databases to.", None))
+#endif // QT_CONFIG(statustip)
         self.TMPInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"TMP", None))
+#if QT_CONFIG(statustip)
+        self.qualityInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Base quality needed to support a multiple allele call. Defaults to 20.", None))
+#endif // QT_CONFIG(statustip)
         self.qualityInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Quality Cutoff", None))
+#if QT_CONFIG(statustip)
+        self.databaseInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Databases folder. To download these, you will need to get access to the rMLST databases. For complete instructions on how to do this, please see https://olc-bioinformatics.github.io/ConFindr/install/#downloading-confindr-databases", None))
+#endif // QT_CONFIG(statustip)
         self.databaseInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Databases", None))
+#if QT_CONFIG(statustip)
+        self.cgmlstInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Path to a cgMLST database to use for contamination detection instead of using the default rMLST database. Sequences in this file should have headers in format >genename_allelenumber. To speed up ConFindr runs, clustering the cgMLST database with CD-HIT before running ConFindr is recommended. This is highly experimental, results should be interpreted with great care.", None))
+#endif // QT_CONFIG(statustip)
         self.cgmlstInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"CGMLST", None))
         self.labelBoxAdvancedArguements.setText(QCoreApplication.translate("MainWindow", u"ADVANCED ARGUEMENTS", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"TABLE RESULTS", None))
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Results appear in the table below once you've selected a .csv or .xlsx file", None))
-        self.resultsBtn.setText(QCoreApplication.translate("MainWindow", u"Open Table", None))
-        self.tableLabelError.setText("")
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"PoreSippR SeekR", None))
+        self.timeLabel.setText(QCoreApplication.translate("MainWindow", u"Time Passed: 0hrs", None))
+        self.runLabelError.setText("")
+        self.runBtn.setText(QCoreApplication.translate("MainWindow", u"Begin Run", None))
+        self.addIsolateBtn.setText(QCoreApplication.translate("MainWindow", u"Add Isolates", None))
+#if QT_CONFIG(statustip)
+        self.isolateInput.setStatusTip("")
+#endif // QT_CONFIG(statustip)
+        self.isolateInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Isolate Name", None))
+        self.deleteIsolateBtn.setText(QCoreApplication.translate("MainWindow", u"Delete Isolates", None))
         ___qtablewidgetitem = self.resultsTableWidget.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"0", None));
         ___qtablewidgetitem1 = self.resultsTableWidget.horizontalHeaderItem(1)
@@ -1825,67 +1803,34 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem9.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
         ___qtablewidgetitem10 = self.resultsTableWidget.verticalHeaderItem(3)
         ___qtablewidgetitem10.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem11 = self.resultsTableWidget.verticalHeaderItem(4)
-        ___qtablewidgetitem11.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem12 = self.resultsTableWidget.verticalHeaderItem(5)
-        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem13 = self.resultsTableWidget.verticalHeaderItem(6)
-        ___qtablewidgetitem13.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem14 = self.resultsTableWidget.verticalHeaderItem(7)
-        ___qtablewidgetitem14.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem15 = self.resultsTableWidget.verticalHeaderItem(8)
-        ___qtablewidgetitem15.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem16 = self.resultsTableWidget.verticalHeaderItem(9)
-        ___qtablewidgetitem16.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem17 = self.resultsTableWidget.verticalHeaderItem(10)
-        ___qtablewidgetitem17.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem18 = self.resultsTableWidget.verticalHeaderItem(11)
-        ___qtablewidgetitem18.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem19 = self.resultsTableWidget.verticalHeaderItem(12)
-        ___qtablewidgetitem19.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem20 = self.resultsTableWidget.verticalHeaderItem(13)
-        ___qtablewidgetitem20.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem21 = self.resultsTableWidget.verticalHeaderItem(14)
-        ___qtablewidgetitem21.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
-        ___qtablewidgetitem22 = self.resultsTableWidget.verticalHeaderItem(15)
-        ___qtablewidgetitem22.setText(QCoreApplication.translate("MainWindow", u"New Row", None));
 
         __sortingEnabled = self.resultsTableWidget.isSortingEnabled()
         self.resultsTableWidget.setSortingEnabled(False)
-        ___qtablewidgetitem23 = self.resultsTableWidget.item(0, 0)
-        ___qtablewidgetitem23.setText(QCoreApplication.translate("MainWindow", u"Sample", None));
-        ___qtablewidgetitem24 = self.resultsTableWidget.item(0, 1)
-        ___qtablewidgetitem24.setText(QCoreApplication.translate("MainWindow", u"Genus", None));
-        ___qtablewidgetitem25 = self.resultsTableWidget.item(0, 2)
-        ___qtablewidgetitem25.setText(QCoreApplication.translate("MainWindow", u"NumContamSNVs", None));
-        ___qtablewidgetitem26 = self.resultsTableWidget.item(0, 3)
-        ___qtablewidgetitem26.setText(QCoreApplication.translate("MainWindow", u"ContamStatus", None));
-        ___qtablewidgetitem27 = self.resultsTableWidget.item(0, 4)
-        ___qtablewidgetitem27.setText(QCoreApplication.translate("MainWindow", u"PercentContam", None));
-        ___qtablewidgetitem28 = self.resultsTableWidget.item(0, 5)
-        ___qtablewidgetitem28.setText(QCoreApplication.translate("MainWindow", u"PercentContamStandardDeviation", None));
-        ___qtablewidgetitem29 = self.resultsTableWidget.item(0, 6)
-        ___qtablewidgetitem29.setText(QCoreApplication.translate("MainWindow", u"BasesExamined", None));
-        ___qtablewidgetitem30 = self.resultsTableWidget.item(0, 7)
-        ___qtablewidgetitem30.setText(QCoreApplication.translate("MainWindow", u"DatabaseDownloadDate", None));
+        ___qtablewidgetitem11 = self.resultsTableWidget.item(0, 0)
+        ___qtablewidgetitem11.setText(QCoreApplication.translate("MainWindow", u"Isolate", None));
+        ___qtablewidgetitem12 = self.resultsTableWidget.item(0, 1)
+        ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"O-type", None));
+        ___qtablewidgetitem13 = self.resultsTableWidget.item(0, 2)
+        ___qtablewidgetitem13.setText(QCoreApplication.translate("MainWindow", u"H-type", None));
+        ___qtablewidgetitem14 = self.resultsTableWidget.item(0, 3)
+        ___qtablewidgetitem14.setText(QCoreApplication.translate("MainWindow", u"str Subtype", None));
+        ___qtablewidgetitem15 = self.resultsTableWidget.item(0, 4)
+        ___qtablewidgetitem15.setText(QCoreApplication.translate("MainWindow", u"eao", None));
+        ___qtablewidgetitem16 = self.resultsTableWidget.item(0, 5)
+        ___qtablewidgetitem16.setText(QCoreApplication.translate("MainWindow", u"hlya", None));
+        ___qtablewidgetitem17 = self.resultsTableWidget.item(0, 6)
+        ___qtablewidgetitem17.setText(QCoreApplication.translate("MainWindow", u"aggR", None));
+        ___qtablewidgetitem18 = self.resultsTableWidget.item(0, 7)
+        ___qtablewidgetitem18.setText(QCoreApplication.translate("MainWindow", u"GDCS", None));
+        ___qtablewidgetitem19 = self.resultsTableWidget.item(1, 0)
+        ___qtablewidgetitem19.setText(QCoreApplication.translate("MainWindow", u"OLC0677 E. coli", None));
+        ___qtablewidgetitem20 = self.resultsTableWidget.item(2, 0)
+        ___qtablewidgetitem20.setText(QCoreApplication.translate("MainWindow", u"OLC0679 E. coli", None));
+        ___qtablewidgetitem21 = self.resultsTableWidget.item(3, 0)
+        ___qtablewidgetitem21.setText(QCoreApplication.translate("MainWindow", u"OLC0807 E. coli", None));
         self.resultsTableWidget.setSortingEnabled(__sortingEnabled)
 
-        self.labelBoxBlenderInstalation_2.setText(QCoreApplication.translate("MainWindow", u"How Does ConFindr Work?", None))
-        self.label_9.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>ConFindr is a pipeline that can detect contamination in bacterial NGS data, both between and within species. It can do this with pretty darn good sensitivity - two samples mixed together with as few as 500 SNPs between them (&gt; 99.9 percent identity!) can be identified. This allows for stringent quality control of NGS samples.</p><p>ConFindr works by looking at conserved core genes - either using rMLST genes (53 genes are known to be single copy and conserved across all bacteria with some known exceptions, which ConFindr handles), or custom sets of genes derived from core-genome schemes. As the genes ConFindr looks at are single copy, any sample that has multiple alleles of one or more gene is likely to be contaminated. To identify the presence of multiple alleles in a sample, the following workflow is followed:</p><p>1. Use Mash to determine the genus of each sample so that genus-specific databases can be constructed and check for interspecies contamination.</p><p>2. Perform stringent "
-                        "quality trimming and bait out reads that contain rMLST gene sequence, using BBDuk.</p><p>3. Align reads back to the rMLST genes.</p><p>4. Look at the alignment to find Contaminating SNVs - those that have sites where more than one base is present, indicating that multiple alleles are present, indicating contamination.</p></body></html>", None))
-        self.labelBoxBlenderInstalation_5.setText(QCoreApplication.translate("MainWindow", u"Limits of Detection", None))
-        self.label_12.setText(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:'Segoe UI'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">The limit of detection for ConFindr is going to be a function of several factors, so it's hard to give exact information on what can and can't be detected. However, here are a few guidelines:</p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">- Two strains with identical rMLST genes won't ever have contamination detected between them.</p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">- ConFindr has a cuto"
-                        "ff of finding 3 Contaminating SNVs found for calling a sample as contaminated, as there will occasionally be 1 false positive, and very rarely 2 false positive sites. In practice, this still lets you detect contamination essentially whenever two strains have different rMLST types, as &gt;99 percent of types have at least 3 SNPs between them in E. coli, S. enterica, and L. monocytogenes. I haven't looked at other species in detail, but this very likely holds true for them too.</p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">- The degree of contamination matters: things with very low levels of contamination (around 1 percent) probably won't ever be picked up under default parameters. Once you hit 5 percent contamination, whether or not it gets detected is a function of sequencing depth and distance between species.</p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-"
-                        "indent:0px;\">- Sequencing depth matters: Contaminating SNVs are found more reliably the more depth you have. ConFindr seems to work pretty well once you hit 40X or 50X, but trying to run it on a sample with only 10X coverage is unlikely to ever find anything (unless default parameters get changed)</p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">- Relatedness of the contaminant strain is the the final major factor - with something very closely related to the strain you actually want, picking up contamination at 5 percent will be pretty difficult.</p></body></html>", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p></body></html>", None))
         self.label_credits.setText(QCoreApplication.translate("MainWindow", u"Developed for OLC Bioinformaticians", None))
         self.label_version.setText(QCoreApplication.translate("MainWindow", u"v0.8.1", None))
     # retranslateUi
