@@ -21,6 +21,7 @@ from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTi
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 import openpyxl, csv, subprocess, os, pathlib, psutil, glob
+from time import sleep
 
 # GUI FILE
 from app_modules import *
@@ -66,8 +67,7 @@ class MainWindow(QMainWindow):
         ## ==> ADD CUSTOM MENUS
         self.ui.stackedWidget.setMinimumWidth(20)
         UIFunctions.addNewMenu(self, "HOME", "btn_home", "url(:/16x16/icons/16x16/cil-home.png)", True)
-        UIFunctions.addNewMenu(self, "Analyze", "btn_analyze", "url(:/16x16/icons/16x16/cil-folder-open.png)", True)
-        UIFunctions.addNewMenu(self, "Start Run", "btn_run", "url(:/16x16/icons/16x16/cil-chart.png)", True)
+        UIFunctions.addNewMenu(self, "Start Run", "btn_run", "url(:/16x16/icons/16x16/cil-data-transfer-down.png)", True)
 
         ## ==> END ##
 
@@ -143,64 +143,33 @@ class MainWindow(QMainWindow):
     ## MENUS ==> DYNAMIC MENUS FUNCTIONS
     ########################################################################
     
-    # Function for when the button in analyzation station is clicked
+    # Function for when the run button is clicked
     def runClicker(self):
+        if self.resultsTableWidget.rowCount() > 0:
 
-        # Gets the name of the folder with the data
-        folderName = str(QFileDialog.getExistingDirectory(self, "Select Folder of Sequences"))
-        print("This is the folder directory: " + folderName)
+            # Resets the error text to nothing
+            self.runLabelError.setText("")
 
-        # Checks if the folder selected contains any fastq.gz or fasta files which is what confindr uses. If not, return that dummy back
-        if glob.glob(f'{folderName}/*.fastq.gz') or glob.glob(f'{folderName}/*.fasta'):
-
-            # Prints a success message to say the file is found
+            # Prints a success message to say the run will take place
             msg = QMessageBox()
             msg.setWindowTitle("Success")
-            msg.setText("Successfully found folder. Results may take up to 5 minutes to complete")
+            msg.setText("Starting run now...")
             msg.setIcon(QMessageBox.Information)
-            x = msg.exec_()
+            x = msg.exec_()  
 
-            # Checks what options are selected and applies those arguements to our command line
-            rmlst = self.rmlstOptions()
-            fasta = self.fastaOptions()
-            baseCutoff = self.baseCutoffOptions()
-            dataChoice = self.dataChoiceOptions()
-            keepFiles = self.keepOptions()
-            versionDisplay = self.versionOptions()
-            crossDetails = self.crossDetailsOptions()
-            verbosity = self.verbosityOptions()
-            databases = self.databaseOptions()
-            tmp = self.TMPOptions()
-            baseFraction = self.baseFractionOptions()
-            threads = self.threadsOptions()
-            qualityCutoff = self.qualityOptions()
-            cgmlst = self.CGMLISTOptions()
-            forwardId = self.forwardOptions()
-            reverseId = self.reverseOptions()
-            MMH = self.MMHOptions()
+            # RUNS THE NANOPORE SEQUENCE HERE ADD THE CODE FOR THAT WHENEVER 
+            # Sleep for 15 seconds
+            sleep(15)
+        
+        else:
+            self.runLabelError.setText("There are not enough isolates. Please try again")
 
 
             # Uses the folder name as an argument to run ConFindr and get the results. Mem represents total allocated memory that is being reserved for confindr
-            self.test_out = os.path.join(folderName, "test_out")
-            mem = int(0.85 * float(psutil.virtual_memory().total) / 1024)
-            subprocess.run(f'confindr -i {folderName} -o {self.test_out}{databases}{rmlst}{threads}{tmp}{keepFiles}{qualityCutoff}{baseCutoff}{baseFraction}{forwardId}{reverseId}{versionDisplay}{dataChoice}{cgmlst}{fasta}{verbosity}{crossDetails}{MMH} -Xmx {mem}K', shell=True)
-            print(f'confindr -i {folderName} -o {self.test_out}{databases}{rmlst}{threads}{tmp}{keepFiles}{qualityCutoff}{baseCutoff}{baseFraction}{forwardId}{reverseId}{versionDisplay}{dataChoice}{cgmlst}{fasta}{verbosity}{crossDetails}{MMH} -Xmx {mem}K')
-            self.analyzeLabelError.setText("")
-
-            # Prints a success message to say the results are successfully completed
-            msg = QMessageBox()
-            msg.setWindowTitle("Success")
-            msg.setText("Successfully created a csv results file!")
-            msg.setIcon(QMessageBox.Information)
-            x = msg.exec_()
-
-
-        # Checks if there is a folder containing your sequence or if there is anything written
-        elif len(folderName) == 0:
-            self.analyzeLabelError.setText("Please select a folder to continue")
-
-        else:
-            self.analyzeLabelError.setText("The folder does not contain any fastq.gz or fasta files")        
+            #self.test_out = os.path.join(folderName, "test_out")
+            #mem = int(0.85 * float(psutil.virtual_memory().total) / 1024)
+            #subprocess.run(f'confindr -i {folderName} -o {self.test_out}{databases}{rmlst}{threads}{tmp}{keepFiles}{qualityCutoff}{baseCutoff}{baseFraction}{forwardId}{reverseId}{versionDisplay}{dataChoice}{cgmlst}{fasta}{verbosity}{crossDetails}{MMH} -Xmx {mem}K', shell=True)
+            #print(f'confindr -i {folderName} -o {self.test_out}{databases}{rmlst}{threads}{tmp}{keepFiles}{qualityCutoff}{baseCutoff}{baseFraction}{forwardId}{reverseId}{versionDisplay}{dataChoice}{cgmlst}{fasta}{verbosity}{crossDetails}{MMH} -Xmx {mem}K')
 
     # Function for when the button addIsolate is clicked
     def isolateClicker(self):
@@ -214,7 +183,6 @@ class MainWindow(QMainWindow):
             numOfRows = self.resultsTableWidget.rowCount() + 1
             self.resultsTableWidget.setRowCount(numOfRows)
             self.resultsTableWidget.setItem(numOfRows - 1, 0, QtWidgets.QTableWidgetItem(isolateName))
-            #print(numOfRows)
 
         else:
             self.runLabelError.setText("Please type in an isolate name to continue")
@@ -226,15 +194,14 @@ class MainWindow(QMainWindow):
         indices = self.resultsTableWidget.selectionModel().selectedRows() 
 
         for index in sorted(indices):
-            if self.resultsTableWidget.item(index.row(), 0) == "Isolate":
-                print("DO NOT DELETE THE ROW")
+            if index.row() == 0:
+                self.runLabelError.setText("You cannot delete the header row")
 
             else:
                 self.resultsTableWidget.removeRow(index.row()) 
 
 
     # Loads the data from the xlsx file to the table widget in PyQt5
-    
     def load_data(self, fileName):
         
         # Gathers the path and locates the excel file. Takes the file path, removes the all files header, subtracts the csv portion and adds on the xlsx
@@ -283,13 +250,6 @@ class MainWindow(QMainWindow):
             self.ui.stackedWidget.setCurrentWidget(self.ui.page_home)
             UIFunctions.resetStyle(self, "btn_home")
             UIFunctions.labelPage(self, "Home")
-            btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
-
-        # PAGE ANALYZE
-        if btnWidget.objectName() == "btn_analyze":
-            self.ui.stackedWidget.setCurrentWidget(self.ui.page_analysis)
-            UIFunctions.resetStyle(self, "btn_analyze")
-            UIFunctions.labelPage(self, "Analyze")
             btnWidget.setStyleSheet(UIFunctions.selectMenu(btnWidget.styleSheet()))
 
         # PAGE RUN

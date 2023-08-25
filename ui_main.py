@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASEDEUAts.ui'
+## Form generated from reading UI file 'GUI_BASErfUyyX.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -729,484 +729,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_10.addWidget(self.label_7)
 
         self.stackedWidget.addWidget(self.page_home)
-        self.page_analysis = QWidget()
-        self.page_analysis.setObjectName(u"page_analysis")
-        self.verticalLayout_16 = QVBoxLayout(self.page_analysis)
-        self.verticalLayout_16.setObjectName(u"verticalLayout_16")
-        self.frame_div_content_2 = QFrame(self.page_analysis)
-        self.frame_div_content_2.setObjectName(u"frame_div_content_2")
-        self.frame_div_content_2.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_2.setMaximumSize(QSize(16777215, 110))
-        self.frame_div_content_2.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
-"border-radius: 5px;\n"
-"")
-        self.frame_div_content_2.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_2.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_17 = QVBoxLayout(self.frame_div_content_2)
-        self.verticalLayout_17.setSpacing(0)
-        self.verticalLayout_17.setObjectName(u"verticalLayout_17")
-        self.verticalLayout_17.setContentsMargins(0, 0, 0, 0)
-        self.label_2 = QLabel(self.frame_div_content_2)
-        self.label_2.setObjectName(u"label_2")
-        font9 = QFont()
-        font9.setFamily(u"Segoe UI")
-        font9.setPointSize(26)
-        self.label_2.setFont(font9)
-        self.label_2.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_17.addWidget(self.label_2)
-
-        self.label_3 = QLabel(self.frame_div_content_2)
-        self.label_3.setObjectName(u"label_3")
-        self.label_3.setFont(font7)
-        self.label_3.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_17.addWidget(self.label_3)
-
-
-        self.verticalLayout_16.addWidget(self.frame_div_content_2)
-
-        self.frame_5 = QFrame(self.page_analysis)
-        self.frame_5.setObjectName(u"frame_5")
-        self.frame_5.setFrameShape(QFrame.StyledPanel)
-        self.frame_5.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_14 = QVBoxLayout(self.frame_5)
-        self.verticalLayout_14.setObjectName(u"verticalLayout_14")
-        self.sequenceBtn = QPushButton(self.frame_5)
-        self.sequenceBtn.setObjectName(u"sequenceBtn")
-        self.sequenceBtn.setMinimumSize(QSize(150, 30))
-        font10 = QFont()
-        font10.setFamily(u"Segoe UI")
-        font10.setPointSize(9)
-        self.sequenceBtn.setFont(font10)
-        self.sequenceBtn.setStyleSheet(u"QPushButton {\n"
-"	border: 2px solid rgb(52, 59, 72);\n"
-"	border-radius: 5px;	\n"
-"	background-color: rgb(52, 59, 72);\n"
-"}\n"
-"QPushButton:hover {\n"
-"	background-color: rgb(57, 65, 80);\n"
-"	border: 2px solid rgb(61, 70, 86);\n"
-"}\n"
-"QPushButton:pressed {	\n"
-"	background-color: rgb(35, 40, 49);\n"
-"	border: 2px solid rgb(43, 50, 61);\n"
-"}")
-        icon3 = QIcon()
-        icon3.addFile(u":/16x16/icons/16x16/cil-folder-open.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.sequenceBtn.setIcon(icon3)
-
-        self.verticalLayout_14.addWidget(self.sequenceBtn)
-
-        self.analyzeLabelError = QLabel(self.frame_5)
-        self.analyzeLabelError.setObjectName(u"analyzeLabelError")
-        palette1 = QPalette()
-        brush15 = QBrush(QColor(190, 9, 9, 255))
-        brush15.setStyle(Qt.SolidPattern)
-        palette1.setBrush(QPalette.Active, QPalette.WindowText, brush15)
-        palette1.setBrush(QPalette.Active, QPalette.Button, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.Text, brush15)
-        palette1.setBrush(QPalette.Active, QPalette.ButtonText, brush15)
-        palette1.setBrush(QPalette.Active, QPalette.Base, brush1)
-        palette1.setBrush(QPalette.Active, QPalette.Window, brush1)
-        brush16 = QBrush(QColor(190, 9, 9, 128))
-        brush16.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush16)
-#endif
-        palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
-        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush15)
-        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush15)
-        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush1)
-        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush1)
-        brush17 = QBrush(QColor(190, 9, 9, 128))
-        brush17.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush17)
-#endif
-        palette1.setBrush(QPalette.Disabled, QPalette.WindowText, brush15)
-        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush15)
-        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush15)
-        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush1)
-        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush1)
-        brush18 = QBrush(QColor(190, 9, 9, 128))
-        brush18.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush18)
-#endif
-        self.analyzeLabelError.setPalette(palette1)
-        self.analyzeLabelError.setFont(font10)
-        self.analyzeLabelError.setStyleSheet(u"color:rgb(190, 9, 9);")
-        self.analyzeLabelError.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_14.addWidget(self.analyzeLabelError)
-
-        self.verticalLayout_14.setStretch(0, 1)
-
-        self.verticalLayout_16.addWidget(self.frame_5)
-
-        self.frame_div_content_3 = QFrame(self.page_analysis)
-        self.frame_div_content_3.setObjectName(u"frame_div_content_3")
-        self.frame_div_content_3.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_3.setMaximumSize(QSize(16777215, 180))
-        self.frame_div_content_3.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
-"border-radius: 5px;\n"
-"")
-        self.frame_div_content_3.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_3.setFrameShadow(QFrame.Raised)
-        self.gridLayout_5 = QGridLayout(self.frame_div_content_3)
-        self.gridLayout_5.setObjectName(u"gridLayout_5")
-        self.gridLayout_5.setContentsMargins(-1, 9, -1, -1)
-        self.baseCutoffInput = QLineEdit(self.frame_div_content_3)
-        self.baseCutoffInput.setObjectName(u"baseCutoffInput")
-        self.baseCutoffInput.setMinimumSize(QSize(0, 30))
-        self.baseCutoffInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_5.addWidget(self.baseCutoffInput, 1, 2, 1, 1)
-
-        self.FASTAcheckBox = QCheckBox(self.frame_div_content_3)
-        self.FASTAcheckBox.setObjectName(u"FASTAcheckBox")
-        self.FASTAcheckBox.setAutoFillBackground(False)
-        self.FASTAcheckBox.setStyleSheet(u"")
-
-        self.gridLayout_5.addWidget(self.FASTAcheckBox, 1, 1, 1, 1)
-
-        self.dataDropdownMenu = QComboBox(self.frame_div_content_3)
-        self.dataDropdownMenu.addItem("")
-        self.dataDropdownMenu.addItem("")
-        self.dataDropdownMenu.setObjectName(u"dataDropdownMenu")
-        self.dataDropdownMenu.setFont(font10)
-        self.dataDropdownMenu.setAutoFillBackground(False)
-        self.dataDropdownMenu.setStyleSheet(u"QComboBox{\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding: 5px;\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QComboBox:hover{\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QComboBox QAbstractItemView {\n"
-"	color: rgb(85, 170, 255);	\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	padding: 10px;\n"
-"	selection-background-color: rgb(39, 44, 54);\n"
-"}")
-        self.dataDropdownMenu.setIconSize(QSize(16, 16))
-        self.dataDropdownMenu.setFrame(True)
-
-        self.gridLayout_5.addWidget(self.dataDropdownMenu, 1, 3, 1, 1)
-
-        self.RMLSTcheckBox = QCheckBox(self.frame_div_content_3)
-        self.RMLSTcheckBox.setObjectName(u"RMLSTcheckBox")
-        self.RMLSTcheckBox.setAutoFillBackground(False)
-        self.RMLSTcheckBox.setStyleSheet(u"")
-
-        self.gridLayout_5.addWidget(self.RMLSTcheckBox, 1, 0, 1, 1)
-
-        self.labelBoxMainArguements = QLabel(self.frame_div_content_3)
-        self.labelBoxMainArguements.setObjectName(u"labelBoxMainArguements")
-        self.labelBoxMainArguements.setFont(font1)
-        self.labelBoxMainArguements.setStyleSheet(u"")
-
-        self.gridLayout_5.addWidget(self.labelBoxMainArguements, 0, 0, 1, 4, Qt.AlignBottom)
-
-
-        self.verticalLayout_16.addWidget(self.frame_div_content_3)
-
-        self.frame_div_content_4 = QFrame(self.page_analysis)
-        self.frame_div_content_4.setObjectName(u"frame_div_content_4")
-        self.frame_div_content_4.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_4.setMaximumSize(QSize(16777215, 250))
-        self.frame_div_content_4.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
-"border-radius: 5px;\n"
-"")
-        self.frame_div_content_4.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_4.setFrameShadow(QFrame.Raised)
-        self.gridLayout_4 = QGridLayout(self.frame_div_content_4)
-        self.gridLayout_4.setObjectName(u"gridLayout_4")
-        self.frame_div_content_6 = QFrame(self.frame_div_content_4)
-        self.frame_div_content_6.setObjectName(u"frame_div_content_6")
-        self.frame_div_content_6.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_6.setMaximumSize(QSize(16777215, 250))
-        self.frame_div_content_6.setStyleSheet(u"background-color:rgb(67, 73, 91);\n"
-"border-radius: 5px;\n"
-"")
-        self.frame_div_content_6.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_6.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_13 = QVBoxLayout(self.frame_div_content_6)
-        self.verticalLayout_13.setObjectName(u"verticalLayout_13")
-        self.verbosityDropdownMenu = QComboBox(self.frame_div_content_6)
-        self.verbosityDropdownMenu.addItem("")
-        self.verbosityDropdownMenu.addItem("")
-        self.verbosityDropdownMenu.addItem("")
-        self.verbosityDropdownMenu.setObjectName(u"verbosityDropdownMenu")
-        self.verbosityDropdownMenu.setFont(font10)
-        self.verbosityDropdownMenu.setAutoFillBackground(False)
-        self.verbosityDropdownMenu.setStyleSheet(u"QComboBox{\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding: 5px;\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QComboBox:hover{\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QComboBox QAbstractItemView {\n"
-"	color: rgb(85, 170, 255);	\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	padding: 10px;\n"
-"	selection-background-color: rgb(39, 44, 54);\n"
-"}")
-        self.verbosityDropdownMenu.setIconSize(QSize(16, 16))
-        self.verbosityDropdownMenu.setFrame(True)
-
-        self.verticalLayout_13.addWidget(self.verbosityDropdownMenu)
-
-
-        self.gridLayout_4.addWidget(self.frame_div_content_6, 1, 1, 1, 1)
-
-        self.frame_div_content_5 = QFrame(self.frame_div_content_4)
-        self.frame_div_content_5.setObjectName(u"frame_div_content_5")
-        self.frame_div_content_5.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_5.setMaximumSize(QSize(16777215, 250))
-        self.frame_div_content_5.setStyleSheet(u"background-color:rgb(67, 73, 91);\n"
-"border-radius: 5px;\n"
-"")
-        self.frame_div_content_5.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_5.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_12 = QVBoxLayout(self.frame_div_content_5)
-        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
-        self.keepCheckBox = QCheckBox(self.frame_div_content_5)
-        self.keepCheckBox.setObjectName(u"keepCheckBox")
-        self.keepCheckBox.setAutoFillBackground(False)
-        self.keepCheckBox.setStyleSheet(u"")
-
-        self.verticalLayout_12.addWidget(self.keepCheckBox)
-
-        self.versionCheckBox = QCheckBox(self.frame_div_content_5)
-        self.versionCheckBox.setObjectName(u"versionCheckBox")
-        self.versionCheckBox.setAutoFillBackground(False)
-        self.versionCheckBox.setStyleSheet(u"")
-
-        self.verticalLayout_12.addWidget(self.versionCheckBox)
-
-        self.crossDetailsCheckBox = QCheckBox(self.frame_div_content_5)
-        self.crossDetailsCheckBox.setObjectName(u"crossDetailsCheckBox")
-        self.crossDetailsCheckBox.setAutoFillBackground(False)
-        self.crossDetailsCheckBox.setStyleSheet(u"")
-
-        self.verticalLayout_12.addWidget(self.crossDetailsCheckBox)
-
-
-        self.gridLayout_4.addWidget(self.frame_div_content_5, 1, 0, 1, 1)
-
-        self.frame_div_content_7 = QFrame(self.frame_div_content_4)
-        self.frame_div_content_7.setObjectName(u"frame_div_content_7")
-        self.frame_div_content_7.setMinimumSize(QSize(0, 110))
-        self.frame_div_content_7.setMaximumSize(QSize(16777215, 250))
-        self.frame_div_content_7.setStyleSheet(u"background-color:rgb(67, 73, 91);\n"
-"border-radius: 5px;\n"
-"")
-        self.frame_div_content_7.setFrameShape(QFrame.NoFrame)
-        self.frame_div_content_7.setFrameShadow(QFrame.Raised)
-        self.gridLayout_3 = QGridLayout(self.frame_div_content_7)
-        self.gridLayout_3.setObjectName(u"gridLayout_3")
-        self.threadsInput = QLineEdit(self.frame_div_content_7)
-        self.threadsInput.setObjectName(u"threadsInput")
-        self.threadsInput.setMinimumSize(QSize(0, 30))
-        self.threadsInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.threadsInput, 1, 0, 1, 1)
-
-        self.reverseInput = QLineEdit(self.frame_div_content_7)
-        self.reverseInput.setObjectName(u"reverseInput")
-        self.reverseInput.setMinimumSize(QSize(0, 30))
-        self.reverseInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.reverseInput, 2, 1, 1, 1)
-
-        self.MMHInput = QLineEdit(self.frame_div_content_7)
-        self.MMHInput.setObjectName(u"MMHInput")
-        self.MMHInput.setMinimumSize(QSize(0, 30))
-        self.MMHInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.MMHInput, 2, 2, 1, 1)
-
-        self.baseFractionInput = QLineEdit(self.frame_div_content_7)
-        self.baseFractionInput.setObjectName(u"baseFractionInput")
-        self.baseFractionInput.setMinimumSize(QSize(0, 30))
-        self.baseFractionInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.baseFractionInput, 0, 2, 1, 1)
-
-        self.forwardInput = QLineEdit(self.frame_div_content_7)
-        self.forwardInput.setObjectName(u"forwardInput")
-        self.forwardInput.setMinimumSize(QSize(0, 30))
-        self.forwardInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.forwardInput, 2, 0, 1, 1)
-
-        self.TMPInput = QLineEdit(self.frame_div_content_7)
-        self.TMPInput.setObjectName(u"TMPInput")
-        self.TMPInput.setMinimumSize(QSize(0, 30))
-        self.TMPInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.TMPInput, 0, 1, 1, 1)
-
-        self.qualityInput = QLineEdit(self.frame_div_content_7)
-        self.qualityInput.setObjectName(u"qualityInput")
-        self.qualityInput.setMinimumSize(QSize(0, 30))
-        self.qualityInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.qualityInput, 1, 1, 1, 1)
-
-        self.databaseInput = QLineEdit(self.frame_div_content_7)
-        self.databaseInput.setObjectName(u"databaseInput")
-        self.databaseInput.setMinimumSize(QSize(0, 30))
-        self.databaseInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.databaseInput, 0, 0, 1, 1)
-
-        self.cgmlstInput = QLineEdit(self.frame_div_content_7)
-        self.cgmlstInput.setObjectName(u"cgmlstInput")
-        self.cgmlstInput.setMinimumSize(QSize(0, 30))
-        self.cgmlstInput.setStyleSheet(u"QLineEdit {\n"
-"	background-color: rgb(27, 29, 35);\n"
-"	border-radius: 5px;\n"
-"	border: 2px solid rgb(27, 29, 35);\n"
-"	padding-left: 10px;\n"
-"}\n"
-"QLineEdit:hover {\n"
-"	border: 2px solid rgb(64, 71, 88);\n"
-"}\n"
-"QLineEdit:focus {\n"
-"	border: 2px solid rgb(91, 101, 124);\n"
-"}")
-
-        self.gridLayout_3.addWidget(self.cgmlstInput, 1, 2, 1, 1)
-
-
-        self.gridLayout_4.addWidget(self.frame_div_content_7, 1, 2, 1, 1)
-
-        self.labelBoxAdvancedArguements = QLabel(self.frame_div_content_4)
-        self.labelBoxAdvancedArguements.setObjectName(u"labelBoxAdvancedArguements")
-        self.labelBoxAdvancedArguements.setFont(font1)
-        self.labelBoxAdvancedArguements.setStyleSheet(u"")
-
-        self.gridLayout_4.addWidget(self.labelBoxAdvancedArguements, 0, 0, 1, 3, Qt.AlignBottom)
-
-        self.gridLayout_4.setRowStretch(1, 3)
-
-        self.verticalLayout_16.addWidget(self.frame_div_content_4)
-
-        self.verticalLayout_16.setStretch(0, 3)
-        self.verticalLayout_16.setStretch(2, 1)
-        self.verticalLayout_16.setStretch(3, 4)
-        self.stackedWidget.addWidget(self.page_analysis)
         self.page_table = QWidget()
         self.page_table.setObjectName(u"page_table")
         self.verticalLayout_20 = QVBoxLayout(self.page_table)
@@ -1224,6 +746,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.label_8 = QLabel(self.frame_div_content_10)
         self.label_8.setObjectName(u"label_8")
+        font9 = QFont()
+        font9.setFamily(u"Segoe UI")
+        font9.setPointSize(26)
         self.label_8.setFont(font9)
         self.label_8.setAlignment(Qt.AlignCenter)
 
@@ -1231,53 +756,58 @@ class Ui_MainWindow(object):
 
         self.timeLabel = QLabel(self.frame_div_content_10)
         self.timeLabel.setObjectName(u"timeLabel")
-        font11 = QFont()
-        font11.setPointSize(14)
-        self.timeLabel.setFont(font11)
+        font10 = QFont()
+        font10.setPointSize(14)
+        self.timeLabel.setFont(font10)
         self.timeLabel.setAlignment(Qt.AlignCenter)
 
         self.verticalLayout_8.addWidget(self.timeLabel)
 
         self.runLabelError = QLabel(self.frame_div_content_10)
         self.runLabelError.setObjectName(u"runLabelError")
-        palette2 = QPalette()
-        palette2.setBrush(QPalette.Active, QPalette.WindowText, brush15)
-        brush19 = QBrush(QColor(41, 45, 56, 255))
-        brush19.setStyle(Qt.SolidPattern)
-        palette2.setBrush(QPalette.Active, QPalette.Button, brush19)
-        palette2.setBrush(QPalette.Active, QPalette.Text, brush15)
-        palette2.setBrush(QPalette.Active, QPalette.ButtonText, brush15)
-        palette2.setBrush(QPalette.Active, QPalette.Base, brush19)
-        palette2.setBrush(QPalette.Active, QPalette.Window, brush19)
-        brush20 = QBrush(QColor(190, 9, 9, 128))
-        brush20.setStyle(Qt.NoBrush)
+        palette1 = QPalette()
+        brush15 = QBrush(QColor(190, 9, 9, 255))
+        brush15.setStyle(Qt.SolidPattern)
+        palette1.setBrush(QPalette.Active, QPalette.WindowText, brush15)
+        brush16 = QBrush(QColor(41, 45, 56, 255))
+        brush16.setStyle(Qt.SolidPattern)
+        palette1.setBrush(QPalette.Active, QPalette.Button, brush16)
+        palette1.setBrush(QPalette.Active, QPalette.Text, brush15)
+        palette1.setBrush(QPalette.Active, QPalette.ButtonText, brush15)
+        palette1.setBrush(QPalette.Active, QPalette.Base, brush16)
+        palette1.setBrush(QPalette.Active, QPalette.Window, brush16)
+        brush17 = QBrush(QColor(190, 9, 9, 128))
+        brush17.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Active, QPalette.PlaceholderText, brush20)
+        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush17)
 #endif
-        palette2.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
-        palette2.setBrush(QPalette.Inactive, QPalette.Button, brush19)
-        palette2.setBrush(QPalette.Inactive, QPalette.Text, brush15)
-        palette2.setBrush(QPalette.Inactive, QPalette.ButtonText, brush15)
-        palette2.setBrush(QPalette.Inactive, QPalette.Base, brush19)
-        palette2.setBrush(QPalette.Inactive, QPalette.Window, brush19)
-        brush21 = QBrush(QColor(190, 9, 9, 128))
-        brush21.setStyle(Qt.NoBrush)
+        palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
+        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush16)
+        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush15)
+        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush15)
+        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush16)
+        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush16)
+        brush18 = QBrush(QColor(190, 9, 9, 128))
+        brush18.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush21)
+        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush18)
 #endif
-        palette2.setBrush(QPalette.Disabled, QPalette.WindowText, brush15)
-        palette2.setBrush(QPalette.Disabled, QPalette.Button, brush19)
-        palette2.setBrush(QPalette.Disabled, QPalette.Text, brush15)
-        palette2.setBrush(QPalette.Disabled, QPalette.ButtonText, brush15)
-        palette2.setBrush(QPalette.Disabled, QPalette.Base, brush19)
-        palette2.setBrush(QPalette.Disabled, QPalette.Window, brush19)
-        brush22 = QBrush(QColor(190, 9, 9, 128))
-        brush22.setStyle(Qt.NoBrush)
+        palette1.setBrush(QPalette.Disabled, QPalette.WindowText, brush15)
+        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush16)
+        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush15)
+        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush15)
+        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush16)
+        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush16)
+        brush19 = QBrush(QColor(190, 9, 9, 128))
+        brush19.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette2.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush22)
+        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush19)
 #endif
-        self.runLabelError.setPalette(palette2)
-        self.runLabelError.setFont(font10)
+        self.runLabelError.setPalette(palette1)
+        font11 = QFont()
+        font11.setFamily(u"Segoe UI")
+        font11.setPointSize(9)
+        self.runLabelError.setFont(font11)
         self.runLabelError.setStyleSheet(u"color:rgb(190, 9, 9);")
         self.runLabelError.setAlignment(Qt.AlignCenter)
 
@@ -1289,7 +819,7 @@ class Ui_MainWindow(object):
         self.runBtn = QPushButton(self.page_table)
         self.runBtn.setObjectName(u"runBtn")
         self.runBtn.setMinimumSize(QSize(150, 30))
-        self.runBtn.setFont(font10)
+        self.runBtn.setFont(font11)
         self.runBtn.setStyleSheet(u"QPushButton {\n"
 "	border: 2px solid rgb(52, 59, 72);\n"
 "	border-radius: 5px;	\n"
@@ -1303,20 +833,13 @@ class Ui_MainWindow(object):
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
 "}")
-        icon4 = QIcon()
-        icon4.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.runBtn.setIcon(icon4)
+        icon3 = QIcon()
+        icon3.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.runBtn.setIcon(icon3)
 
         self.verticalLayout_20.addWidget(self.runBtn)
 
-        self.frame_4 = QFrame(self.page_table)
-        self.frame_4.setObjectName(u"frame_4")
-        self.frame_4.setMinimumSize(QSize(0, 150))
-        self.frame_4.setFrameShape(QFrame.StyledPanel)
-        self.frame_4.setFrameShadow(QFrame.Raised)
-        self.gridLayout = QGridLayout(self.frame_4)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.frame_div_content_8 = QFrame(self.frame_4)
+        self.frame_div_content_8 = QFrame(self.page_table)
         self.frame_div_content_8.setObjectName(u"frame_div_content_8")
         self.frame_div_content_8.setMinimumSize(QSize(721, 0))
         self.frame_div_content_8.setMaximumSize(QSize(16777215, 50))
@@ -1327,12 +850,14 @@ class Ui_MainWindow(object):
         self.frame_div_content_8.setFrameShape(QFrame.NoFrame)
         self.frame_div_content_8.setFrameShadow(QFrame.Raised)
         self.gridLayout_2 = QGridLayout(self.frame_div_content_8)
+        self.gridLayout_2.setSpacing(0)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
+        self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
         self.addIsolateBtn = QPushButton(self.frame_div_content_8)
         self.addIsolateBtn.setObjectName(u"addIsolateBtn")
         self.addIsolateBtn.setMinimumSize(QSize(120, 30))
         self.addIsolateBtn.setMaximumSize(QSize(150, 16777215))
-        self.addIsolateBtn.setFont(font10)
+        self.addIsolateBtn.setFont(font11)
         self.addIsolateBtn.setLayoutDirection(Qt.LeftToRight)
         self.addIsolateBtn.setAutoFillBackground(False)
         self.addIsolateBtn.setStyleSheet(u"QPushButton {\n"
@@ -1348,9 +873,9 @@ class Ui_MainWindow(object):
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
 "}")
-        icon5 = QIcon()
-        icon5.addFile(u":/16x16/icons/16x16/cil-3d.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.addIsolateBtn.setIcon(icon5)
+        icon4 = QIcon()
+        icon4.addFile(u":/16x16/icons/16x16/cil-3d.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.addIsolateBtn.setIcon(icon4)
 
         self.gridLayout_2.addWidget(self.addIsolateBtn, 0, 1, 1, 1)
 
@@ -1376,7 +901,7 @@ class Ui_MainWindow(object):
         self.deleteIsolateBtn.setObjectName(u"deleteIsolateBtn")
         self.deleteIsolateBtn.setMinimumSize(QSize(120, 30))
         self.deleteIsolateBtn.setMaximumSize(QSize(150, 16777215))
-        self.deleteIsolateBtn.setFont(font10)
+        self.deleteIsolateBtn.setFont(font11)
         self.deleteIsolateBtn.setLayoutDirection(Qt.LeftToRight)
         self.deleteIsolateBtn.setAutoFillBackground(False)
         self.deleteIsolateBtn.setStyleSheet(u"QPushButton {\n"
@@ -1392,15 +917,25 @@ class Ui_MainWindow(object):
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
 "}")
-        icon6 = QIcon()
-        icon6.addFile(u":/16x16/icons/16x16/cil-x-circle.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.deleteIsolateBtn.setIcon(icon6)
+        icon5 = QIcon()
+        icon5.addFile(u":/16x16/icons/16x16/cil-x-circle.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.deleteIsolateBtn.setIcon(icon5)
 
         self.gridLayout_2.addWidget(self.deleteIsolateBtn, 0, 4, 1, 1)
 
 
-        self.gridLayout.addWidget(self.frame_div_content_8, 0, 0, 1, 1)
+        self.verticalLayout_20.addWidget(self.frame_div_content_8)
 
+        self.frame_4 = QFrame(self.page_table)
+        self.frame_4.setObjectName(u"frame_4")
+        sizePolicy3.setHeightForWidth(self.frame_4.sizePolicy().hasHeightForWidth())
+        self.frame_4.setSizePolicy(sizePolicy3)
+        self.frame_4.setMinimumSize(QSize(0, 40))
+        self.frame_4.setFrameShape(QFrame.StyledPanel)
+        self.frame_4.setFrameShadow(QFrame.Raised)
+        self.gridLayout = QGridLayout(self.frame_4)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setSizeConstraint(QLayout.SetNoConstraint)
         self.resultsTableWidget = QTableWidget(self.frame_4)
         if (self.resultsTableWidget.columnCount() < 8):
             self.resultsTableWidget.setColumnCount(8)
@@ -1462,43 +997,44 @@ class Ui_MainWindow(object):
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.resultsTableWidget.sizePolicy().hasHeightForWidth())
         self.resultsTableWidget.setSizePolicy(sizePolicy5)
-        palette3 = QPalette()
-        palette3.setBrush(QPalette.Active, QPalette.WindowText, brush6)
-        brush23 = QBrush(QColor(39, 44, 54, 255))
-        brush23.setStyle(Qt.SolidPattern)
-        palette3.setBrush(QPalette.Active, QPalette.Button, brush23)
-        palette3.setBrush(QPalette.Active, QPalette.Text, brush6)
-        palette3.setBrush(QPalette.Active, QPalette.ButtonText, brush6)
-        palette3.setBrush(QPalette.Active, QPalette.Base, brush23)
-        palette3.setBrush(QPalette.Active, QPalette.Window, brush23)
-        brush24 = QBrush(QColor(210, 210, 210, 128))
-        brush24.setStyle(Qt.NoBrush)
+        self.resultsTableWidget.setMaximumSize(QSize(16777215, 360))
+        palette2 = QPalette()
+        palette2.setBrush(QPalette.Active, QPalette.WindowText, brush6)
+        brush20 = QBrush(QColor(39, 44, 54, 255))
+        brush20.setStyle(Qt.SolidPattern)
+        palette2.setBrush(QPalette.Active, QPalette.Button, brush20)
+        palette2.setBrush(QPalette.Active, QPalette.Text, brush6)
+        palette2.setBrush(QPalette.Active, QPalette.ButtonText, brush6)
+        palette2.setBrush(QPalette.Active, QPalette.Base, brush20)
+        palette2.setBrush(QPalette.Active, QPalette.Window, brush20)
+        brush21 = QBrush(QColor(210, 210, 210, 128))
+        brush21.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette3.setBrush(QPalette.Active, QPalette.PlaceholderText, brush24)
+        palette2.setBrush(QPalette.Active, QPalette.PlaceholderText, brush21)
 #endif
-        palette3.setBrush(QPalette.Inactive, QPalette.WindowText, brush6)
-        palette3.setBrush(QPalette.Inactive, QPalette.Button, brush23)
-        palette3.setBrush(QPalette.Inactive, QPalette.Text, brush6)
-        palette3.setBrush(QPalette.Inactive, QPalette.ButtonText, brush6)
-        palette3.setBrush(QPalette.Inactive, QPalette.Base, brush23)
-        palette3.setBrush(QPalette.Inactive, QPalette.Window, brush23)
-        brush25 = QBrush(QColor(210, 210, 210, 128))
-        brush25.setStyle(Qt.NoBrush)
+        palette2.setBrush(QPalette.Inactive, QPalette.WindowText, brush6)
+        palette2.setBrush(QPalette.Inactive, QPalette.Button, brush20)
+        palette2.setBrush(QPalette.Inactive, QPalette.Text, brush6)
+        palette2.setBrush(QPalette.Inactive, QPalette.ButtonText, brush6)
+        palette2.setBrush(QPalette.Inactive, QPalette.Base, brush20)
+        palette2.setBrush(QPalette.Inactive, QPalette.Window, brush20)
+        brush22 = QBrush(QColor(210, 210, 210, 128))
+        brush22.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette3.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush25)
+        palette2.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush22)
 #endif
-        palette3.setBrush(QPalette.Disabled, QPalette.WindowText, brush6)
-        palette3.setBrush(QPalette.Disabled, QPalette.Button, brush23)
-        palette3.setBrush(QPalette.Disabled, QPalette.Text, brush6)
-        palette3.setBrush(QPalette.Disabled, QPalette.ButtonText, brush6)
-        palette3.setBrush(QPalette.Disabled, QPalette.Base, brush23)
-        palette3.setBrush(QPalette.Disabled, QPalette.Window, brush23)
-        brush26 = QBrush(QColor(210, 210, 210, 128))
-        brush26.setStyle(Qt.NoBrush)
+        palette2.setBrush(QPalette.Disabled, QPalette.WindowText, brush6)
+        palette2.setBrush(QPalette.Disabled, QPalette.Button, brush20)
+        palette2.setBrush(QPalette.Disabled, QPalette.Text, brush6)
+        palette2.setBrush(QPalette.Disabled, QPalette.ButtonText, brush6)
+        palette2.setBrush(QPalette.Disabled, QPalette.Base, brush20)
+        palette2.setBrush(QPalette.Disabled, QPalette.Window, brush20)
+        brush23 = QBrush(QColor(210, 210, 210, 128))
+        brush23.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette3.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush26)
+        palette2.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush23)
 #endif
-        self.resultsTableWidget.setPalette(palette3)
+        self.resultsTableWidget.setPalette(palette2)
         self.resultsTableWidget.setStyleSheet(u"QTableWidget {	\n"
 "	background-color: rgb(39, 44, 54);\n"
 "	padding: 10px;\n"
@@ -1570,19 +1106,13 @@ class Ui_MainWindow(object):
         self.resultsTableWidget.horizontalHeader().setVisible(False)
         self.resultsTableWidget.horizontalHeader().setCascadingSectionResizes(True)
         self.resultsTableWidget.horizontalHeader().setDefaultSectionSize(200)
-        self.resultsTableWidget.horizontalHeader().setStretchLastSection(True)
+        self.resultsTableWidget.horizontalHeader().setStretchLastSection(False)
         self.resultsTableWidget.verticalHeader().setVisible(False)
         self.resultsTableWidget.verticalHeader().setCascadingSectionResizes(False)
         self.resultsTableWidget.verticalHeader().setHighlightSections(False)
-        self.resultsTableWidget.verticalHeader().setStretchLastSection(True)
+        self.resultsTableWidget.verticalHeader().setStretchLastSection(False)
 
-        self.gridLayout.addWidget(self.resultsTableWidget, 1, 0, 1, 1)
-
-        self.label_4 = QLabel(self.frame_4)
-        self.label_4.setObjectName(u"label_4")
-        self.label_4.setTextFormat(Qt.RichText)
-
-        self.gridLayout.addWidget(self.label_4, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.resultsTableWidget, 0, 0, 1, 1)
 
 
         self.verticalLayout_20.addWidget(self.frame_4)
@@ -1664,7 +1194,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1691,86 +1221,7 @@ class Ui_MainWindow(object):
         self.label_user_icon.setText("")
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"WELCOME TO PORESIPPR", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>This program is designed to find specific genes in runs created from its </p><p>user over a specified time. PoreSippR must be installed for this app to work.</p></body></html>", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>For complete instructions on installation,</p><p>please visit: https://olc-bioinformatics.github.io/PoreSippR-GUI/</p></body></html>", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"ANALYZATION STATION", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Please select your folder of sequences you would like to analyze", None))
-        self.sequenceBtn.setText(QCoreApplication.translate("MainWindow", u"Open Sequence Files", None))
-        self.analyzeLabelError.setText("")
-#if QT_CONFIG(statustip)
-        self.baseCutoffInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Number of bases necessary to support a multiple allele call. Defaults to 2.", None))
-#endif // QT_CONFIG(statustip)
-        self.baseCutoffInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Base Cutoff", None))
-#if QT_CONFIG(statustip)
-        self.FASTAcheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"If activated, will look for FASTA files instead of FASTQ for unpaired reads.", None))
-#endif // QT_CONFIG(statustip)
-        self.FASTAcheckBox.setText(QCoreApplication.translate("MainWindow", u"FASTA", None))
-        self.dataDropdownMenu.setItemText(0, QCoreApplication.translate("MainWindow", u"Illumina", None))
-        self.dataDropdownMenu.setItemText(1, QCoreApplication.translate("MainWindow", u"Nanopore", None))
-
-#if QT_CONFIG(statustip)
-        self.dataDropdownMenu.setStatusTip(QCoreApplication.translate("MainWindow", u"Type of input data. Default is Illumina, but can be used for Nanopore too. No PacBio support (yet).", None))
-#endif // QT_CONFIG(statustip)
-#if QT_CONFIG(statustip)
-        self.RMLSTcheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"Activate to prefer using rMLST databases over core-gene derived databases. By default, ConFindr will use core-gene derived databases where available.", None))
-#endif // QT_CONFIG(statustip)
-        self.RMLSTcheckBox.setText(QCoreApplication.translate("MainWindow", u"RMLST", None))
-        self.labelBoxMainArguements.setText(QCoreApplication.translate("MainWindow", u"MAIN ARGUEMENTS", None))
-        self.verbosityDropdownMenu.setItemText(0, QCoreApplication.translate("MainWindow", u"Info", None))
-        self.verbosityDropdownMenu.setItemText(1, QCoreApplication.translate("MainWindow", u"Debug", None))
-        self.verbosityDropdownMenu.setItemText(2, QCoreApplication.translate("MainWindow", u"Warning", None))
-
-#if QT_CONFIG(statustip)
-        self.verbosityDropdownMenu.setStatusTip(QCoreApplication.translate("MainWindow", u"Amount of output you want printed to the screen. Defaults to info, which should be good for most users.", None))
-#endif // QT_CONFIG(statustip)
-#if QT_CONFIG(statustip)
-        self.keepCheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"By default, intermediate files are deleted. Activate this flag to keep intermediate files.", None))
-#endif // QT_CONFIG(statustip)
-        self.keepCheckBox.setText(QCoreApplication.translate("MainWindow", u"Keep Files", None))
-#if QT_CONFIG(statustip)
-        self.versionCheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"Show program's version number and exit", None))
-#endif // QT_CONFIG(statustip)
-        self.versionCheckBox.setText(QCoreApplication.translate("MainWindow", u"Version Display", None))
-#if QT_CONFIG(statustip)
-        self.crossDetailsCheckBox.setStatusTip(QCoreApplication.translate("MainWindow", u"Continue ConFindr analyses on samples with two or more genera identified. Default is False", None))
-#endif // QT_CONFIG(statustip)
-        self.crossDetailsCheckBox.setText(QCoreApplication.translate("MainWindow", u"Cross Details", None))
-#if QT_CONFIG(statustip)
-        self.threadsInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Number of threads to run analysis with.", None))
-#endif // QT_CONFIG(statustip)
-        self.threadsInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Threads", None))
-#if QT_CONFIG(statustip)
-        self.reverseInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Identifier for reverse reads.", None))
-#endif // QT_CONFIG(statustip)
-        self.reverseInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Reverse ID", None))
-#if QT_CONFIG(statustip)
-        self.MMHInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Minimum number of matching hashes in a MASH screen in order for a genus to be considered present in a sample. Default is 150", None))
-#endif // QT_CONFIG(statustip)
-        self.MMHInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"MMH", None))
-#if QT_CONFIG(statustip)
-        self.baseFractionInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Fraction of bases necessary to support a multiple allele call. Particularly useful when dealing with very high coverage samples. Default is 0.05.", None))
-#endif // QT_CONFIG(statustip)
-        self.baseFractionInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"BFC", None))
-#if QT_CONFIG(statustip)
-        self.forwardInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Identifier for forward reads.", None))
-#endif // QT_CONFIG(statustip)
-        self.forwardInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Forward ID", None))
-#if QT_CONFIG(statustip)
-        self.TMPInput.setStatusTip(QCoreApplication.translate("MainWindow", u"If your ConFindr databases are in a location you don't have write access to, you can enter this option to specify a temporary directory to put genus-specific databases to.", None))
-#endif // QT_CONFIG(statustip)
-        self.TMPInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"TMP", None))
-#if QT_CONFIG(statustip)
-        self.qualityInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Base quality needed to support a multiple allele call. Defaults to 20.", None))
-#endif // QT_CONFIG(statustip)
-        self.qualityInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Quality Cutoff", None))
-#if QT_CONFIG(statustip)
-        self.databaseInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Databases folder. To download these, you will need to get access to the rMLST databases. For complete instructions on how to do this, please see https://olc-bioinformatics.github.io/ConFindr/install/#downloading-confindr-databases", None))
-#endif // QT_CONFIG(statustip)
-        self.databaseInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Databases", None))
-#if QT_CONFIG(statustip)
-        self.cgmlstInput.setStatusTip(QCoreApplication.translate("MainWindow", u"Path to a cgMLST database to use for contamination detection instead of using the default rMLST database. Sequences in this file should have headers in format >genename_allelenumber. To speed up ConFindr runs, clustering the cgMLST database with CD-HIT before running ConFindr is recommended. This is highly experimental, results should be interpreted with great care.", None))
-#endif // QT_CONFIG(statustip)
-        self.cgmlstInput.setPlaceholderText(QCoreApplication.translate("MainWindow", u"CGMLST", None))
-        self.labelBoxAdvancedArguements.setText(QCoreApplication.translate("MainWindow", u"ADVANCED ARGUEMENTS", None))
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>To add isolates, type in your isolate name and click add isolate! </p><p>To delete isolates, select the isolate from the table and click delete isolate!</p></body></html>", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"PoreSippR SeekR", None))
         self.timeLabel.setText(QCoreApplication.translate("MainWindow", u"Time Passed: 0hrs", None))
         self.runLabelError.setText("")
@@ -1830,8 +1281,7 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem21.setText(QCoreApplication.translate("MainWindow", u"OLC0807 E. coli", None));
         self.resultsTableWidget.setSortingEnabled(__sortingEnabled)
 
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p><p><br/></p></body></html>", None))
         self.label_credits.setText(QCoreApplication.translate("MainWindow", u"Developed for OLC Bioinformaticians", None))
-        self.label_version.setText(QCoreApplication.translate("MainWindow", u"v0.8.1", None))
+        self.label_version.setText(QCoreApplication.translate("MainWindow", u"v1.0", None))
     # retranslateUi
 
