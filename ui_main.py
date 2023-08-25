@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASErfUyyX.ui'
+## Form generated from reading UI file 'GUI_BASEmhaqpz.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -1098,7 +1098,7 @@ class Ui_MainWindow(object):
         self.resultsTableWidget.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContentsOnFirstShow)
         self.resultsTableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.resultsTableWidget.setAlternatingRowColors(False)
-        self.resultsTableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.resultsTableWidget.setSelectionMode(QAbstractItemView.MultiSelection)
         self.resultsTableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.resultsTableWidget.setShowGrid(True)
         self.resultsTableWidget.setGridStyle(Qt.SolidLine)
