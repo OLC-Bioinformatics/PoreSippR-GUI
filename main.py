@@ -123,7 +123,6 @@ class MainWindow(QMainWindow):
         # Then, calls each function according to each button clicked
         self.runBtn.clicked.connect(self.runClicker)
         self.addIsolateBtn.clicked.connect(self.isolateClicker)
-        self.deleteIsolateBtn.clicked.connect(self.deleteClicker)
 
         ########################################################################
 
@@ -145,100 +144,25 @@ class MainWindow(QMainWindow):
     
     # Function for when the run button is clicked
     def runClicker(self):
-        if self.resultsTableWidget.rowCount() > 0:
 
-            # Resets the error text to nothing
-            self.runLabelError.setText("")
+        # Resets the error text to nothing
+        self.runLabelError.setText("")
 
-            # Prints a success message to say the run will take place
-            msg = QMessageBox()
-            msg.setWindowTitle("Success")
-            msg.setText("Starting run now...")
-            msg.setIcon(QMessageBox.Information)
-            x = msg.exec_()  
+        # Prints a success message to say the run will take place
+        msg = QMessageBox()
+        msg.setWindowTitle("Success")
+        msg.setText("Starting run now...")
+        msg.setIcon(QMessageBox.Information)
+        x = msg.exec_()  
 
-            # RUNS THE NANOPORE SEQUENCE HERE ADD THE CODE FOR THAT WHENEVER 
-            # Sleep for 15 seconds
-            sleep(15)
-        
-        else:
-            self.runLabelError.setText("There are not enough isolates. Please try again")
-
-
-            # Uses the folder name as an argument to run ConFindr and get the results. Mem represents total allocated memory that is being reserved for confindr
-            #self.test_out = os.path.join(folderName, "test_out")
-            #mem = int(0.85 * float(psutil.virtual_memory().total) / 1024)
-            #subprocess.run(f'confindr -i {folderName} -o {self.test_out}{databases}{rmlst}{threads}{tmp}{keepFiles}{qualityCutoff}{baseCutoff}{baseFraction}{forwardId}{reverseId}{versionDisplay}{dataChoice}{cgmlst}{fasta}{verbosity}{crossDetails}{MMH} -Xmx {mem}K', shell=True)
-            #print(f'confindr -i {folderName} -o {self.test_out}{databases}{rmlst}{threads}{tmp}{keepFiles}{qualityCutoff}{baseCutoff}{baseFraction}{forwardId}{reverseId}{versionDisplay}{dataChoice}{cgmlst}{fasta}{verbosity}{crossDetails}{MMH} -Xmx {mem}K')
+        # RUNS THE NANOPORE SEQUENCE HERE ADD THE CODE FOR THAT WHENEVER 
+        subprocess.Popen("python poresippr_placeholder.py", shell=True)
 
     # Function for when the button addIsolate is clicked
     def isolateClicker(self):
 
-        # Adds whatever is typed into the isolateInput into the variable isolateName
-        isolateName = self.isolateInput.text()
-
-        # If something is typed in, add this to the first coloumn of the table
-        if isolateName != "":
-
-            numOfRows = self.resultsTableWidget.rowCount() + 1
-            self.resultsTableWidget.setRowCount(numOfRows)
-            self.resultsTableWidget.setItem(numOfRows - 1, 0, QtWidgets.QTableWidgetItem(isolateName))
-
-        else:
-            self.runLabelError.setText("Please type in an isolate name to continue")
-
-    # Function for when the button deleteIsolate is clicked
-    def deleteClicker(self):
-
-        # Deletes the selected row
-        indices = self.resultsTableWidget.selectionModel().selectedRows() 
-
-        for index in sorted(indices):
-            if index.row() == 0:
-                self.runLabelError.setText("You cannot delete the header row")
-
-            else:
-                self.resultsTableWidget.removeRow(index.row()) 
-
-
-    # Loads the data from the xlsx file to the table widget in PyQt5
-    def load_data(self, fileName):
-        
-        # Gathers the path and locates the excel file. Takes the file path, removes the all files header, subtracts the csv portion and adds on the xlsx
-        fileName = str(fileName).replace(".xlsx", ".csv", 1)
-        path = str(fileName[:-3] + "xlsx")
-        workbook = openpyxl.load_workbook(path)
-        sheet = workbook.active
-
-        # Sets the number of rows and columns to the max rows and columns of the excel sheet entered
-        self.resultsTableWidget.setRowCount(sheet.max_row)
-        self.resultsTableWidget.setColumnCount(sheet.max_column)
-
-        # Sets the headers of the widget table to the headers in the excel sheet entered
-        list_values = list(sheet.values)
-
-        # Gives a success message
-        msg = QMessageBox()
-        msg.setWindowTitle("Success")
-        msg.setText("Table successfully generated!")
-        msg.setIcon(QMessageBox.Information)
-        x = msg.exec_()
-
-        # Adds all other elements (value_tuple) of the excel file, skipping the header (starting at column 1 -> # of columns left)
-        row_index = 0
-        for value_tuple in list_values:
-            col_index = 0
-            for value in value_tuple:
-                self.resultsTableWidget.setColumnWidth(col_index, 200)                
-                self.resultsTableWidget.setItem(row_index, col_index, QTableWidgetItem(str(value))) 
-
-                # Sets a whole row to red if there is contamination
-                if str(value) == "True":
-                    self.resultsTableWidget.item(row_index, col_index).setBackground(QtGui.QColor(255,114,118))    
-
-                col_index += 1                   
-                                            
-            row_index += 1
+        qpixmap = QPixmap("mockup_0.png")
+        self.imageLabel.setPixmap(qpixmap)
 
     # Buttons that take you to different pages in stacked widget
     def Button(self):
@@ -308,11 +232,9 @@ class MainWindow(QMainWindow):
         # Defines all the widgets used [there is a lot of them]
         self.runBtn = self.findChild(QPushButton, "runBtn")
         self.addIsolateBtn = self.findChild(QPushButton, "addIsolateBtn")
-        self.deleteIsolateBtn = self.findChild(QPushButton, "deleteIsolateBtn")
         self.runLabelError = self.findChild(QLabel, "runLabelError")
         self.timeLabel = self.findChild(QLabel, "timeLabel")
-        self.resultsTableWidget = self.findChild(QTableWidget, "resultsTableWidget")
-        self.isolateInput = self.findChild(QLineEdit, "isolateInput")
+        self.imageLabel = self.findChild(QLabel, "imageLabel")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
