@@ -2011,6 +2011,9 @@ QPushButton:pressed {
                        </property>
                        <item>
                         <widget class="QStackedWidget" name="stackedWidget_2">
+                         <property name="currentIndex">
+                          <number>0</number>
+                         </property>
                          <widget class="QWidget" name="page_3">
                           <layout class="QVBoxLayout" name="verticalLayout_7">
                            <item>
@@ -2026,19 +2029,15 @@ QPushButton:pressed {
                           </layout>
                          </widget>
                          <widget class="QWidget" name="page_4">
-                          <widget class="QPushButton" name="pushButton">
-                           <property name="geometry">
-                            <rect>
-                             <x>400</x>
-                             <y>170</y>
-                             <width>80</width>
-                             <height>22</height>
-                            </rect>
-                           </property>
-                           <property name="text">
-                            <string>PushButton</string>
-                           </property>
-                          </widget>
+                          <layout class="QHBoxLayout" name="horizontalLayout_9">
+                           <item>
+                            <widget class="QPushButton" name="pushButton">
+                             <property name="text">
+                              <string>PushButton</string>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
                          </widget>
                         </widget>
                        </item>
