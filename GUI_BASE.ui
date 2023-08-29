@@ -1947,6 +1947,47 @@ QPushButton:pressed {
                       </property>
                      </widget>
                     </item>
+                    <item>
+                     <widget class="QPushButton" name="cancelBtn">
+                      <property name="minimumSize">
+                       <size>
+                        <width>150</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <family>Segoe UI</family>
+                        <pointsize>9</pointsize>
+                       </font>
+                      </property>
+                      <property name="layoutDirection">
+                       <enum>Qt::LeftToRight</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton {
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;	
+	background-color: rgb(52, 59, 72);
+}
+QPushButton:hover {
+	background-color: rgb(57, 65, 80);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(35, 40, 49);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>Stop Processing</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="files.qrc">
+                        <normaloff>:/16x16/icons/16x16/cil-ban.png</normaloff>:/16x16/icons/16x16/cil-ban.png</iconset>
+                      </property>
+                     </widget>
+                    </item>
                     <item alignment="Qt::AlignLeft|Qt::AlignTop">
                      <widget class="QFrame" name="frame">
                       <property name="maximumSize">
@@ -2074,7 +2115,7 @@ QPushButton:pressed {
                           <number>0</number>
                          </property>
                          <widget class="QWidget" name="page_0">
-                          <layout class="QVBoxLayout" name="verticalLayout_7">
+                          <layout class="QVBoxLayout" name="verticalLayout_6">
                            <item>
                             <widget class="QPushButton" name="pushButton">
                              <property name="text">
