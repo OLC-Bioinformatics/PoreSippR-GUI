@@ -10,7 +10,7 @@ from glob import glob
 import os
 import shutil
 from time import sleep
-from PySide2 import QtCore, QtGui
+from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, QEvent)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 
@@ -21,11 +21,6 @@ class HoldPlace():
         """
         Run the appropriate methods in the correct order
         """
-
-        # Defines the label to display the image
-        self.imageLabel = self.findChild(QLabel, "imageLabel")
-        qpixmap = QPixmap("mockup_0.png")
-        self.imageLabel.setPixmap(qpixmap)
 
         HoldPlace.clear_folder(
             working_dir=self.current_working_dir
@@ -42,7 +37,7 @@ class HoldPlace():
                 image=self.image_list[-1]
             )
             # Sleep for 15 seconds
-            sleep(15)
+            sleep(3)
 
     @staticmethod
     def clear_folder(working_dir, extension='.png'):
@@ -90,9 +85,11 @@ class HoldPlace():
         :param image: Name and path of the source image to copy to the current working directory
         """
         # Copy the image from the image directory to the current working directory
+        # os.path.basename(image)
         shutil.copyfile(
             src=image,
             dst=os.path.join(working_dir, os.path.basename(image))
+            #dst=os.path.join(working_dir, 'test_image.png')
         )
 
     def __init__(self):

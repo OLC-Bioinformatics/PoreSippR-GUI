@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASEZyjgmw.ui'
+## Form generated from reading UI file 'GUI_BASELuoWJX.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -839,11 +839,12 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_20.addWidget(self.runBtn)
 
-        self.addIsolateBtn = QPushButton(self.page_table)
-        self.addIsolateBtn.setObjectName(u"addIsolateBtn")
-        self.addIsolateBtn.setMinimumSize(QSize(150, 30))
-        self.addIsolateBtn.setFont(font11)
-        self.addIsolateBtn.setStyleSheet(u"QPushButton {\n"
+        self.cancelBtn = QPushButton(self.page_table)
+        self.cancelBtn.setObjectName(u"cancelBtn")
+        self.cancelBtn.setMinimumSize(QSize(150, 30))
+        self.cancelBtn.setFont(font11)
+        self.cancelBtn.setLayoutDirection(Qt.LeftToRight)
+        self.cancelBtn.setStyleSheet(u"QPushButton {\n"
 "	border: 2px solid rgb(52, 59, 72);\n"
 "	border-radius: 5px;	\n"
 "	background-color: rgb(52, 59, 72);\n"
@@ -856,9 +857,69 @@ class Ui_MainWindow(object):
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
 "}")
-        self.addIsolateBtn.setIcon(icon3)
+        icon4 = QIcon()
+        icon4.addFile(u":/16x16/icons/16x16/cil-ban.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.cancelBtn.setIcon(icon4)
 
-        self.verticalLayout_20.addWidget(self.addIsolateBtn)
+        self.verticalLayout_20.addWidget(self.cancelBtn)
+
+        self.frame = QFrame(self.page_table)
+        self.frame.setObjectName(u"frame")
+        self.frame.setMaximumSize(QSize(16777215, 40))
+        self.frame.setLayoutDirection(Qt.RightToLeft)
+        self.frame.setFrameShape(QFrame.StyledPanel)
+        self.frame.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_9 = QHBoxLayout(self.frame)
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.rightBtn = QPushButton(self.frame)
+        self.rightBtn.setObjectName(u"rightBtn")
+        self.rightBtn.setMinimumSize(QSize(150, 30))
+        self.rightBtn.setFont(font11)
+        self.rightBtn.setStyleSheet(u"QPushButton {\n"
+"	border: 2px solid rgb(52, 59, 72);\n"
+"	border-radius: 5px;	\n"
+"	background-color: rgb(52, 59, 72);\n"
+"}\n"
+"QPushButton:hover {\n"
+"	background-color: rgb(57, 65, 80);\n"
+"	border: 2px solid rgb(61, 70, 86);\n"
+"}\n"
+"QPushButton:pressed {	\n"
+"	background-color: rgb(35, 40, 49);\n"
+"	border: 2px solid rgb(43, 50, 61);\n"
+"}")
+        icon5 = QIcon()
+        icon5.addFile(u":/16x16/icons/16x16/cil-arrow-circle-right.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.rightBtn.setIcon(icon5)
+
+        self.horizontalLayout_9.addWidget(self.rightBtn)
+
+        self.leftBtn = QPushButton(self.frame)
+        self.leftBtn.setObjectName(u"leftBtn")
+        self.leftBtn.setMinimumSize(QSize(150, 30))
+        self.leftBtn.setFont(font11)
+        self.leftBtn.setLayoutDirection(Qt.LeftToRight)
+        self.leftBtn.setStyleSheet(u"QPushButton {\n"
+"	border: 2px solid rgb(52, 59, 72);\n"
+"	border-radius: 5px;	\n"
+"	background-color: rgb(52, 59, 72);\n"
+"}\n"
+"QPushButton:hover {\n"
+"	background-color: rgb(57, 65, 80);\n"
+"	border: 2px solid rgb(61, 70, 86);\n"
+"}\n"
+"QPushButton:pressed {	\n"
+"	background-color: rgb(35, 40, 49);\n"
+"	border: 2px solid rgb(43, 50, 61);\n"
+"}")
+        icon6 = QIcon()
+        icon6.addFile(u":/16x16/icons/16x16/cil-arrow-circle-left.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.leftBtn.setIcon(icon6)
+
+        self.horizontalLayout_9.addWidget(self.leftBtn)
+
+
+        self.verticalLayout_20.addWidget(self.frame, 0, Qt.AlignLeft|Qt.AlignTop)
 
         self.frame_4 = QFrame(self.page_table)
         self.frame_4.setObjectName(u"frame_4")
@@ -867,30 +928,60 @@ class Ui_MainWindow(object):
         self.frame_4.setMinimumSize(QSize(0, 40))
         self.frame_4.setFrameShape(QFrame.StyledPanel)
         self.frame_4.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_6 = QVBoxLayout(self.frame_4)
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.verticalLayout_6.setSizeConstraint(QLayout.SetNoConstraint)
+        self.horizontalLayout_11 = QHBoxLayout(self.frame_4)
+        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.stackedWidget_2 = QStackedWidget(self.frame_4)
         self.stackedWidget_2.setObjectName(u"stackedWidget_2")
-        self.page_3 = QWidget()
-        self.page_3.setObjectName(u"page_3")
-        self.verticalLayout_7 = QVBoxLayout(self.page_3)
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.imageLabel = QLabel(self.page_3)
-        self.imageLabel.setObjectName(u"imageLabel")
-        self.imageLabel.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_7.addWidget(self.imageLabel)
-
-        self.stackedWidget_2.addWidget(self.page_3)
-        self.page_4 = QWidget()
-        self.page_4.setObjectName(u"page_4")
-        self.pushButton = QPushButton(self.page_4)
+        self.page_0 = QWidget()
+        self.page_0.setObjectName(u"page_0")
+        self.verticalLayout_6 = QVBoxLayout(self.page_0)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.pushButton = QPushButton(self.page_0)
         self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setGeometry(QRect(400, 170, 80, 22))
-        self.stackedWidget_2.addWidget(self.page_4)
 
-        self.verticalLayout_6.addWidget(self.stackedWidget_2)
+        self.verticalLayout_6.addWidget(self.pushButton)
+
+        self.imageLabel_0 = QLabel(self.page_0)
+        self.imageLabel_0.setObjectName(u"imageLabel_0")
+        self.imageLabel_0.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_6.addWidget(self.imageLabel_0)
+
+        self.stackedWidget_2.addWidget(self.page_0)
+        self.page_1 = QWidget()
+        self.page_1.setObjectName(u"page_1")
+        self.verticalLayout_11 = QVBoxLayout(self.page_1)
+        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
+        self.pushButton_2 = QPushButton(self.page_1)
+        self.pushButton_2.setObjectName(u"pushButton_2")
+
+        self.verticalLayout_11.addWidget(self.pushButton_2)
+
+        self.imageLabel_1 = QLabel(self.page_1)
+        self.imageLabel_1.setObjectName(u"imageLabel_1")
+        self.imageLabel_1.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_11.addWidget(self.imageLabel_1)
+
+        self.stackedWidget_2.addWidget(self.page_1)
+        self.page_2 = QWidget()
+        self.page_2.setObjectName(u"page_2")
+        self.verticalLayout_12 = QVBoxLayout(self.page_2)
+        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
+        self.pushButton_3 = QPushButton(self.page_2)
+        self.pushButton_3.setObjectName(u"pushButton_3")
+
+        self.verticalLayout_12.addWidget(self.pushButton_3)
+
+        self.imageLabel_2 = QLabel(self.page_2)
+        self.imageLabel_2.setObjectName(u"imageLabel_2")
+        self.imageLabel_2.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_12.addWidget(self.imageLabel_2)
+
+        self.stackedWidget_2.addWidget(self.page_2)
+
+        self.horizontalLayout_11.addWidget(self.stackedWidget_2)
 
 
         self.verticalLayout_20.addWidget(self.frame_4)
@@ -973,6 +1064,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget_2.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1004,9 +1096,15 @@ class Ui_MainWindow(object):
         self.timeLabel.setText(QCoreApplication.translate("MainWindow", u"Time Passed: 0hrs", None))
         self.runLabelError.setText("")
         self.runBtn.setText(QCoreApplication.translate("MainWindow", u"Begin Run", None))
-        self.addIsolateBtn.setText(QCoreApplication.translate("MainWindow", u"Add photo", None))
-        self.imageLabel.setText("")
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"PushButton", None))
+        self.cancelBtn.setText(QCoreApplication.translate("MainWindow", u"Stop Processing", None))
+        self.rightBtn.setText("")
+        self.leftBtn.setText("")
+        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.imageLabel_0.setText("")
+        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"1", None))
+        self.imageLabel_1.setText("")
+        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"2", None))
+        self.imageLabel_2.setText("")
         self.label_credits.setText(QCoreApplication.translate("MainWindow", u"Developed for OLC Bioinformaticians", None))
         self.label_version.setText(QCoreApplication.translate("MainWindow", u"v1.0", None))
     # retranslateUi

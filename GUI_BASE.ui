@@ -1947,22 +1947,40 @@ QPushButton:pressed {
                       </property>
                      </widget>
                     </item>
-                    <item>
-                     <widget class="QPushButton" name="addIsolateBtn">
-                      <property name="minimumSize">
+                    <item alignment="Qt::AlignLeft|Qt::AlignTop">
+                     <widget class="QFrame" name="frame">
+                      <property name="maximumSize">
                        <size>
-                        <width>150</width>
-                        <height>30</height>
+                        <width>16777215</width>
+                        <height>40</height>
                        </size>
                       </property>
-                      <property name="font">
-                       <font>
-                        <family>Segoe UI</family>
-                        <pointsize>9</pointsize>
-                       </font>
+                      <property name="layoutDirection">
+                       <enum>Qt::RightToLeft</enum>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">QPushButton {
+                      <property name="frameShape">
+                       <enum>QFrame::StyledPanel</enum>
+                      </property>
+                      <property name="frameShadow">
+                       <enum>QFrame::Raised</enum>
+                      </property>
+                      <layout class="QHBoxLayout" name="horizontalLayout_9">
+                       <item>
+                        <widget class="QPushButton" name="rightBtn">
+                         <property name="minimumSize">
+                          <size>
+                           <width>150</width>
+                           <height>30</height>
+                          </size>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <family>Segoe UI</family>
+                           <pointsize>9</pointsize>
+                          </font>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">QPushButton {
 	border: 2px solid rgb(52, 59, 72);
 	border-radius: 5px;	
 	background-color: rgb(52, 59, 72);
@@ -1975,14 +1993,58 @@ QPushButton:pressed {
 	background-color: rgb(35, 40, 49);
 	border: 2px solid rgb(43, 50, 61);
 }</string>
-                      </property>
-                      <property name="text">
-                       <string>Add photo</string>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="files.qrc">
-                        <normaloff>:/16x16/icons/16x16/cil-lightbulb.png</normaloff>:/16x16/icons/16x16/cil-lightbulb.png</iconset>
-                      </property>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="files.qrc">
+                           <normaloff>:/16x16/icons/16x16/cil-arrow-circle-right.png</normaloff>:/16x16/icons/16x16/cil-arrow-circle-right.png</iconset>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QPushButton" name="leftBtn">
+                         <property name="minimumSize">
+                          <size>
+                           <width>150</width>
+                           <height>30</height>
+                          </size>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <family>Segoe UI</family>
+                           <pointsize>9</pointsize>
+                          </font>
+                         </property>
+                         <property name="layoutDirection">
+                          <enum>Qt::LeftToRight</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">QPushButton {
+	border: 2px solid rgb(52, 59, 72);
+	border-radius: 5px;	
+	background-color: rgb(52, 59, 72);
+}
+QPushButton:hover {
+	background-color: rgb(57, 65, 80);
+	border: 2px solid rgb(61, 70, 86);
+}
+QPushButton:pressed {	
+	background-color: rgb(35, 40, 49);
+	border: 2px solid rgb(43, 50, 61);
+}</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="files.qrc">
+                           <normaloff>:/16x16/icons/16x16/cil-arrow-circle-left.png</normaloff>:/16x16/icons/16x16/cil-arrow-circle-left.png</iconset>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </item>
                     <item>
@@ -2005,19 +2067,23 @@ QPushButton:pressed {
                       <property name="frameShadow">
                        <enum>QFrame::Raised</enum>
                       </property>
-                      <layout class="QVBoxLayout" name="verticalLayout_6">
-                       <property name="sizeConstraint">
-                        <enum>QLayout::SetNoConstraint</enum>
-                       </property>
+                      <layout class="QHBoxLayout" name="horizontalLayout_11">
                        <item>
                         <widget class="QStackedWidget" name="stackedWidget_2">
                          <property name="currentIndex">
                           <number>0</number>
                          </property>
-                         <widget class="QWidget" name="page_3">
+                         <widget class="QWidget" name="page_0">
                           <layout class="QVBoxLayout" name="verticalLayout_7">
                            <item>
-                            <widget class="QLabel" name="imageLabel">
+                            <widget class="QPushButton" name="pushButton">
+                             <property name="text">
+                              <string>0</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QLabel" name="imageLabel_0">
                              <property name="text">
                               <string/>
                              </property>
@@ -2028,12 +2094,43 @@ QPushButton:pressed {
                            </item>
                           </layout>
                          </widget>
-                         <widget class="QWidget" name="page_4">
-                          <layout class="QHBoxLayout" name="horizontalLayout_9">
+                         <widget class="QWidget" name="page_1">
+                          <layout class="QVBoxLayout" name="verticalLayout_11">
                            <item>
-                            <widget class="QPushButton" name="pushButton">
+                            <widget class="QPushButton" name="pushButton_2">
                              <property name="text">
-                              <string>PushButton</string>
+                              <string>1</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QLabel" name="imageLabel_1">
+                             <property name="text">
+                              <string/>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignCenter</set>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
+                         </widget>
+                         <widget class="QWidget" name="page_2">
+                          <layout class="QVBoxLayout" name="verticalLayout_12">
+                           <item>
+                            <widget class="QPushButton" name="pushButton_3">
+                             <property name="text">
+                              <string>2</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item>
+                            <widget class="QLabel" name="imageLabel_2">
+                             <property name="text">
+                              <string/>
+                             </property>
+                             <property name="alignment">
+                              <set>Qt::AlignCenter</set>
                              </property>
                             </widget>
                            </item>

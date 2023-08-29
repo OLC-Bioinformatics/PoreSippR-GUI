@@ -14,17 +14,27 @@
 ##
 ################################################################################
 
+from glob import glob
 import sys
 import platform
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, QEvent)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
-import openpyxl, csv, subprocess, os, pathlib, psutil, glob
+import openpyxl, csv, subprocess, os, pathlib, psutil
 from time import sleep
 
 # GUI FILE
 from app_modules import *
+
+# from PySide2 import uic
+from PySide2.QtWidgets import QWidget
+
+class ItemWidget(QWidget):
+    def __init__(self, parent = None):
+        QWidget.__init__(self, parent = parent)
+        # uic.loadUi(r'interface/TestItemWidget.ui', self)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -77,6 +87,7 @@ class MainWindow(QMainWindow):
 
         ## ==> START PAGE
         self.ui.stackedWidget.setCurrentWidget(self.ui.page_home)
+        self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_0)
         ## ==> END ##
 
         ## USER ICON ==> SHOW HIDE
@@ -122,7 +133,10 @@ class MainWindow(QMainWindow):
 
         # Then, calls each function according to each button clicked
         self.runBtn.clicked.connect(self.runClicker)
-        self.addIsolateBtn.clicked.connect(self.isolateClicker)
+
+        # Swaps between all the pages in the stacked widget
+        self.leftBtn.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(self.ui.stackedWidget_2.currentIndex() - 1))
+        self.rightBtn.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(self.ui.stackedWidget_2.currentIndex() + 1))
 
         ########################################################################
 
@@ -156,13 +170,51 @@ class MainWindow(QMainWindow):
         x = msg.exec_()  
 
         # RUNS THE NANOPORE SEQUENCE HERE ADD THE CODE FOR THAT WHENEVER 
+        # Starts adding new photos inside
         subprocess.Popen("python poresippr_placeholder.py", shell=True)
 
-    # Function for when the button addIsolate is clicked
-    def isolateClicker(self):
+        # self.stackedWidget.addWidget(self.page_home)
+        sleep(1)
 
-        qpixmap = QPixmap("mockup_0.png")
-        self.imageLabel.setPixmap(qpixmap)
+        complete = False
+
+        while not complete:
+            QtCore.QCoreApplication.processEvents()
+            
+            images = sorted(glob('*.png'))
+
+            if len(images) == 1:
+                qpixmap = QPixmap(images[-1])
+                self.imageLabel_0.setPixmap(qpixmap)
+
+            elif len(images) == 2:
+                qpixmap = QPixmap(images[-1])
+                self.imageLabel_1.setPixmap(qpixmap)
+            
+            elif len(images) == 3:
+                qpixmap = QPixmap(images[-1])
+                self.imageLabel_2.setPixmap(qpixmap)
+
+            print(len(images))
+
+            # Checks to finish run
+            #complete = self.cancelBtn.clicked.connect(self.cancelClicker(complete))
+
+    # Finished the run and breaks the while loop
+    def cancelClicker(self, complete):
+        complete = True
+        return complete
+        
+        # while True:
+        #     images = sorted(glob('*.png'))
+        #     qpixmap = QPixmap(images[-1])
+        #     self.imageLabel.setPixmap(qpixmap)
+        #     sleep(5)
+        # for i, image in enumerate(images):
+            # w = ItemWidget(self)
+            # w.label.setText(i)
+            # self.ItemStackedWidget.insertWidget(f'test_{i}', w)
+            # self.stackedWidget.addWidget(self.page_home)
 
     # Buttons that take you to different pages in stacked widget
     def Button(self):
@@ -231,10 +283,14 @@ class MainWindow(QMainWindow):
     def widgetDefiner(self):
         # Defines all the widgets used [there is a lot of them]
         self.runBtn = self.findChild(QPushButton, "runBtn")
-        self.addIsolateBtn = self.findChild(QPushButton, "addIsolateBtn")
+        self.leftBtn = self.findChild(QPushButton, "leftBtn")
+        self.rightBtn = self.findChild(QPushButton, "rightBtn")
+        self.cancelBtn = self.findChild(QPushButton, "cancelBtn")
         self.runLabelError = self.findChild(QLabel, "runLabelError")
         self.timeLabel = self.findChild(QLabel, "timeLabel")
-        self.imageLabel = self.findChild(QLabel, "imageLabel")
+        self.imageLabel_0 = self.findChild(QLabel, "imageLabel_0")
+        self.imageLabel_1 = self.findChild(QLabel, "imageLabel_1")
+        self.imageLabel_2 = self.findChild(QLabel, "imageLabel_2")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
