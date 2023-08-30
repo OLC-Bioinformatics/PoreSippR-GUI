@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
 
         # Firstly, defines all widgets used
         self.widgetDefiner()
-
+        
         # Then, calls each function according to each button clicked
         self.runBtn.clicked.connect(self.runClicker)
 
@@ -173,11 +173,15 @@ class MainWindow(QMainWindow):
         # Starts adding new photos inside
         subprocess.Popen("python poresippr_placeholder.py", shell=True)
 
-        # self.stackedWidget.addWidget(self.page_home)
+        # 1 second delay to allow pictures to load in
         sleep(1)
 
+        # Allows the button to be toggleable and sets the complete var to false
+        self.cancelBtn.setCheckable(True)
         complete = False
-
+        addedWidget = False
+        
+        # While loop to constantly look for new images to add into the GUI. Always adds the last image to the GUI
         while not complete:
             QtCore.QCoreApplication.processEvents()
             
@@ -195,26 +199,59 @@ class MainWindow(QMainWindow):
                 qpixmap = QPixmap(images[-1])
                 self.imageLabel_2.setPixmap(qpixmap)
 
-            print(len(images))
+            elif len(images) == 4:
+                if addedWidget == False:
+                    self.newPage = QWidget()
+                    self.ui.stackedWidget_2.addWidget(self.newPage)
+                    addedWidget = True
 
-            # Checks to finish run
-            #complete = self.cancelBtn.clicked.connect(self.cancelClicker(complete))
+                    self.imageLabel = QLabel(self.newPage)
+                    self.imageLabel.setObjectName(u"imageLabel")
+                    self.imageLabel.setAlignment(Qt.AlignCenter)
 
-    # Finished the run and breaks the while loop
-    def cancelClicker(self, complete):
-        complete = True
-        return complete
+                    qpixmap = QPixmap(images[-1])
+                    self.imageLabel.setPixmap(qpixmap)
+
+            #if len(images) == len(images) + 1:
+
+            if self.cancelBtn.isChecked():
+                msg = QMessageBox()
+                msg.setWindowTitle("Warning")
+                msg.setText("Are you sure you want to stop the run?")
+                msg.setIcon(QMessageBox.Warning)
+                msg.setStandardButtons(QMessageBox.Yes|QMessageBox.Cancel)
+                msg.buttonClicked.connect(self.dialogClicked)
+                x = msg.exec_()  
+                print(x)
+
+                #Yes = 16384     
+                #Cancel = 4194304     
+                if x == 16384:
+                    complete = True
+
+                # Rechecks the button to false to make sure we don't loop
+                self.cancelBtn.setChecked(False)
+            
+            print(len(images)) 
+
+    # Allows you to cancel if you accidently try cancelling a run
+    def dialogClicked(self, dialog_button):
         
-        # while True:
-        #     images = sorted(glob('*.png'))
-        #     qpixmap = QPixmap(images[-1])
-        #     self.imageLabel.setPixmap(qpixmap)
-        #     sleep(5)
-        # for i, image in enumerate(images):
-            # w = ItemWidget(self)
-            # w.label.setText(i)
-            # self.ItemStackedWidget.insertWidget(f'test_{i}', w)
-            # self.stackedWidget.addWidget(self.page_home)
+        if dialog_button.text() == "&Yes":
+            if self.cancelBtn.isChecked():
+                msg = QMessageBox()
+                msg.setWindowTitle("STOPPED")
+                msg.setText("Application has stopped reading images")
+                msg.setIcon(QMessageBox.Warning)
+                msg.exec_()  
+        
+        if dialog_button.text() == "Cancel":
+                msg = QMessageBox()
+                msg.setWindowTitle("CONTINUED")
+                msg.setText("Application will continue to read images")
+                msg.setIcon(QMessageBox.Warning)
+                msg.exec_()  
+    
 
     # Buttons that take you to different pages in stacked widget
     def Button(self):

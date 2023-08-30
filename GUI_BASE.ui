@@ -1986,6 +1986,9 @@ QPushButton:pressed {
                        <iconset resource="files.qrc">
                         <normaloff>:/16x16/icons/16x16/cil-ban.png</normaloff>:/16x16/icons/16x16/cil-ban.png</iconset>
                       </property>
+                      <property name="checkable">
+                       <bool>true</bool>
+                      </property>
                      </widget>
                     </item>
                     <item alignment="Qt::AlignLeft|Qt::AlignTop">
