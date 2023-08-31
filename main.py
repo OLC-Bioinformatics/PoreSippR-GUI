@@ -18,23 +18,18 @@ from glob import glob
 import sys
 import platform
 from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, QEvent)
+from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QTimer, QUrl, Qt, QEvent)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
-import openpyxl, csv, subprocess, os, pathlib, psutil
+import subprocess
 from time import sleep
+from datetime import datetime
 
 # GUI FILE
 from app_modules import *
 
 # from PySide2 import uic
 from PySide2.QtWidgets import QWidget
-
-class ItemWidget(QWidget):
-    def __init__(self, parent = None):
-        QWidget.__init__(self, parent = parent)
-        # uic.loadUi(r'interface/TestItemWidget.ui', self)
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -87,7 +82,7 @@ class MainWindow(QMainWindow):
 
         ## ==> START PAGE
         self.ui.stackedWidget.setCurrentWidget(self.ui.page_home)
-        self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_0)
+        #self.ui.stackedWidget_2.setCurrentWidget(self.ui.page_0)
         ## ==> END ##
 
         ## USER ICON ==> SHOW HIDE
@@ -132,7 +127,13 @@ class MainWindow(QMainWindow):
         self.widgetDefiner()
         
         # Then, calls each function according to each button clicked
+        self.runBtn.setCheckable(True)
         self.runBtn.clicked.connect(self.runClicker)
+        self.cancelBtn.clicked.connect(self.cancelClicker)
+
+        # Also sets a timer to count down the time the process takes. Starts the timer and updates every second
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.lcd_number)
 
         # Swaps between all the pages in the stacked widget
         self.leftBtn.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(self.ui.stackedWidget_2.currentIndex() - 1))
@@ -156,54 +157,82 @@ class MainWindow(QMainWindow):
     ## MENUS ==> DYNAMIC MENUS FUNCTIONS
     ########################################################################
     
+    # Starts the beginning of the timer
+    def lcd_number(self):
+        time = datetime.now()
+        time = time.replace(hour=0, minute=0, second=0, microsecond=0)
+        formatted_time = time.strftime("%H:%M:%S")
+        print(time)
+
+        # Makes text flat (no white outlines)
+        self.lcd.setSegmentStyle(QLCDNumber.Flat)
+
+        # Set number of LCD digits
+        self.lcd.setDigitCount(8)
+
+        # Displays the time
+        self.lcd.display(formatted_time)
+        #'Time now: %s. End time: %s. Seconds left: %s'%(now.strftime("%H:%M:%S"), (now + datetime.timedelta(seconds=count)).strftime("%H:%M:%S"), count)
+
     # Function for when the run button is clicked
     def runClicker(self):
 
-        # Resets the error text to nothing
-        self.runLabelError.setText("")
+        # Checks if the button is checked when you click on it. If there is another process running, cancel it
+        if self.runBtn.isChecked():
 
-        # Prints a success message to say the run will take place
-        msg = QMessageBox()
-        msg.setWindowTitle("Success")
-        msg.setText("Starting run now...")
-        msg.setIcon(QMessageBox.Information)
-        x = msg.exec_()  
+            # Resets the error text to nothing
+            self.runLabelError.setText("")
 
-        # RUNS THE NANOPORE SEQUENCE HERE ADD THE CODE FOR THAT WHENEVER 
-        # Starts adding new photos inside
-        subprocess.Popen("python poresippr_placeholder.py", shell=True)
+            # Prints a success message to say the run will take place
+            msg = QMessageBox()
+            msg.setWindowTitle("Success")
+            msg.setText("Starting run now...")
+            msg.setIcon(QMessageBox.Information)
+            x = msg.exec_()  
 
-        # 1 second delay to allow pictures to load in
-        sleep(1)
+            # RUNS THE NANOPORE SEQUENCE HERE ADD THE CODE FOR THAT WHENEVER 
+            # Starts adding new photos inside
+            p = subprocess.Popen("python poresippr_placeholder.py", shell=True)
 
-        # Allows the button to be toggleable and sets the complete var to false
-        self.cancelBtn.setCheckable(True)
-        complete = False
-        addedWidget = False
-        
-        # While loop to constantly look for new images to add into the GUI. Always adds the last image to the GUI
-        while not complete:
-            QtCore.QCoreApplication.processEvents()
+            # Starts the timer
+            self.timer.start(1000)
+
+            # 1 second delay to allow pictures to load in
+            sleep(1)
+
+            # Allows the button to be toggleable and sets the complete var to false. Also defines the listOfImages variable before using it.
+            self.cancelBtn.setCheckable(True)
+            complete = False
+            listOfImages = 0
             
-            images = sorted(glob('*.png'))
+            # While loop to constantly look for new images to add into the GUI. Always adds the last image to the GUI
+            while not complete:
+                QtCore.QCoreApplication.processEvents()
+                
+                # Gathers all avalaible images in the current directory and puts them in a sorted list
+                images = sorted(glob('*.png'))
 
-            if len(images) == 1:
-                qpixmap = QPixmap(images[-1])
-                self.imageLabel_0.setPixmap(qpixmap)
+                # Sets the page number for each page you travel through
+                self.pageLabel.setText(str(self.ui.stackedWidget_2.currentIndex() + 1))
 
-            elif len(images) == 2:
-                qpixmap = QPixmap(images[-1])
-                self.imageLabel_1.setPixmap(qpixmap)
-            
-            elif len(images) == 3:
-                qpixmap = QPixmap(images[-1])
-                self.imageLabel_2.setPixmap(qpixmap)
+                # Watches to see which page you are on to disable arrow buttons if you are on one of the extreme pages
+                if self.ui.stackedWidget_2.currentIndex() == 0:
+                    self.leftBtn.setVisible(False)
+                    self.rightBtn.setVisible(True) 
 
-            elif len(images) == 4:
-                if addedWidget == False:
+                elif self.ui.stackedWidget_2.currentIndex() == self.ui.stackedWidget_2.count() - 1:
+                    self.rightBtn.setVisible(False)
+                    self.leftBtn.setVisible(True)
+                
+                else:
+                    self.leftBtn.setVisible(True)
+                    self.rightBtn.setVisible(True) 
+
+                # Checks to see if a new image is added in, and if it is, this if statement executes once to add a new photo through a label and vericalLayout. Grabs the last image in the list added
+                if len(images) == listOfImages + 1:
+
                     self.newPage = QWidget()
                     self.ui.stackedWidget_2.addWidget(self.newPage)
-                    addedWidget = True
 
                     self.imageLabel = QLabel(self.newPage)
                     self.imageLabel.setObjectName(u"imageLabel")
@@ -215,31 +244,49 @@ class MainWindow(QMainWindow):
 
                     qpixmap = QPixmap(images[-1])
                     self.imageLabel.setPixmap(qpixmap)
-
-            #if len(images) == len(images) + 1:
-
-            if self.cancelBtn.isChecked():
-                msg = QMessageBox()
-                msg.setWindowTitle("Warning")
-                msg.setText("Are you sure you want to stop the run?")
-                msg.setIcon(QMessageBox.Warning)
                 
-                # If you are using the linux, it will return an error but this cannot be fixed as it's a PySide 2 error
-                msg.setStandardButtons(QMessageBox.Yes|QMessageBox.Cancel)
+                # Updates the number of images added
+                listOfImages = len(images)
 
-                msg.buttonClicked.connect(self.dialogClicked)
-                x = msg.exec_()  
-                print(x)
+                # Checks if you want to cancel the run and asks a warning before you cancel it
+                if self.cancelBtn.isChecked():
+                    msg = QMessageBox()
+                    msg.setWindowTitle("Warning")
+                    msg.setText("Are you sure you want to stop the run?")
+                    msg.setIcon(QMessageBox.Warning)
+                    
+                    # If you are using the linux, it will return an error but this cannot be fixed as it's a PySide 2 error
+                    msg.setStandardButtons(QMessageBox.Yes|QMessageBox.Cancel)
 
-                #Yes = 16384     
-                #Cancel = 4194304     
-                if x == 16384:
-                    complete = True
+                    msg.buttonClicked.connect(self.dialogClicked)
+                    x = msg.exec_()  
+                    print(x)
 
-                # Rechecks the button to false to make sure we don't loop
-                self.cancelBtn.setChecked(False)
-            
-            print(len(images)) 
+                    # The variable x above produces these two integers below that corrospond to either yes or cancel. Not sure why they produce these numbers but we can make code from them
+                    #Yes = 16384     
+                    #Cancel = 4194304     
+                    if x == 16384:
+                        complete = True
+                        self.runBtn.setChecked(False)
+
+                    # Rechecks the button to false to make sure we don't loop
+                    self.cancelBtn.setChecked(False)
+                
+                #print(len(images)) 
+        
+        else:
+            # Warns there is a process in run, and resets setChecked to true to make sure you don't press it again
+            self.runLabelError.setText("There is a process in run. Please cancel and try again!")
+            self.runBtn.setChecked(True)
+
+    # Prevents you from cancelling a run if there is no run active
+    def cancelClicker(self):
+        if self.runBtn.isChecked():
+            pass
+
+        else:
+            self.runLabelError.setText("There is no run active. Please try when a run is active!")
+            self.cancelBtn.setChecked(False)
 
     # Allows you to cancel if you accidently try cancelling a run
     def dialogClicked(self, dialog_button):
@@ -332,9 +379,11 @@ class MainWindow(QMainWindow):
         self.cancelBtn = self.findChild(QPushButton, "cancelBtn")
         self.runLabelError = self.findChild(QLabel, "runLabelError")
         self.timeLabel = self.findChild(QLabel, "timeLabel")
+        self.pageLabel = self.findChild(QLabel, "pageLabel")
         self.imageLabel_0 = self.findChild(QLabel, "imageLabel_0")
         self.imageLabel_1 = self.findChild(QLabel, "imageLabel_1")
         self.imageLabel_2 = self.findChild(QLabel, "imageLabel_2")
+        self.lcd = self.findChild(QLCDNumber, "lcdNumber")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

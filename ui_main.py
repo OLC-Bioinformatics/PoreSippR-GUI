@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASEGsZiCT.ui'
+## Form generated from reading UI file 'GUI_BASERCrhjz.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -742,8 +742,8 @@ class Ui_MainWindow(object):
 "")
         self.frame_div_content_10.setFrameShape(QFrame.NoFrame)
         self.frame_div_content_10.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_8 = QVBoxLayout(self.frame_div_content_10)
-        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.verticalLayout_6 = QVBoxLayout(self.frame_div_content_10)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
         self.label_8 = QLabel(self.frame_div_content_10)
         self.label_8.setObjectName(u"label_8")
         font9 = QFont()
@@ -752,16 +752,15 @@ class Ui_MainWindow(object):
         self.label_8.setFont(font9)
         self.label_8.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_8.addWidget(self.label_8)
+        self.verticalLayout_6.addWidget(self.label_8)
 
-        self.timeLabel = QLabel(self.frame_div_content_10)
-        self.timeLabel.setObjectName(u"timeLabel")
-        font10 = QFont()
-        font10.setPointSize(14)
-        self.timeLabel.setFont(font10)
-        self.timeLabel.setAlignment(Qt.AlignCenter)
+        self.lcdNumber = QLCDNumber(self.frame_div_content_10)
+        self.lcdNumber.setObjectName(u"lcdNumber")
+        self.lcdNumber.setStyleSheet(u"QLCDNumber {\n"
+"	background-color: rgb(52, 59, 72)\n"
+"}")
 
-        self.verticalLayout_8.addWidget(self.timeLabel)
+        self.verticalLayout_6.addWidget(self.lcdNumber)
 
         self.runLabelError = QLabel(self.frame_div_content_10)
         self.runLabelError.setObjectName(u"runLabelError")
@@ -804,14 +803,14 @@ class Ui_MainWindow(object):
         palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush19)
 #endif
         self.runLabelError.setPalette(palette1)
-        font11 = QFont()
-        font11.setFamily(u"Segoe UI")
-        font11.setPointSize(9)
-        self.runLabelError.setFont(font11)
+        font10 = QFont()
+        font10.setFamily(u"Segoe UI")
+        font10.setPointSize(9)
+        self.runLabelError.setFont(font10)
         self.runLabelError.setStyleSheet(u"color:rgb(190, 9, 9);")
         self.runLabelError.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_8.addWidget(self.runLabelError)
+        self.verticalLayout_6.addWidget(self.runLabelError)
 
 
         self.verticalLayout_20.addWidget(self.frame_div_content_10)
@@ -819,7 +818,7 @@ class Ui_MainWindow(object):
         self.runBtn = QPushButton(self.page_table)
         self.runBtn.setObjectName(u"runBtn")
         self.runBtn.setMinimumSize(QSize(150, 30))
-        self.runBtn.setFont(font11)
+        self.runBtn.setFont(font10)
         self.runBtn.setStyleSheet(u"QPushButton {\n"
 "	border: 2px solid rgb(52, 59, 72);\n"
 "	border-radius: 5px;	\n"
@@ -836,13 +835,14 @@ class Ui_MainWindow(object):
         icon3 = QIcon()
         icon3.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Normal, QIcon.Off)
         self.runBtn.setIcon(icon3)
+        self.runBtn.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.runBtn)
 
         self.cancelBtn = QPushButton(self.page_table)
         self.cancelBtn.setObjectName(u"cancelBtn")
         self.cancelBtn.setMinimumSize(QSize(150, 30))
-        self.cancelBtn.setFont(font11)
+        self.cancelBtn.setFont(font10)
         self.cancelBtn.setLayoutDirection(Qt.LeftToRight)
         self.cancelBtn.setStyleSheet(u"QPushButton {\n"
 "	border: 2px solid rgb(52, 59, 72);\n"
@@ -866,16 +866,38 @@ class Ui_MainWindow(object):
 
         self.frame = QFrame(self.page_table)
         self.frame.setObjectName(u"frame")
-        self.frame.setMaximumSize(QSize(16777215, 40))
+        self.frame.setMaximumSize(QSize(16777215, 50))
         self.frame.setLayoutDirection(Qt.RightToLeft)
         self.frame.setFrameShape(QFrame.StyledPanel)
         self.frame.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_9 = QHBoxLayout(self.frame)
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.frame_div_content_11 = QFrame(self.frame)
+        self.frame_div_content_11.setObjectName(u"frame_div_content_11")
+        self.frame_div_content_11.setMinimumSize(QSize(0, 30))
+        self.frame_div_content_11.setMaximumSize(QSize(16777215, 110))
+        self.frame_div_content_11.setStyleSheet(u"background-color: rgb(41, 45, 56);\n"
+"border-radius: 5px;\n"
+"")
+        self.frame_div_content_11.setFrameShape(QFrame.NoFrame)
+        self.frame_div_content_11.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_7 = QVBoxLayout(self.frame_div_content_11)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.pageLabel = QLabel(self.frame_div_content_11)
+        self.pageLabel.setObjectName(u"pageLabel")
+        font11 = QFont()
+        font11.setPointSize(12)
+        self.pageLabel.setFont(font11)
+
+        self.verticalLayout_7.addWidget(self.pageLabel)
+
+
+        self.horizontalLayout_9.addWidget(self.frame_div_content_11)
+
         self.rightBtn = QPushButton(self.frame)
         self.rightBtn.setObjectName(u"rightBtn")
         self.rightBtn.setMinimumSize(QSize(150, 30))
-        self.rightBtn.setFont(font11)
+        self.rightBtn.setFont(font10)
         self.rightBtn.setStyleSheet(u"QPushButton {\n"
 "	border: 2px solid rgb(52, 59, 72);\n"
 "	border-radius: 5px;	\n"
@@ -898,7 +920,7 @@ class Ui_MainWindow(object):
         self.leftBtn = QPushButton(self.frame)
         self.leftBtn.setObjectName(u"leftBtn")
         self.leftBtn.setMinimumSize(QSize(150, 30))
-        self.leftBtn.setFont(font11)
+        self.leftBtn.setFont(font10)
         self.leftBtn.setLayoutDirection(Qt.LeftToRight)
         self.leftBtn.setStyleSheet(u"QPushButton {\n"
 "	border: 2px solid rgb(52, 59, 72);\n"
@@ -933,54 +955,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
         self.stackedWidget_2 = QStackedWidget(self.frame_4)
         self.stackedWidget_2.setObjectName(u"stackedWidget_2")
-        self.page_0 = QWidget()
-        self.page_0.setObjectName(u"page_0")
-        self.verticalLayout_6 = QVBoxLayout(self.page_0)
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.pushButton = QPushButton(self.page_0)
-        self.pushButton.setObjectName(u"pushButton")
-
-        self.verticalLayout_6.addWidget(self.pushButton)
-
-        self.imageLabel_0 = QLabel(self.page_0)
-        self.imageLabel_0.setObjectName(u"imageLabel_0")
-        self.imageLabel_0.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_6.addWidget(self.imageLabel_0)
-
-        self.stackedWidget_2.addWidget(self.page_0)
-        self.page_1 = QWidget()
-        self.page_1.setObjectName(u"page_1")
-        self.verticalLayout_11 = QVBoxLayout(self.page_1)
-        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
-        self.pushButton_2 = QPushButton(self.page_1)
-        self.pushButton_2.setObjectName(u"pushButton_2")
-
-        self.verticalLayout_11.addWidget(self.pushButton_2)
-
-        self.imageLabel_1 = QLabel(self.page_1)
-        self.imageLabel_1.setObjectName(u"imageLabel_1")
-        self.imageLabel_1.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_11.addWidget(self.imageLabel_1)
-
-        self.stackedWidget_2.addWidget(self.page_1)
-        self.page_2 = QWidget()
-        self.page_2.setObjectName(u"page_2")
-        self.verticalLayout_12 = QVBoxLayout(self.page_2)
-        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
-        self.pushButton_3 = QPushButton(self.page_2)
-        self.pushButton_3.setObjectName(u"pushButton_3")
-
-        self.verticalLayout_12.addWidget(self.pushButton_3)
-
-        self.imageLabel_2 = QLabel(self.page_2)
-        self.imageLabel_2.setObjectName(u"imageLabel_2")
-        self.imageLabel_2.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout_12.addWidget(self.imageLabel_2)
-
-        self.stackedWidget_2.addWidget(self.page_2)
 
         self.horizontalLayout_11.addWidget(self.stackedWidget_2)
 
@@ -1065,7 +1039,7 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget.setCurrentIndex(1)
-        self.stackedWidget_2.setCurrentIndex(0)
+        self.stackedWidget_2.setCurrentIndex(-1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -1093,19 +1067,13 @@ class Ui_MainWindow(object):
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"WELCOME TO PORESIPPR", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>This program is designed to find specific genes in runs created from its </p><p>user over a specified time. PoreSippR must be installed for this app to work.</p></body></html>", None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>To add isolates, type in your isolate name and click add isolate! </p><p>To delete isolates, select the isolate from the table and click delete isolate!</p></body></html>", None))
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"PoreSippR SeekR", None))
-        self.timeLabel.setText(QCoreApplication.translate("MainWindow", u"Time Passed: 0hrs", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"PoreSippR", None))
         self.runLabelError.setText("")
         self.runBtn.setText(QCoreApplication.translate("MainWindow", u"Begin Run", None))
         self.cancelBtn.setText(QCoreApplication.translate("MainWindow", u"Stop Processing", None))
+        self.pageLabel.setText("")
         self.rightBtn.setText("")
         self.leftBtn.setText("")
-        self.pushButton.setText(QCoreApplication.translate("MainWindow", u"0", None))
-        self.imageLabel_0.setText("")
-        self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"1", None))
-        self.imageLabel_1.setText("")
-        self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"2", None))
-        self.imageLabel_2.setText("")
         self.label_credits.setText(QCoreApplication.translate("MainWindow", u"Developed for OLC Bioinformaticians", None))
         self.label_version.setText(QCoreApplication.translate("MainWindow", u"v1.0", None))
     # retranslateUi
