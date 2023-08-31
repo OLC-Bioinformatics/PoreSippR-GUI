@@ -1991,7 +1991,7 @@ QPushButton:pressed {
                       </property>
                      </widget>
                     </item>
-                    <item alignment="Qt::AlignLeft|Qt::AlignTop">
+                    <item alignment="Qt::AlignLeft">
                      <widget class="QFrame" name="frame">
                       <property name="maximumSize">
                        <size>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASELuoWJX.ui'
+## Form generated from reading UI file 'GUI_BASEGsZiCT.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -860,6 +860,7 @@ class Ui_MainWindow(object):
         icon4 = QIcon()
         icon4.addFile(u":/16x16/icons/16x16/cil-ban.png", QSize(), QIcon.Normal, QIcon.Off)
         self.cancelBtn.setIcon(icon4)
+        self.cancelBtn.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.cancelBtn)
 
@@ -919,7 +920,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_9.addWidget(self.leftBtn)
 
 
-        self.verticalLayout_20.addWidget(self.frame, 0, Qt.AlignLeft|Qt.AlignTop)
+        self.verticalLayout_20.addWidget(self.frame, 0, Qt.AlignLeft)
 
         self.frame_4 = QFrame(self.page_table)
         self.frame_4.setObjectName(u"frame_4")

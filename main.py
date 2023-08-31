@@ -209,6 +209,10 @@ class MainWindow(QMainWindow):
                     self.imageLabel.setObjectName(u"imageLabel")
                     self.imageLabel.setAlignment(Qt.AlignCenter)
 
+                    self.verticalLayout = QVBoxLayout(self.newPage)
+                    self.verticalLayout.setObjectName(u"verticalLayout")
+                    self.verticalLayout.addWidget(self.imageLabel)
+
                     qpixmap = QPixmap(images[-1])
                     self.imageLabel.setPixmap(qpixmap)
 
@@ -219,7 +223,10 @@ class MainWindow(QMainWindow):
                 msg.setWindowTitle("Warning")
                 msg.setText("Are you sure you want to stop the run?")
                 msg.setIcon(QMessageBox.Warning)
+                
+                # If you are using the linux, it will return an error but this cannot be fixed as it's a PySide 2 error
                 msg.setStandardButtons(QMessageBox.Yes|QMessageBox.Cancel)
+
                 msg.buttonClicked.connect(self.dialogClicked)
                 x = msg.exec_()  
                 print(x)
