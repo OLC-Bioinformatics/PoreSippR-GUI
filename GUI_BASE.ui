@@ -1572,7 +1572,7 @@ QPushButton:pressed {
                    <string notr="true">background: transparent;</string>
                   </property>
                   <property name="currentIndex">
-                   <number>1</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="page_home">
                    <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -2040,7 +2040,7 @@ border-radius: 5px;
                              </font>
                             </property>
                             <property name="text">
-                             <string> </string>
+                             <string/>
                             </property>
                            </widget>
                           </item>

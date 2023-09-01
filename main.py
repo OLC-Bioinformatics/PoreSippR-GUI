@@ -22,6 +22,7 @@ from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTi
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 import subprocess
+import time
 from time import sleep
 from datetime import datetime
 
@@ -131,9 +132,10 @@ class MainWindow(QMainWindow):
         self.runBtn.clicked.connect(self.runClicker)
         self.cancelBtn.clicked.connect(self.cancelClicker)
 
-        # Also sets a timer to count down the time the process takes. Starts the timer and updates every second
+        # Also displays the current time passing. 1000 is in miliseconds which is the amount of time the timer updates
         self.timer = QTimer()
         self.timer.timeout.connect(self.lcd_number)
+        self.timer.start(1000)
 
         # Swaps between all the pages in the stacked widget
         self.leftBtn.clicked.connect(lambda: self.ui.stackedWidget_2.setCurrentIndex(self.ui.stackedWidget_2.currentIndex() - 1))
@@ -157,12 +159,10 @@ class MainWindow(QMainWindow):
     ## MENUS ==> DYNAMIC MENUS FUNCTIONS
     ########################################################################
     
-    # Starts the beginning of the timer
+    # Function to get the current time each second
     def lcd_number(self):
         time = datetime.now()
-        time = time.replace(hour=0, minute=0, second=0, microsecond=0)
         formatted_time = time.strftime("%H:%M:%S")
-        print(time)
 
         # Makes text flat (no white outlines)
         self.lcd.setSegmentStyle(QLCDNumber.Flat)
@@ -172,7 +172,6 @@ class MainWindow(QMainWindow):
 
         # Displays the time
         self.lcd.display(formatted_time)
-        #'Time now: %s. End time: %s. Seconds left: %s'%(now.strftime("%H:%M:%S"), (now + datetime.timedelta(seconds=count)).strftime("%H:%M:%S"), count)
 
     # Function for when the run button is clicked
     def runClicker(self):
@@ -193,9 +192,6 @@ class MainWindow(QMainWindow):
             # RUNS THE NANOPORE SEQUENCE HERE ADD THE CODE FOR THAT WHENEVER 
             # Starts adding new photos inside
             p = subprocess.Popen("python poresippr_placeholder.py", shell=True)
-
-            # Starts the timer
-            self.timer.start(1000)
 
             # 1 second delay to allow pictures to load in
             sleep(1)
@@ -268,6 +264,8 @@ class MainWindow(QMainWindow):
                     if x == 16384:
                         complete = True
                         self.runBtn.setChecked(False)
+                        self.runLabelError.setText("Process has been stopped and completed!")
+                        self.runLabelError.setStyleSheet(u"color:rgb(34,139,34);")
 
                     # Rechecks the button to false to make sure we don't loop
                     self.cancelBtn.setChecked(False)
@@ -277,6 +275,7 @@ class MainWindow(QMainWindow):
         else:
             # Warns there is a process in run, and resets setChecked to true to make sure you don't press it again
             self.runLabelError.setText("There is a process in run. Please cancel and try again!")
+            self.runLabelError.setStyleSheet(u"color:rgb(190, 9, 9);")
             self.runBtn.setChecked(True)
 
     # Prevents you from cancelling a run if there is no run active
@@ -286,6 +285,7 @@ class MainWindow(QMainWindow):
 
         else:
             self.runLabelError.setText("There is no run active. Please try when a run is active!")
+            self.runLabelError.setStyleSheet(u"color:rgb(190, 9, 9);")
             self.cancelBtn.setChecked(False)
 
     # Allows you to cancel if you accidently try cancelling a run
