@@ -1,7 +1,7 @@
 ################################################################################
 ##
 ## BY: WANDERSON M.PIMENTA
-## PROJECT MADE WITH: Qt Designer and PySide2
+## PROJECT MADE WITH: Qt Designer and PySide6
 ## V: 1.0.0
 ##
 ## This project can be used freely for all uses, as long as they maintain the
@@ -13,14 +13,14 @@
 ## https://doc.qt.io/qtforpython/licenses.html
 ##
 ################################################################################
-
+import signal
 from glob import glob
 import sys
 import platform
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QTimer, QUrl, Qt, QEvent)
-from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
-from PySide2.QtWidgets import *
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QTimer, QUrl, Qt, QEvent)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
+from PySide6.QtWidgets import *
 import subprocess
 import time
 from time import sleep
@@ -29,8 +29,8 @@ from datetime import datetime
 # GUI FILE
 from app_modules import *
 
-# from PySide2 import uic
-from PySide2.QtWidgets import QWidget
+# from PySide6 import uic
+from PySide6.QtWidgets import QWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -341,13 +341,14 @@ class MainWindow(QMainWindow):
 
     ## EVENT ==> MOUSE CLICK
     ########################################################################
+    # Event mouse click
     def mousePressEvent(self, event):
-        self.dragPos = event.globalPos()
-        if event.buttons() == Qt.LeftButton:
+        self.dragPos = event.globalPosition()
+        if event.buttons() == Qt.MouseButton.LeftButton:
             print('Mouse click: LEFT CLICK')
-        if event.buttons() == Qt.RightButton:
+        if event.buttons() == Qt.MouseButton.RightButton:
             print('Mouse click: RIGHT CLICK')
-        if event.buttons() == Qt.MidButton:
+        if event.buttons() == Qt.MouseButton.MiddleButton:
             print('Mouse click: MIDDLE BUTTON')
     ## ==> END ##
 
@@ -385,9 +386,11 @@ class MainWindow(QMainWindow):
         self.imageLabel_2 = self.findChild(QLabel, "imageLabel_2")
         self.lcd = self.findChild(QLCDNumber, "lcdNumber")
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     QtGui.QFontDatabase.addApplicationFont('fonts/segoeui.ttf')
     QtGui.QFontDatabase.addApplicationFont('fonts/segoeuib.ttf')
     window = MainWindow()
-    sys.exit(app.exec_())
+    signal.signal(signal.SIGINT, lambda *args: app.quit())
+    app.exec()

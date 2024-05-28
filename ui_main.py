@@ -8,9 +8,9 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide6.QtCore import *
+from PySide6.QtGui import *
+from PySide6.QtWidgets import *
 
 import files_rc
 
@@ -450,7 +450,7 @@ class Ui_MainWindow(object):
         font1.setFamily(u"Segoe UI")
         font1.setPointSize(10)
         font1.setBold(True)
-        font1.setWeight(75)
+        font1.setWeight(QFont.Weight.Bold)
         self.label_title_bar_top.setFont(font1)
         self.label_title_bar_top.setStyleSheet(u"background: transparent;\n"
 "")
@@ -573,7 +573,7 @@ class Ui_MainWindow(object):
         font3 = QFont()
         font3.setFamily(u"Segoe UI")
         font3.setBold(True)
-        font3.setWeight(75)
+        font3.setWeight(QFont.Weight.Bold)
         self.label_top_info_2.setFont(font3)
         self.label_top_info_2.setStyleSheet(u"color: rgb(98, 103, 111);")
         self.label_top_info_2.setAlignment(Qt.AlignCenter)
