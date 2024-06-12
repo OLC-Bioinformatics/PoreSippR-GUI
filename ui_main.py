@@ -14,7 +14,7 @@ from PySide6.QtWidgets import *
 
 import files_rc
 
-class Ui_MainWindow(object):
+class Ui_MainWindow:
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
