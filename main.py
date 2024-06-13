@@ -8,6 +8,7 @@ processed in real-time. The GUI is created using PySide6 and Qt Designer.
 # Standard library imports
 from glob import glob
 import logging
+import multiprocessing
 import os
 import platform
 import signal
@@ -23,9 +24,11 @@ from PySide6.QtCore import (
     QPoint,
     QPropertyAnimation,
     QSize,
+    QThread,
     QTime,
     QTimer,
-    Qt
+    Qt,
+    Signal
 )
 from PySide6.QtGui import (
     QColor,
@@ -47,6 +50,8 @@ from PySide6.QtWidgets import (
     QWidget
 )
 
+# Local imports
+from poresippr_placeholder import HoldPlace
 from ui_main import Ui_MainWindow
 from ui_styles import (
     Style
@@ -57,6 +62,31 @@ logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s %(levelname)s %(message)s',
 )
+
+
+class Worker(QThread):
+    """
+    Worker thread class for running
+    """
+    finished = Signal()
+
+    def __init__(self, hold_place):
+        super().__init__()
+        self.hold_place = hold_place
+
+    def run(self):
+        """
+        Run the worker thread.
+        """
+        self.hold_place.main_loop()
+        self.finished.emit()
+
+    def terminate(self):
+        """
+        Terminate the worker thread.
+        """
+        print('terminating')
+        self.hold_place.terminate()
 
 
 class MainWindow(QMainWindow):
@@ -237,6 +267,20 @@ class MainWindow(QMainWindow):
         # Displays the time
         self.lcd.display(self.time.toString('hh:mm:ss'))
 
+    def on_worker_finished(self):
+        self.run_button.setChecked(False)
+        self.run_label_error.setText(
+            "Process has been stopped and completed!")
+        self.run_label_error.setStyleSheet(
+            u"color:rgb(34,139,34);")
+        # Stop the timer
+        self.timer.stop()
+        # Rechecks the button to false to make sure we don't loop
+        self.cancel_button.setChecked(False)
+        # Enables the run button again after the run is finished or cancelled
+        self.run_button.setEnabled(True)
+        self.worker.terminate()
+
     # Function for when the run button is clicked
     def run_clicker(self):
 
@@ -260,9 +304,16 @@ class MainWindow(QMainWindow):
             self.timer.timeout.connect(self.lcd_number)
             self.timer.start(1000)
 
-            # Runs the PoreSippr output parsing script
-            self.process = subprocess.Popen(
-                ["python", "poresippr_placeholder.py"], preexec_fn=os.setsid)
+            # Create a shared value for the complete flag
+            complete = multiprocessing.Value('b', False)
+
+            # Create a HoldPlace instance and pass the shared complete flag to it
+            self.hold_place = HoldPlace(complete)
+
+            # Create a Worker instance and connect its finished signal to a slot method
+            self.worker = Worker(self.hold_place)
+            self.worker.finished.connect(self.on_worker_finished)
+            self.worker.start()
 
             # Give a one-second delay to allow pictures to load in
             sleep(1)
@@ -327,7 +378,7 @@ class MainWindow(QMainWindow):
                     message.setStandardButtons(
                         QMessageBox.Yes | QMessageBox.Cancel)
 
-                    message.buttonClicked.connect(self.dialogClicked)
+                    message.buttonClicked.connect(self.dialog_clicked)
                     self.move_message(message=message)
                     response = message.exec()
 
@@ -336,6 +387,7 @@ class MainWindow(QMainWindow):
                     # Cancel = 4194304
                     if response == QMessageBox.Yes:
                         self.complete = True
+                        # Wait for the process to terminate
                         self.run_button.setChecked(False)
                         self.run_label_error.setText(
                             "Process has been stopped and completed!")
@@ -345,7 +397,8 @@ class MainWindow(QMainWindow):
                         self.timer.stop()
                     # Rechecks the button to false to make sure we don't loop
                     self.cancel_button.setChecked(False)
-
+                    # Terminate the worker thread
+                    self.worker.terminate()
             # Enables the run button again after the run is finished or cancelled
             self.run_button.setEnabled(True)
 
@@ -359,7 +412,7 @@ class MainWindow(QMainWindow):
             # Stop the timer
             self.timer.stop()
             # Reset the time to 0:00:00
-            self.time.setHMS(h=0, m=0, s=0)
+            self.time.setHMS(0, 0, 0)
             # Display the reset time
             self.lcd.display(
                 self.time.toString('hh:mm:ss'))
@@ -375,24 +428,36 @@ class MainWindow(QMainWindow):
         self.run_label_error.setStyleSheet(u"color:rgb(190, 9, 9);")
         self.cancel_button.setChecked(False)
 
-    # Allows you to cancel if you accidently try cancelling a run
-    def dialogClicked(self, dialog_button):
 
-        # if dialog_button.text() == "&Yes":
-        #     if self.cancel_button.isChecked():
-        #         message = QMessageBox()
-        #         message.setWindowTitle("STOPPED")
-        #         message.setText("Application has stopped reading images")
-        #         message.setIcon(QMessageBox.Warning)
-        #         self.move_message(message=message)
-        #         message.exec()
+    def dialog_clicked(self, dialog_button):
+        """
+        Handles the event when a dialog button is clicked.
 
+        If the "Cancel" button is clicked, a message box is displayed to the
+        user indicating that the application will continue to read images.
+
+        Parameters:
+        dialog_button (QPushButton): The button in the dialog that was clicked.
+        """
+
+        # Check if the "Cancel" button was clicked
         if dialog_button.text() == "Cancel":
+            # Create a new message box
             message = QMessageBox()
+
+            # Set the title of the message box
             message.setWindowTitle("CONTINUED")
+
+            # Set the text of the message box
             message.setText("Application will continue to read images")
+
+            # Set the icon of the message box to a warning icon
             message.setIcon(QMessageBox.Warning)
+
+            # Move the message box to the center of the window
             self.move_message(message=message)
+
+            # Display the message box and wait for the user to close it
             message.exec()
 
     def closeEvent(self, event):
@@ -423,8 +488,8 @@ class MainWindow(QMainWindow):
             # If the user clicked 'Yes', kill the process and accept
             # the close event
             if response == QMessageBox.Yes:
-                if self.process is not None:
-                    self.complete = True
+                self.complete = True
+                self.worker.terminate()
             # If the user clicked 'Cancel', ignore the close event
             else:
                 event.ignore()

@@ -94,7 +94,7 @@ class HoldPlace:
         HoldPlace.clear_folder(
             working_dir=self.current_working_dir
         )
-        while not self.complete:
+        while not self.complete.value:
             self.image_list, complete = HoldPlace.locate_image(
                 image_dir=self.image_dir,
                 image_list=self.image_list,
@@ -106,9 +106,15 @@ class HoldPlace:
             )
             # Sleep for 5 seconds, checking for signals every second
             for _ in range(5):
-                if self.complete:
+                if self.complete.value:
                     break
                 sleep(1)
+
+    def terminate(self):
+        """
+        Terminate the main loop.
+        """
+        self.complete.value = True
 
     @staticmethod
     def clear_folder(working_dir, extension='.png'):
@@ -170,20 +176,17 @@ class HoldPlace:
             dst=os.path.join(working_dir, os.path.basename(image))
         )
 
-    def __init__(self):
+    def __init__(self, complete):
         self.current_working_dir = os.getcwd()
         self.image_dir = os.path.join(self.current_working_dir, 'images')
         self.image_list = []
-        self.complete = False
+        self.complete = complete
 
 
 def cli():
     """
     Run the HoldPlace class
     """
-    place_holder = HoldPlace()
+    complete = multiprocessing.Value('b', False)  # 'b' stands for boolean
+    place_holder = HoldPlace(complete=complete)
     place_holder.main()
-
-
-if __name__ == '__main__':
-    cli()
