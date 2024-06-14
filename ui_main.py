@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASEjHCQTb.ui'
+## Form generated from reading UI file 'GUI_BASEsJYMCO.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.7.0
 ##
@@ -693,6 +693,61 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_20.addWidget(self.frame_div_content_10)
 
+        self.file_selection_button = QPushButton(self.run_page)
+        self.file_selection_button.setObjectName(u"file_selection_button")
+        self.file_selection_button.setStyleSheet(u"QPushButton {\n"
+"    border: 3px solid rgb(255, 255, 255); /* White border */\n"
+"    border-radius: 5px;\n"
+"    background-color: rgb(0, 0, 255); /* Blue background */\n"
+"    color: rgb(255, 255, 255); /* White text */\n"
+"    font-size: 16px; /* Larger font size */\n"
+"    padding: 10px; /* Padding around the text */\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: rgb(0, 0, 200); /* Darker blue when hovered */\n"
+"    border: 3px solid rgb(255, 255, 255); /* White border when hovered */\n"
+"}\n"
+"QPushButton:pressed {\n"
+"    background-color: rgb(0, 0, 150); /* Even darker blue when pressed */\n"
+"    border: 3px solid rgb(255, 255, 255); /* White border when pressed */\n"
+"}\n"
+"QPushButton:disabled {\n"
+"    background-color: rgb(128, 128, 128); /* Grey background when disabled */\n"
+"    border: 3px solid rgb(255, 255, 255); /* White border when disabled */\n"
+"    color: rgb(255, 255, 255); /* White text when disabled */\n"
+"}")
+        icon3 = QIcon(QIcon.fromTheme(u"system-search"))
+        self.file_selection_button.setIcon(icon3)
+
+        self.verticalLayout_20.addWidget(self.file_selection_button, 0, Qt.AlignmentFlag.AlignHCenter)
+
+        self.file_label_error = QLabel(self.run_page)
+        self.file_label_error.setObjectName(u"file_label_error")
+        self.file_label_error.setStyleSheet(u"QLabel {\n"
+"    color: #FF6347; /* Tomato color for the text */\n"
+"    background-color: transparent; /* Transparent background */\n"
+"    border: 2px solid #FF6347; /* Tomato border */\n"
+"    border-radius: 5px; /* Rounded corners */\n"
+"    padding: 5px; /* Some padding */\n"
+"    font-size: 16px; /* Increase font size */\n"
+"}")
+
+        self.verticalLayout_20.addWidget(self.file_label_error, 0, Qt.AlignmentFlag.AlignHCenter)
+
+        self.file_selection_label = QLabel(self.run_page)
+        self.file_selection_label.setObjectName(u"file_selection_label")
+        self.file_selection_label.setStyleSheet(u"QLabel {\n"
+"    color: rgb(255, 255, 255); /* White text color */\n"
+"    background-color: rgb(70, 70, 70); /* Dark grey background */\n"
+"    border: 2px solid rgb(255, 255, 255); /* White border */\n"
+"    border-radius: 5px; /* Rounded corners */\n"
+"    padding: 5px; /* Padding around the text */\n"
+"    font-size: 14px; /* Font size */\n"
+"    font-weight: bold; /* Bold font */\n"
+"}")
+
+        self.verticalLayout_20.addWidget(self.file_selection_label, 0, Qt.AlignmentFlag.AlignRight)
+
         self.run_button = QPushButton(self.run_page)
         self.run_button.setObjectName(u"run_button")
         sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
@@ -703,21 +758,25 @@ class Ui_MainWindow(object):
         self.run_button.setMinimumSize(QSize(150, 30))
         self.run_button.setFont(font6)
         self.run_button.setStyleSheet(u"QPushButton {\n"
-"	border: 2px solid rgb(52, 59, 72);\n"
+"	border: 2px solid rgb(34, 139, 34); /* Green border */\n"
 "	border-radius: 5px;	\n"
-"	background-color: rgb(52, 59, 72);\n"
+"	background-color: rgb(34, 139, 34); /* Green background */\n"
 "}\n"
 "QPushButton:hover {\n"
-"	background-color: rgb(57, 65, 80);\n"
-"	border: 2px solid rgb(61, 70, 86);\n"
+"	background-color: rgb(50, 205, 50); /* Lighter green when hovered */\n"
+"	border: 2px solid rgb(34, 139, 34); /* Green border when hovered */\n"
 "}\n"
 "QPushButton:pressed {	\n"
-"	background-color: rgb(35, 40, 49);\n"
-"	border: 2px solid rgb(43, 50, 61);\n"
+"	background-color: rgb(0, 100, 0); /* Darker green when pressed */\n"
+"	border: 2px solid rgb(34, 139, 34); /* Green border when pressed */\n"
+"}\n"
+"QPushButton:disabled {\n"
+"    background-color: rgb(128, 128, 128); /* Grey background when disabled */\n"
+"    border: 2px solid rgb(128, 128, 128); /* Grey border when disabled */\n"
 "}")
-        icon3 = QIcon()
-        icon3.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.run_button.setIcon(icon3)
+        icon4 = QIcon()
+        icon4.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.run_button.setIcon(icon4)
         self.run_button.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.run_button, 0, Qt.AlignmentFlag.AlignRight)
@@ -730,21 +789,25 @@ class Ui_MainWindow(object):
         self.cancel_button.setFont(font6)
         self.cancel_button.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.cancel_button.setStyleSheet(u"QPushButton {\n"
-"	border: 2px solid rgb(52, 59, 72);\n"
-"	border-radius: 5px;	\n"
-"	background-color: rgb(52, 59, 72);\n"
+" border: 2px solid rgb(139, 0, 0); /* Red border */\n"
+" border-radius: 5px;\n"
+" background-color: rgb(139, 0, 0); /* Red background */\n"
 "}\n"
 "QPushButton:hover {\n"
-"	background-color: rgb(57, 65, 80);\n"
-"	border: 2px solid rgb(61, 70, 86);\n"
+" background-color: rgb(205, 92, 92); /* Lighter red when hovered */\n"
+" border: 2px solid rgb(139, 0, 0); /* Red border when hovered */\n"
 "}\n"
-"QPushButton:pressed {	\n"
-"	background-color: rgb(35, 40, 49);\n"
-"	border: 2px solid rgb(43, 50, 61);\n"
+"QPushButton:pressed {\n"
+" background-color: rgb(165, 42, 42); /* Darker red when pressed */\n"
+" border: 2px solid rgb(139, 0, 0); /* Red border when pressed */\n"
+"}\n"
+"QPushButton:disabled {\n"
+"    background-color: rgb(128, 128, 128); /* Grey background when disabled */\n"
+"    border: 2px solid rgb(128, 128, 128); /* Grey border when disabled */\n"
 "}")
-        icon4 = QIcon()
-        icon4.addFile(u":/16x16/icons/16x16/cil-ban.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.cancel_button.setIcon(icon4)
+        icon5 = QIcon()
+        icon5.addFile(u":/16x16/icons/16x16/cil-ban.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.cancel_button.setIcon(icon5)
         self.cancel_button.setCheckable(True)
 
         self.verticalLayout_20.addWidget(self.cancel_button, 0, Qt.AlignmentFlag.AlignRight)
@@ -796,9 +859,9 @@ class Ui_MainWindow(object):
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
 "}")
-        icon5 = QIcon()
-        icon5.addFile(u":/16x16/icons/16x16/cil-arrow-circle-right.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.right_button.setIcon(icon5)
+        icon6 = QIcon()
+        icon6.addFile(u":/16x16/icons/16x16/cil-arrow-circle-right.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.right_button.setIcon(icon6)
 
         self.horizontalLayout_9.addWidget(self.right_button)
 
@@ -820,9 +883,9 @@ class Ui_MainWindow(object):
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
 "}")
-        icon6 = QIcon()
-        icon6.addFile(u":/16x16/icons/16x16/cil-arrow-circle-left.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.left_button.setIcon(icon6)
+        icon7 = QIcon()
+        icon7.addFile(u":/16x16/icons/16x16/cil-arrow-circle-left.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.left_button.setIcon(icon7)
 
         self.horizontalLayout_9.addWidget(self.left_button)
 
@@ -975,10 +1038,13 @@ class Ui_MainWindow(object):
         self.close_button.setText("")
         self.label_top_info_1.setText(QCoreApplication.translate("MainWindow", u"C:\\Program Files\\Blender Foundation\\Blender 2.82", None))
         self.label_top_info_2.setText(QCoreApplication.translate("MainWindow", u"| HOME", None))
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"PoreSippR", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"PoreSippr", None))
         self.run_label_error.setText("")
-        self.run_button.setText(QCoreApplication.translate("MainWindow", u"Begin Run", None))
-        self.cancel_button.setText(QCoreApplication.translate("MainWindow", u"Stop Processing", None))
+        self.file_selection_button.setText(QCoreApplication.translate("MainWindow", u" Browse for PoreSippr run configuration file", None))
+        self.file_label_error.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.file_selection_label.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.run_button.setText(QCoreApplication.translate("MainWindow", u" Begin Run", None))
+        self.cancel_button.setText(QCoreApplication.translate("MainWindow", u" Stop Processing", None))
         self.pageLabel.setText("")
         self.right_button.setText("")
         self.left_button.setText("")
