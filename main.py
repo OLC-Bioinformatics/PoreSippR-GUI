@@ -30,6 +30,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QApplication,
+    QFileDialog,
     QGraphicsDropShadowEffect,
     QLabel,
     QLCDNumber,
@@ -42,6 +43,12 @@ from PySide6.QtWidgets import (
 )
 
 # Local imports
+from methods import (
+    parse_dataframe,
+    read_csv_file,
+    validate_data_dict,
+    validate_headers
+)
 from poresippr_placeholder import HoldPlace
 from ui_main import Ui_MainWindow
 
@@ -91,18 +98,28 @@ class MainWindow(QMainWindow):
 
         # Define class variables
         self.drag_pos = QPoint()
-        # Defines all the widgets used [there is a lot of them]
-        self.run_button = self.findChild(QPushButton, name="run_button")
+
+        # Defines the buttons
         self.left_button = self.findChild(QPushButton, name="left_button")
         self.right_button = self.findChild(QPushButton, name="right_button")
         self.cancel_button = self.findChild(QPushButton, name="cancel_button")
+        self.file_selection_button = self.findChild(
+            QPushButton,
+            name="file_selection_button"
+        )
 
         # Disables the left and right buttons until images are added
         self.update_button_states()
 
+        # Defines the labels
         self.run_label_error = self.findChild(QLabel, name="run_label_error")
         self.time_label = self.findChild(QLabel, name="timeLabel")
         self.page_label = self.findChild(QLabel, name="pageLabel")
+
+        # Hide the error QLabel
+        self.user_interface.file_label_error.hide()
+        
+        # Defines the LCD
         self.lcd = self.findChild(QLCDNumber, name="lcd_display")
 
         # Remove standard title bar
@@ -157,13 +174,17 @@ class MainWindow(QMainWindow):
         app_icon = QIcon("cfia.jpg")
         self.setWindowIcon(app_icon)
 
-        # Call each function according to each button clicked
-        self.run_button.setCheckable(True)
-        self.run_button.clicked.connect(self.run_clicker)
+        # Set the run button to be uncheckable and disable it initially
+        self.user_interface.run_button.setCheckable(False)
+        self.user_interface.run_button.setEnabled(False)
 
+        # Connect the run button to the run_clicker method
+        self.user_interface.run_button.clicked.connect(self.run_clicker)
+
+        # Set the cancel button to be checkable
         self.cancel_button.setEnabled(False)
 
-        # Swap between all the pages in the stacked widget
+        # Initialize the left and right buttons
         self.left_button.clicked.connect(
             lambda: [
                 self.user_interface.progress_widget.setCurrentIndex(
@@ -172,6 +193,10 @@ class MainWindow(QMainWindow):
                 self.update_button_states()
             ]
         )
+
+        # Disables the left button until images are added
+        self.left_button.setEnabled(False)
+
         self.right_button.clicked.connect(
             lambda: [
                 self.user_interface.progress_widget.setCurrentIndex(
@@ -180,6 +205,18 @@ class MainWindow(QMainWindow):
                 self.update_button_states()
             ]
         )
+
+        # Disable the right button until images are added
+        self.right_button.setEnabled(False)
+
+        # Connect the 'select_file' method to the 'clicked' signal of the
+        # 'file_selection_button'.
+        self.user_interface.file_selection_button.clicked.connect(
+            self.select_file
+        )
+
+        # Hide the QLineEdit initially
+        self.user_interface.file_selection_label.hide()
 
         # Create a timer to show the elapsed time of the run
         self.timer = QTimer()
@@ -217,6 +254,86 @@ class MainWindow(QMainWindow):
 
         # Show the main window
         self.show()
+
+    def select_file(self):
+        """
+        Opens a file dialog to select a file.
+        :return:
+        """
+        # Set the options for the file dialog
+        options = QFileDialog.Options()
+
+        # Set the file dialog to read-only
+        options |= QFileDialog.ReadOnly
+
+        # Set the default directory path
+        default_dir = "/home/adamkoziol/Bioinformatics/poresippr_gui/"
+
+        # Get the file name and directory from the file dialog
+        file_name, _ = QFileDialog.getOpenFileName(
+            self, caption="Select File",
+            dir=default_dir,
+            filter="CSV Files (*.csv)",  # Filter for CSV files
+            options=options
+        )
+
+        # Check if a file was selected
+        if file_name:
+            # Read the CSV file
+            df = read_csv_file(file_name)
+
+            # Parse the DataFrame
+            data_dict = parse_dataframe(df)
+
+            # Validate the headers
+            missing_headers = validate_headers(data_dict)
+            if missing_headers:
+                print(missing_headers)
+
+                # Update the QLabel text with the error message
+                self.user_interface.file_label_error.setText(missing_headers)
+                self.user_interface.file_label_error.show()  # Show the QLabel
+                return
+
+            # Validate the data
+            errors = validate_data_dict(data_dict)
+            if errors:
+                print(errors)
+
+                # Update the QLabel text with the error message
+                self.user_interface.file_label_error.setText(errors)
+                self.user_interface.file_label_error.show()  # Show the QLabel
+                return
+
+            # Set the text of the QLabel to the selected file name
+            self.user_interface.file_selection_label.setText(
+                f'PoreSippr configuration file:\n {file_name}'
+            )
+
+            # Show the QLabel
+            self.user_interface.file_selection_label.show()
+
+            # Hide the error QLabel
+            self.user_interface.file_label_error.hide()
+
+            # Get the font metrics of the QLabel
+            font_metrics = \
+                self.user_interface.file_selection_label.fontMetrics()
+
+            # Calculate the width of the text
+            text_width = font_metrics.horizontalAdvance(file_name)
+
+            # Add a buffer to the width
+            buffer = 30
+            total_width = text_width + buffer
+
+            # Set the minimum width of the QLabel
+            self.user_interface.file_selection_label.setMinimumWidth(
+                total_width)
+
+            # Enable the run button and make it checkable
+            self.user_interface.run_button.setEnabled(True)
+            self.user_interface.run_button.setCheckable(True)
 
     def update_button_states(self) -> list:
         """
@@ -291,9 +408,9 @@ class MainWindow(QMainWindow):
         """
         This method is called when the worker thread finishes.
         """
-        self.run_button.setChecked(False)
+        self.user_interface.run_button.setChecked(False)
         self.run_label_error.setText(
-            "Process has been stopped and completed!")
+            "Your PoreSippr run has been successfully terminated")
         self.run_label_error.setStyleSheet(
             u"color:rgb(34,139,34);")
         # Stop the timer
@@ -301,7 +418,7 @@ class MainWindow(QMainWindow):
         # Rechecks the button to false to make sure we don't loop
         self.cancel_button.setChecked(False)
         # Enables the run button again after the run is finished or cancelled
-        self.run_button.setEnabled(True)
+        self.user_interface.run_button.setEnabled(True)
         self.worker.terminate()
 
     def update_page_label(self):
@@ -377,7 +494,7 @@ class MainWindow(QMainWindow):
 
         # Checks if the button is checked when you click on it. If there is
         # another process running, cancel it
-        if self.run_button.isChecked():
+        if self.user_interface.run_button.isChecked():
 
             # If a run has been previously started and stopped
             if self.worker is not None and not self.worker.isRunning():
@@ -397,11 +514,14 @@ class MainWindow(QMainWindow):
                 # If the user clicked 'Cancel', return and do not start
                 # a new run
                 if response == QMessageBox.Cancel:
-                    self.run_button.setChecked(False)
+                    self.user_interface.run_button.setChecked(False)
                     return
 
             # Disables the run button to prevent starting another run
-            self.run_button.setEnabled(False)
+            self.user_interface.run_button.setEnabled(False)
+
+            # Disable the file_selection_button
+            self.file_selection_button.setEnabled(False)
 
             # Resets the error text to nothing
             self.run_label_error.setText("")
@@ -506,28 +626,10 @@ class MainWindow(QMainWindow):
 
             # Enable the run button again after the run is finished or
             # cancelled
-            self.run_button.setEnabled(True)
+            self.user_interface.run_button.setEnabled(True)
 
-        else:
-            # Warns there is a process in run, and resets setChecked to true to
-            # make sure you don't press it again
-            self.run_label_error.setText(
-                "There is a process in run. Please cancel and try again!"
-            )
-            self.run_label_error.setStyleSheet(u"color:rgb(190, 9, 9);")
-
-            # Stop the timer
-            self.timer.stop()
-
-            # Reset the time to 0:00:00
-            self.time.setHMS(0, 0, 0)
-
-            # Display the reset time
-            self.lcd.display(
-                self.time.toString('hh:mm:ss'))
-
-            # Uncheck the cancel button
-            self.cancel_button.setChecked(False)
+            # Enable the file_selection_button
+            self.file_selection_button.setEnabled(True)
 
     def dialog_clicked(self, response):
         """
@@ -536,7 +638,7 @@ class MainWindow(QMainWindow):
         If the "Yes" button is clicked, the run is stopped and the
         complete flag is set to True. The run button is unchecked, and a
         message is displayed to the user indicating that the process has
-        been stopped and completed.
+        been terminated
 
         If the "Cancel" button is clicked, a message box is displayed to the
         user indicating that the application will continue to read images.
@@ -552,11 +654,11 @@ class MainWindow(QMainWindow):
             self.complete = True
 
             # Uncheck the run button
-            self.run_button.setChecked(False)
+            self.user_interface.run_button.setChecked(False)
 
             # Display a message indicating the run has been stopped
             self.run_label_error.setText(
-                "Process has been stopped and completed!")
+                "Your PoreSippr run has been successfully terminated")
             self.run_label_error.setStyleSheet(
                 u"color:rgb(34,139,34);")
             # Stop the timer
@@ -567,6 +669,9 @@ class MainWindow(QMainWindow):
 
             # Disable the cancel button
             self.cancel_button.setEnabled(False)
+
+            # Enable the file_selection_button
+            self.file_selection_button.setEnabled(True)
 
             # Terminate the worker thread
             self.worker.terminate()
@@ -615,7 +720,7 @@ class MainWindow(QMainWindow):
         event (QCloseEvent): The close event.
         """
         # If a run is in progress (i.e., the run button is checked)
-        if self.run_button.isChecked():
+        if self.user_interface.run_button.isChecked():
             # Create a message box
             message = QMessageBox()
             message.setIcon(QMessageBox.Warning)
