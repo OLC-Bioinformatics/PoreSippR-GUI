@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASEsJYMCO.ui'
+## Form generated from reading UI file 'GUI_BASEcqeaAm.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.7.0
 ##
@@ -858,6 +858,10 @@ class Ui_MainWindow(object):
 "QPushButton:pressed {	\n"
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
+"}\n"
+"QPushButton:disabled {\n"
+"	background-color: rgb(84, 84, 84);\n"
+"	border: 2px solid rgb(84, 84, 84);\n"
 "}")
         icon6 = QIcon()
         icon6.addFile(u":/16x16/icons/16x16/cil-arrow-circle-right.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -882,6 +886,10 @@ class Ui_MainWindow(object):
 "QPushButton:pressed {	\n"
 "	background-color: rgb(35, 40, 49);\n"
 "	border: 2px solid rgb(43, 50, 61);\n"
+"}\n"
+"QPushButton:disabled {\n"
+"	background-color: rgb(84, 84, 84);\n"
+"	border: 2px solid rgb(84, 84, 84);\n"
 "}")
         icon7 = QIcon()
         icon7.addFile(u":/16x16/icons/16x16/cil-arrow-circle-left.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -987,9 +995,13 @@ class Ui_MainWindow(object):
         self.frame_size_grip.setObjectName(u"frame_size_grip")
         self.frame_size_grip.setMaximumSize(QSize(20, 20))
         self.frame_size_grip.setStyleSheet(u"QSizeGrip {\n"
-"	background-image: url(:/16x16/icons/16x16/cil-size-grip.png);\n"
-"	background-position: center;\n"
-"	background-repeat: no-reperat;\n"
+"    background-image: url(:/16x16/icons/16x16/cil-size-grip.png);\n"
+"    background-position: center;\n"
+"    background-repeat: no-repeat;\n"
+"    width: 20px; \n"
+"    height: 20px; \n"
+"    margin: 0px; \n"
+"    padding: 0px;\n"
 "}")
         self.frame_size_grip.setFrameShape(QFrame.Shape.NoFrame)
         self.frame_size_grip.setFrameShadow(QFrame.Shadow.Raised)

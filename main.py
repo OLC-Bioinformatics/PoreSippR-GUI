@@ -33,10 +33,8 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QGraphicsDropShadowEffect,
     QLabel,
-    QLCDNumber,
     QMainWindow,
     QMessageBox,
-    QPushButton,
     QSizeGrip,
     QVBoxLayout,
     QWidget
@@ -90,8 +88,12 @@ class MainWindow(QMainWindow):
     """
 
     def __init__(self):
+
+        # Call the parent class constructor
         QMainWindow.__init__(self)
         self.setWindowFlags(Qt.FramelessWindowHint)
+
+        # Create the user interface
         self.user_interface = Ui_MainWindow()
         self.user_interface.setupUi(self)
         self.user_interface_functions = UIFunctions(self)
@@ -99,29 +101,12 @@ class MainWindow(QMainWindow):
         # Define class variables
         self.drag_pos = QPoint()
 
-        # Defines the buttons
-        self.left_button = self.findChild(QPushButton, name="left_button")
-        self.right_button = self.findChild(QPushButton, name="right_button")
-        self.cancel_button = self.findChild(QPushButton, name="cancel_button")
-        self.file_selection_button = self.findChild(
-            QPushButton,
-            name="file_selection_button"
-        )
-
         # Disables the left and right buttons until images are added
         self.update_button_states()
-
-        # Defines the labels
-        self.run_label_error = self.findChild(QLabel, name="run_label_error")
-        self.time_label = self.findChild(QLabel, name="timeLabel")
-        self.page_label = self.findChild(QLabel, name="pageLabel")
 
         # Hide the error QLabel
         self.user_interface.file_label_error.hide()
         
-        # Defines the LCD
-        self.lcd = self.findChild(QLCDNumber, name="lcd_display")
-
         # Remove standard title bar
         self.user_interface_functions.remove_title_bar(True)
 
@@ -182,10 +167,10 @@ class MainWindow(QMainWindow):
         self.user_interface.run_button.clicked.connect(self.run_clicker)
 
         # Set the cancel button to be checkable
-        self.cancel_button.setEnabled(False)
+        self.user_interface.cancel_button.setEnabled(False)
 
         # Initialize the left and right buttons
-        self.left_button.clicked.connect(
+        self.user_interface.left_button.clicked.connect(
             lambda: [
                 self.user_interface.progress_widget.setCurrentIndex(
                     self.user_interface.progress_widget.currentIndex() - 1
@@ -195,9 +180,9 @@ class MainWindow(QMainWindow):
         )
 
         # Disables the left button until images are added
-        self.left_button.setEnabled(False)
+        self.user_interface.left_button.setEnabled(False)
 
-        self.right_button.clicked.connect(
+        self.user_interface.right_button.clicked.connect(
             lambda: [
                 self.user_interface.progress_widget.setCurrentIndex(
                     self.user_interface.progress_widget.currentIndex() + 1
@@ -207,7 +192,7 @@ class MainWindow(QMainWindow):
         )
 
         # Disable the right button until images are added
-        self.right_button.setEnabled(False)
+        self.user_interface.right_button.setEnabled(False)
 
         # Connect the 'select_file' method to the 'clicked' signal of the
         # 'file_selection_button'.
@@ -225,20 +210,22 @@ class MainWindow(QMainWindow):
         self.time = QTime(0, 0)
 
         # Set number of LCD digits
-        self.lcd.setDigitCount(8)
+        self.user_interface.lcd_display.setDigitCount(8)
 
         # Display the initial time on the LCD
         time_str = self.time.toString('hh:mm:ss')
-        self.lcd.display(time_str)
+        self.user_interface.lcd_display.display(time_str)
 
         # Create a timer to update the page label
-        self.page_label_timer = QTimer()
+        self.user_interface.page_label_timer = QTimer()
 
         # Connect the timeout signal to the update_page_label method
-        self.page_label_timer.timeout.connect(self.update_page_label)
+        self.user_interface.page_label_timer.timeout.connect(
+            self.update_page_label
+        )
 
         # Update the page label every second
-        self.page_label_timer.start(10)
+        self.user_interface.page_label_timer.start(10)
 
         # Initialise the PoreSippr parsing process
         self.process = None
@@ -347,23 +334,24 @@ class MainWindow(QMainWindow):
 
         # If there are no images, disable both buttons
         if not images:
-            self.left_button.setEnabled(False)
-            self.right_button.setEnabled(False)
+            self.user_interface.left_button.setEnabled(False)
+            self.user_interface.right_button.setEnabled(False)
 
         # Watches to see which page you are on to disable arrow buttons if
         # you are on one of the extreme pages
         elif self.user_interface.progress_widget.currentIndex() == 0:
-            self.left_button.setEnabled(False)
-            self.right_button.setEnabled(True)
+            self.user_interface.left_button.setEnabled(False)
+            # Enable the right button only if there are at least two images
+            self.user_interface.right_button.setEnabled(len(images) >= 2)
 
         elif self.user_interface.progress_widget.currentIndex() == \
                 self.user_interface.progress_widget.count() - 1:
-            self.right_button.setEnabled(False)
-            self.left_button.setEnabled(True)
+            self.user_interface.right_button.setEnabled(False)
+            self.user_interface.left_button.setEnabled(True)
 
         else:
-            self.left_button.setEnabled(True)
-            self.right_button.setEnabled(True)
+            self.user_interface.left_button.setEnabled(True)
+            self.user_interface.right_button.setEnabled(True)
 
         return images
 
@@ -402,21 +390,24 @@ class MainWindow(QMainWindow):
         self.time = self.time.addSecs(1)
 
         # Displays the time
-        self.lcd.display(self.time.toString('hh:mm:ss'))
+        self.user_interface.lcd_display.display(self.time.toString('hh:mm:ss'))
 
     def on_worker_finished(self):
         """
         This method is called when the worker thread finishes.
         """
         self.user_interface.run_button.setChecked(False)
-        self.run_label_error.setText(
+        self.user_interface.run_label_error.setText(
             "Your PoreSippr run has been successfully terminated")
-        self.run_label_error.setStyleSheet(
+        self.user_interface.run_label_error.setStyleSheet(
             u"color:rgb(34,139,34);")
+
         # Stop the timer
         self.timer.stop()
-        # Rechecks the button to false to make sure we don't loop
-        self.cancel_button.setChecked(False)
+
+        # Rechecks the button to false; ensures we don't loop
+        self.user_interface.cancel_button.setChecked(False)
+
         # Enables the run button again after the run is finished or cancelled
         self.user_interface.run_button.setEnabled(True)
         self.worker.terminate()
@@ -434,7 +425,9 @@ class MainWindow(QMainWindow):
 
         # Updates the page_label to display the current page out of the total
         # number of pages
-        self.page_label.setText(f"{current_page} / {total_pages}")
+        self.user_interface.pageLabel.setText(
+            f"{current_page} / {total_pages}"
+        )
 
     @staticmethod
     def get_images():
@@ -521,10 +514,10 @@ class MainWindow(QMainWindow):
             self.user_interface.run_button.setEnabled(False)
 
             # Disable the file_selection_button
-            self.file_selection_button.setEnabled(False)
+            self.user_interface.file_selection_button.setEnabled(False)
 
             # Resets the error text to nothing
-            self.run_label_error.setText("")
+            self.user_interface.run_label_error.setText("")
 
             # Resets the time to 0:00:00
             self.time = QTime(0, 0, 0)
@@ -558,8 +551,8 @@ class MainWindow(QMainWindow):
             self.worker.start()
 
             # Allows the button to be toggleable
-            self.cancel_button.setCheckable(True)
-            self.cancel_button.setEnabled(True)
+            self.user_interface.cancel_button.setCheckable(True)
+            self.user_interface.cancel_button.setEnabled(True)
 
             # Remove all widgets from progress_widget
             for i in reversed(
@@ -569,7 +562,7 @@ class MainWindow(QMainWindow):
                 )
 
             # Reset the page label
-            self.page_label.setText("0 / 0")
+            self.user_interface.pageLabel.setText("0 / 0")
 
             # Initialise the number of images added to the GUI
             number_of_images = 0
@@ -596,7 +589,7 @@ class MainWindow(QMainWindow):
                 number_of_images = len(images)
 
                 # If the cancel button is checked, stop the run
-                if self.cancel_button.isChecked():
+                if self.user_interface.cancel_button.isChecked():
 
                     # Create a message box to confirm the user wants to stop
                     # the run
@@ -629,7 +622,7 @@ class MainWindow(QMainWindow):
             self.user_interface.run_button.setEnabled(True)
 
             # Enable the file_selection_button
-            self.file_selection_button.setEnabled(True)
+            self.user_interface.file_selection_button.setEnabled(True)
 
     def dialog_clicked(self, response):
         """
@@ -657,21 +650,21 @@ class MainWindow(QMainWindow):
             self.user_interface.run_button.setChecked(False)
 
             # Display a message indicating the run has been stopped
-            self.run_label_error.setText(
+            self.user_interface.run_label_error.setText(
                 "Your PoreSippr run has been successfully terminated")
-            self.run_label_error.setStyleSheet(
+            self.user_interface.run_label_error.setStyleSheet(
                 u"color:rgb(34,139,34);")
             # Stop the timer
             self.timer.stop()
 
             # Uncheck the cancel button
-            self.cancel_button.setChecked(False)
+            self.user_interface.cancel_button.setChecked(False)
 
             # Disable the cancel button
-            self.cancel_button.setEnabled(False)
+            self.user_interface.cancel_button.setEnabled(False)
 
             # Enable the file_selection_button
-            self.file_selection_button.setEnabled(True)
+            self.user_interface.file_selection_button.setEnabled(True)
 
             # Terminate the worker thread
             self.worker.terminate()
@@ -710,7 +703,7 @@ class MainWindow(QMainWindow):
             message.exec()
 
             # Uncheck the cancel button
-            self.cancel_button.setChecked(False)
+            self.user_interface.cancel_button.setChecked(False)
 
     def closeEvent(self, event):
         """
@@ -789,8 +782,6 @@ class UIFunctions:
 
         # Create a size grip
         self.sizegrip = QSizeGrip(self.user_interface.frame_size_grip)
-        self.sizegrip.setStyleSheet(
-            "width: 20px; height: 20px; margin 0px; padding: 0px;")
 
     def maximize_restore(self):
         """
