@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>720</height>
+    <height>1088</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1012,7 +1012,7 @@ background-repeat: no-repeat;
 </string>
                      </property>
                      <property name="text">
-                      <string>Main Window</string>
+                      <string>PoreSippr</string>
                      </property>
                     </widget>
                    </item>
@@ -1243,38 +1243,7 @@ QPushButton:pressed {
                    <string notr="true">color: rgb(98, 103, 111); </string>
                   </property>
                   <property name="text">
-                   <string>C:\Program Files\Blender Foundation\Blender 2.82</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_top_info_2">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>250</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <family>Segoe UI</family>
-                    <bold>true</bold>
-                   </font>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(98, 103, 111);</string>
-                  </property>
-                  <property name="text">
-                   <string>| HOME</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignCenter</set>
+                   <string>Graphical User Interface for PoreSippr</string>
                   </property>
                  </widget>
                 </item>
@@ -1413,22 +1382,6 @@ border-radius: 5px;
                       </property>
                       <layout class="QVBoxLayout" name="verticalLayout_6">
                        <item>
-                        <widget class="QLabel" name="label_8">
-                         <property name="font">
-                          <font>
-                           <family>Segoe UI</family>
-                           <pointsize>26</pointsize>
-                          </font>
-                         </property>
-                         <property name="text">
-                          <string>PoreSippr</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignmentFlag::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item>
                         <widget class="QLCDNumber" name="lcd_display">
                          <property name="styleSheet">
                           <string notr="true">QLCDNumber {
@@ -1453,10 +1406,10 @@ border-radius: 5px;
                             </colorrole>
                             <colorrole role="Button">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
@@ -1480,19 +1433,19 @@ border-radius: 5px;
                             </colorrole>
                             <colorrole role="Base">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
                             <colorrole role="Window">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
@@ -1518,10 +1471,10 @@ border-radius: 5px;
                             </colorrole>
                             <colorrole role="Button">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
@@ -1545,19 +1498,19 @@ border-radius: 5px;
                             </colorrole>
                             <colorrole role="Base">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
                             <colorrole role="Window">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
@@ -1583,10 +1536,10 @@ border-radius: 5px;
                             </colorrole>
                             <colorrole role="Button">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
@@ -1610,19 +1563,19 @@ border-radius: 5px;
                             </colorrole>
                             <colorrole role="Base">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
                             <colorrole role="Window">
                              <brush brushstyle="SolidPattern">
-                              <color alpha="255">
-                               <red>41</red>
-                               <green>45</green>
-                               <blue>56</blue>
+                              <color alpha="0">
+                               <red>0</red>
+                               <green>0</green>
+                               <blue>0</blue>
                               </color>
                              </brush>
                             </colorrole>
@@ -1641,11 +1594,18 @@ border-radius: 5px;
                          <property name="font">
                           <font>
                            <family>Segoe UI</family>
-                           <pointsize>9</pointsize>
+                           <pointsize>-1</pointsize>
                           </font>
                          </property>
                          <property name="styleSheet">
-                          <string notr="true">color:rgb(190, 9, 9);</string>
+                          <string notr="true">QLabel {
+    color: #FF6347; /* Tomato color for the text */
+    background-color: transparent; /* Transparent background */
+    border: 2px solid #FF6347; /* Tomato border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 5px; /* Some padding */
+    font-size: 16px; /* Increase font size */
+}</string>
                          </property>
                          <property name="text">
                           <string/>
@@ -1658,28 +1618,30 @@ border-radius: 5px;
                       </layout>
                      </widget>
                     </item>
-                    <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                    <item alignment="Qt::AlignmentFlag::AlignRight">
                      <widget class="QPushButton" name="file_selection_button">
                       <property name="styleSheet">
                        <string notr="true">QPushButton {
-    border: 3px solid rgb(255, 255, 255); /* White border */
+    border: 3px solid rgb(0, 0, 255); /* Blue border */
     border-radius: 5px;
     background-color: rgb(0, 0, 255); /* Blue background */
     color: rgb(255, 255, 255); /* White text */
-    font-size: 16px; /* Larger font size */
-    padding: 10px; /* Padding around the text */
+    padding: 5px; /* Padding around the text */
+    font-weight: bold; /* Bold font */
 }
 QPushButton:hover {
     background-color: rgb(0, 0, 200); /* Darker blue when hovered */
-    border: 3px solid rgb(255, 255, 255); /* White border when hovered */
+    border: 3px solid rgb(0, 0, 200); /* Darker blue border when hovered */
+    font-weight: bold; /* Bold font */
 }
 QPushButton:pressed {
     background-color: rgb(0, 0, 150); /* Even darker blue when pressed */
-    border: 3px solid rgb(255, 255, 255); /* White border when pressed */
+    border: 3px solid rgb(0, 0, 150); /* Even darker blue border when pressed */
+    font-weight: bold; /* Bold font */
 }
 QPushButton:disabled {
     background-color: rgb(128, 128, 128); /* Grey background when disabled */
-    border: 3px solid rgb(255, 255, 255); /* White border when disabled */
+    border: 3px solid rgb(128, 128, 128); /* Grey border when disabled */
     color: rgb(255, 255, 255); /* White text when disabled */
 }</string>
                       </property>
@@ -1691,144 +1653,139 @@ QPushButton:disabled {
                       </property>
                      </widget>
                     </item>
-                    <item alignment="Qt::AlignmentFlag::AlignHCenter">
-                     <widget class="QLabel" name="file_label_error">
-                      <property name="styleSheet">
-                       <string notr="true">QLabel {
-    color: #FF6347; /* Tomato color for the text */
-    background-color: transparent; /* Transparent background */
-    border: 2px solid #FF6347; /* Tomato border */
-    border-radius: 5px; /* Rounded corners */
-    padding: 5px; /* Some padding */
-    font-size: 16px; /* Increase font size */
-}</string>
-                      </property>
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
                     <item alignment="Qt::AlignmentFlag::AlignRight">
-                     <widget class="QLabel" name="file_selection_label">
-                      <property name="styleSheet">
-                       <string notr="true">QLabel {
-    color: rgb(255, 255, 255); /* White text color */
-    background-color: rgb(70, 70, 70); /* Dark grey background */
-    border: 2px solid rgb(255, 255, 255); /* White border */
-    border-radius: 5px; /* Rounded corners */
-    padding: 5px; /* Padding around the text */
-    font-size: 14px; /* Font size */
-    font-weight: bold; /* Bold font */
-}</string>
-                      </property>
-                      <property name="text">
-                       <string>TextLabel</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item alignment="Qt::AlignmentFlag::AlignRight">
-                     <widget class="QPushButton" name="run_button">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
+                     <widget class="QFrame" name="frame_2">
                       <property name="minimumSize">
                        <size>
-                        <width>150</width>
-                        <height>30</height>
+                        <width>0</width>
+                        <height>50</height>
                        </size>
                       </property>
-                      <property name="font">
-                       <font>
-                        <family>Segoe UI</family>
-                        <pointsize>9</pointsize>
-                       </font>
+                      <property name="frameShape">
+                       <enum>QFrame::Shape::StyledPanel</enum>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">QPushButton {
-	border: 2px solid rgb(34, 139, 34); /* Green border */
-	border-radius: 5px;	
-	background-color: rgb(34, 139, 34); /* Green background */
+                      <property name="frameShadow">
+                       <enum>QFrame::Shadow::Raised</enum>
+                      </property>
+                      <layout class="QHBoxLayout" name="horizontalLayout_12">
+                       <item>
+                        <widget class="QPushButton" name="run_button">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>150</width>
+                           <height>30</height>
+                          </size>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <family>Segoe UI</family>
+                           <pointsize>9</pointsize>
+                           <bold>true</bold>
+                          </font>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">QPushButton {
+    border: 2px solid rgb(34, 139, 34); /* Green border */
+    border-radius: 5px;
+    background-color: rgb(34, 139, 34); /* Green background */
+    font-weight: bold; /* Bold font */
+    text-align: center; /* Centered text */
 }
 QPushButton:hover {
-	background-color: rgb(50, 205, 50); /* Lighter green when hovered */
-	border: 2px solid rgb(34, 139, 34); /* Green border when hovered */
+    background-color: rgb(50, 205, 50); /* Lighter green when hovered */
+    border: 2px solid rgb(34, 139, 34); /* Green border when hovered */
+    font-weight: bold; /* Bold font */
 }
-QPushButton:pressed {	
-	background-color: rgb(0, 100, 0); /* Darker green when pressed */
-	border: 2px solid rgb(34, 139, 34); /* Green border when pressed */
+QPushButton:pressed {
+    background-color: rgb(0, 100, 0); /* Darker green when pressed */
+    border: 2px solid rgb(34, 139, 34); /* Green border when pressed */
+    font-weight: bold; /* Bold font */
 }
 QPushButton:disabled {
     background-color: rgb(128, 128, 128); /* Grey background when disabled */
     border: 2px solid rgb(128, 128, 128); /* Grey border when disabled */
+    font-weight: bold; /* Bold font */
 }</string>
-                      </property>
-                      <property name="text">
-                       <string> Begin Run</string>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="files.qrc">
-                        <normaloff>:/16x16/icons/16x16/cil-lightbulb.png</normaloff>:/16x16/icons/16x16/cil-lightbulb.png</iconset>
-                      </property>
-                      <property name="checkable">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item alignment="Qt::AlignmentFlag::AlignRight">
-                     <widget class="QPushButton" name="cancel_button">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>150</width>
-                        <height>30</height>
-                       </size>
-                      </property>
-                      <property name="font">
-                       <font>
-                        <family>Segoe UI</family>
-                        <pointsize>9</pointsize>
-                       </font>
-                      </property>
-                      <property name="layoutDirection">
-                       <enum>Qt::LayoutDirection::LeftToRight</enum>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">QPushButton {
+                         </property>
+                         <property name="text">
+                          <string> Begin Run</string>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="files.qrc">
+                           <normaloff>:/16x16/icons/16x16/cil-lightbulb.png</normaloff>:/16x16/icons/16x16/cil-lightbulb.png</iconset>
+                         </property>
+                         <property name="checkable">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QPushButton" name="cancel_button">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>150</width>
+                           <height>30</height>
+                          </size>
+                         </property>
+                         <property name="font">
+                          <font>
+                           <family>Segoe UI</family>
+                           <pointsize>9</pointsize>
+                           <bold>true</bold>
+                          </font>
+                         </property>
+                         <property name="layoutDirection">
+                          <enum>Qt::LayoutDirection::LeftToRight</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">QPushButton {
  border: 2px solid rgb(139, 0, 0); /* Red border */
  border-radius: 5px;
  background-color: rgb(139, 0, 0); /* Red background */
+ font-weight: bold; /* Bold font */
+ text-align: center; /* Centered text */
 }
 QPushButton:hover {
  background-color: rgb(205, 92, 92); /* Lighter red when hovered */
  border: 2px solid rgb(139, 0, 0); /* Red border when hovered */
+ font-weight: bold; /* Bold font */
 }
 QPushButton:pressed {
  background-color: rgb(165, 42, 42); /* Darker red when pressed */
  border: 2px solid rgb(139, 0, 0); /* Red border when pressed */
+ font-weight: bold; /* Bold font */
 }
 QPushButton:disabled {
     background-color: rgb(128, 128, 128); /* Grey background when disabled */
     border: 2px solid rgb(128, 128, 128); /* Grey border when disabled */
+    font-weight: bold; /* Bold font */
 }</string>
-                      </property>
-                      <property name="text">
-                       <string> Stop Processing</string>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="files.qrc">
-                        <normaloff>:/16x16/icons/16x16/cil-ban.png</normaloff>:/16x16/icons/16x16/cil-ban.png</iconset>
-                      </property>
-                      <property name="checkable">
-                       <bool>true</bool>
-                      </property>
+                         </property>
+                         <property name="text">
+                          <string> Stop Processing</string>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="files.qrc">
+                           <normaloff>:/16x16/icons/16x16/cil-ban.png</normaloff>:/16x16/icons/16x16/cil-ban.png</iconset>
+                         </property>
+                         <property name="checkable">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </item>
                     <item alignment="Qt::AlignmentFlag::AlignLeft">
@@ -1874,23 +1831,22 @@ border-radius: 5px;
                          <property name="frameShadow">
                           <enum>QFrame::Shadow::Raised</enum>
                          </property>
-                         <layout class="QVBoxLayout" name="verticalLayout_7">
-                          <item>
-                           <widget class="QLabel" name="pageLabel">
-                            <property name="font">
-                             <font>
-                              <pointsize>12</pointsize>
-                             </font>
-                            </property>
-                            <property name="text">
-                             <string/>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
+                         <layout class="QVBoxLayout" name="verticalLayout_7"/>
                         </widget>
                        </item>
                        <item>
+                        <widget class="QLabel" name="pageLabel">
+                         <property name="font">
+                          <font>
+                           <pointsize>12</pointsize>
+                          </font>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item alignment="Qt::AlignmentFlag::AlignLeft">
                         <widget class="QPushButton" name="right_button">
                          <property name="minimumSize">
                           <size>
@@ -1906,21 +1862,23 @@ border-radius: 5px;
                          </property>
                          <property name="styleSheet">
                           <string notr="true">QPushButton {
-	border: 2px solid rgb(52, 59, 72);
+	border: 2px solid rgb(255, 255, 255);
 	border-radius: 5px;	
 	background-color: rgb(52, 59, 72);
+	color: rgb(255, 255, 255);  /* Add this line to change the text color */
 }
 QPushButton:hover {
 	background-color: rgb(57, 65, 80);
-	border: 2px solid rgb(61, 70, 86);
+	border: 2px solid rgb(255, 255, 255);
 }
 QPushButton:pressed {	
 	background-color: rgb(35, 40, 49);
-	border: 2px solid rgb(43, 50, 61);
+	border: 2px solid rgb(255, 255, 255);
 }
 QPushButton:disabled {
 	background-color: rgb(84, 84, 84);
 	border: 2px solid rgb(84, 84, 84);
+	color: rgb(128, 128, 128);  /* Add this line to change the text color */
 }</string>
                          </property>
                          <property name="text">
@@ -1951,21 +1909,23 @@ QPushButton:disabled {
                          </property>
                          <property name="styleSheet">
                           <string notr="true">QPushButton {
-	border: 2px solid rgb(52, 59, 72);
+	border: 2px solid rgb(255, 255, 255);
 	border-radius: 5px;	
 	background-color: rgb(52, 59, 72);
+	color: rgb(255, 255, 255);  /* Add this line to change the text color */
 }
 QPushButton:hover {
 	background-color: rgb(57, 65, 80);
-	border: 2px solid rgb(61, 70, 86);
+	border: 2px solid rgb(255, 255, 255);
 }
 QPushButton:pressed {	
 	background-color: rgb(35, 40, 49);
-	border: 2px solid rgb(43, 50, 61);
+	border: 2px solid rgb(255, 255, 255);
 }
 QPushButton:disabled {
 	background-color: rgb(84, 84, 84);
 	border: 2px solid rgb(84, 84, 84);
+	color: rgb(128, 128, 128);  /* Add this line to change the text color */
 }</string>
                          </property>
                          <property name="text">
@@ -1990,8 +1950,8 @@ QPushButton:disabled {
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
-                        <height>40</height>
+                        <width>400</width>
+                        <height>600</height>
                        </size>
                       </property>
                       <property name="frameShape">

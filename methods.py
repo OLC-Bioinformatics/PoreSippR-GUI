@@ -7,14 +7,15 @@ Methods for the PoreSippr-GUI
 # Standard imports
 from collections import defaultdict
 import glob
+import multiprocessing
 import os
 import re
+import shutil
+import time
 
 # Third-party imports
 from bs4 import BeautifulSoup
-import fitz
 import pandas as pd
-from weasyprint import HTML
 
 
 def read_csv_file(file_path):
@@ -264,10 +265,10 @@ def create_data_dict(df, csv_file):
 
     # Calculate the threshold for the number of mapped reads
     other_genes = df[~df['gene_name'].str.contains('Stx')]
-    threshold = other_genes['number_of_reads_mapped'].median()
+    threshold = other_genes['number_of_reads_mapped'].mean()
 
-    # Adjust the threshold to be 20% of the original threshold
-    threshold *= 0.2
+    # Adjust the threshold to be 25% of the original threshold
+    threshold *= 0.15
 
     # Filter the stx genes based on the threshold
     stx_genes = stx_genes[stx_genes['number_of_reads_mapped'] >= threshold]
@@ -366,6 +367,7 @@ def visualize_data(all_data_df, output_path):
             border-collapse: collapse;
             width: 100%;
             font-family: Arial, sans-serif;
+            font-size: 40px;  /* Add this line to set the font size */
         }
         th {
             background-color: #D3D3D3;
@@ -376,18 +378,17 @@ def visualize_data(all_data_df, output_path):
         td {
             border: 1px solid #ddd;
             padding: 8px;
-            text-align: center;  # Center the text in the cells
+            text-align: center;  /* Center the text in the cells */
         }
         tr:nth-child(even) {
             background-color: #f2f2f2;
         }
     </style>
     """
-
     # Save the styled DataFrame to an HTML file
     with open(output_path, 'w') as f:
         f.write(css)
-        f.write(styled_df.to_html())  # Use to_html without index=False
+        f.write(styled_df.to_html())
 
 
 def remove_index_from_html(html_file_path):
@@ -417,103 +418,114 @@ def remove_index_from_html(html_file_path):
         f.write(str(soup))
 
 
-def html_to_pdf(html_file_path, pdf_file_path):
-    """
-    Convert an HTML file to a PDF document.
-
-    Parameters:
-    html_file_path (str): The path to the HTML file.
-    pdf_file_path (str): The path to the output PDF file.
-    """
-    HTML(html_file_path).write_pdf(pdf_file_path)
-
-
-def pdf_to_png(pdf_file_path, png_file_path):
-    """
-    Convert a PDF file to a PNG image.
-
-    Parameters:
-    pdf_file_path (str): The path to the PDF file.
-    png_file_path (str): The path to the output PNG file.
-    """
-    # Open the PDF file
-    doc = fitz.open(pdf_file_path)
-
-    # Get the first page of the PDF
-    page = doc.load_page(0)
-
-    # Render the page to a pixmap with a transparent background
-    pixmap = page.get_pixmap(alpha=True)
-
-    # Save the pixmap to a PNG file
-    pixmap.save(png_file_path)  # Corrected from 'writePNG' to 'save'
-
-
-def main(folder_path, output_folder):
+def main(folder_path, output_folder, csv_path, complete):
     """
     Main function to process all CSV files in a folder grouped by iteration.
 
     Parameters:
     folder_path (str): The path to the folder.
     output_folder (str): The path to the output folder.
+    csv_path (str): The path to the PoreSIPPR outputs.
+    complete (multiprocessing.Value): A flag to indicate if the process should
+    be stopped.
     """
-    # Get all CSV files in the folder
-    csv_files = glob.glob(os.path.join(folder_path, '*.csv'))
+    # Delete the output_folder if it exists and recreate it
+    if os.path.exists(output_folder):
+        shutil.rmtree(output_folder)
+    os.makedirs(output_folder, exist_ok=True)
 
-    # Extract iteration and barcode from each CSV file name
-    csv_files_info = []
-    for csv_file in csv_files:
+    # Delete the processed_folder if it exists and recreate it
+    processed_folder = os.path.join(folder_path, 'processed')
+    if os.path.exists(processed_folder):
+        shutil.rmtree(processed_folder)
+    os.makedirs(processed_folder, exist_ok=True)
+
+    # Get all CSV files in the csv_path
+    all_csv_files = glob.glob(os.path.join(csv_path, '*.csv'))
+
+    # Group the CSV files by iteration
+    csv_files_by_iteration = defaultdict(list)
+    for csv_file in all_csv_files:
         iteration_match = re.search(r'iteration(\d+)', csv_file)
-        barcode_match = re.search(r'barcode(\d+)', csv_file)
-        if iteration_match and barcode_match:
-            csv_files_info.append(
-                (
-                    csv_file, int(iteration_match.group(1)),
-                    int(barcode_match.group(1))
-                )
-            )
+        if iteration_match:
+            iteration = int(iteration_match.group(1))
+            csv_files_by_iteration[iteration].append(csv_file)
 
-    # Sort the CSV files first by iteration and then by barcode
-    csv_files_info.sort(key=lambda x: (x[1], x[2]))
+    # Sort the iterations
+    sorted_iterations = sorted(csv_files_by_iteration.keys())
 
     # Initialize the current iteration and the all_data list
     current_iteration = None
     all_data = []
 
-    for csv_file, iteration, _ in csv_files_info:
+    for iteration in sorted_iterations:
+        # Check if the process should be stopped
+        if complete.value:
+            break
+
+        # Copy the CSV files for the current iteration to folder_path
+        for csv_file in csv_files_by_iteration[iteration]:
+            shutil.copy(csv_file, folder_path)
+
+        # Get the copied CSV files in folder_path
+        csv_files = glob.glob(os.path.join(
+            folder_path, f'*iteration{iteration}.csv')
+        )
+
+        # Extract barcode from each CSV file name
+        csv_files_info = []
+        for csv_file in csv_files:
+            barcode_match = re.search(r'barcode(\d+)', csv_file)
+            if barcode_match:
+                csv_files_info.append(
+                    (
+                        csv_file, iteration,
+                        int(barcode_match.group(1))
+                    )
+                )
+
+        # Sort the CSV files by barcode
+        csv_files_info.sort(key=lambda x: x[2])
+
         # If the iteration has changed, clear all_data
         if iteration != current_iteration:
             all_data = []
 
-        df = parse_csv_file(csv_file)
-        data_dict = create_data_dict(df, csv_file)
-        all_data.append(data_dict)
+        for csv_file, _, _ in csv_files_info:
+            df = parse_csv_file(csv_file)
+            data_dict = create_data_dict(df, csv_file)
+            all_data.append(data_dict)
 
-        # Create the output path
-        output_path = os.path.join(
-            output_folder, f'iteration_{iteration}.html'
-        )
+            # Create the output path
+            output_path = os.path.join(
+                output_folder, f'iteration_{iteration}.html'
+            )
 
-        visualize_data(pd.DataFrame(all_data), output_path)
+            visualize_data(pd.DataFrame(all_data), output_path)
 
-        remove_index_from_html(output_path)
-
-        # Convert the HTML file to a PDF document
-        pdf_file_path = os.path.join(
-            output_folder, f'iteration_{iteration}.pdf'
-        )
-        html_to_pdf(output_path, pdf_file_path)
-
-        # Convert the PDF file to a PNG image
-        png_file_path = os.path.join(
-            output_folder, f'iteration_{iteration}.png'
-        )
-        pdf_to_png(pdf_file_path, png_file_path)
+            remove_index_from_html(output_path)
 
         # Update the current iteration
         current_iteration = iteration
 
+        # Move the processed CSV files to a different folder
+        processed_folder = os.path.join(folder_path, 'processed')
+        os.makedirs(processed_folder, exist_ok=True)
+        for csv_file in csv_files:
+            shutil.move(csv_file, processed_folder)
+
+        # Wait for 10 seconds
+        time.sleep(5)
+
 
 if __name__ == "__main__":
-    main('/home/adamkoziol/Bioinformatics/poresippr_gui/poresippr_out/',
-         '/home/adamkoziol/Bioinformatics/poresippr_gui/images')
+    # Create a shared value for the complete flag
+    process_complete = multiprocessing.Value('b', False)
+
+    main(
+        csv_path='/home/adamkoziol/Bioinformatics/'
+                 'poresippr_gui/poresippr_out/',
+        folder_path='/home/adamkoziol/Bioinformatics/poresippr_gui/output/',
+        output_folder='/home/adamkoziol/Bioinformatics/poresippr_gui/images',
+        complete=process_complete
+    )

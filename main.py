@@ -7,13 +7,16 @@ processed in real-time. The GUI is created using PySide6 and Qt Designer.
 """
 # Standard library imports
 from glob import glob
-import logging
 import multiprocessing
+import os
+import signal
 import sys
+import time
 
 # Third party imports
 from PySide6 import QtCore, QtGui
 from PySide6.QtCore import (
+    QCoreApplication,
     QEvent,
     QPoint,
     QSize,
@@ -26,60 +29,56 @@ from PySide6.QtCore import (
 from PySide6.QtGui import (
     QColor,
     QIcon,
-    QPixmap
 )
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QGraphicsDropShadowEffect,
-    QLabel,
     QMainWindow,
     QMessageBox,
     QSizeGrip,
+    QSizePolicy,
+    QTextBrowser,
     QVBoxLayout,
     QWidget
 )
 
 # Local imports
 from methods import (
+    main,
     parse_dataframe,
     read_csv_file,
     validate_data_dict,
     validate_headers
 )
-from poresippr_placeholder import HoldPlace
-from ui_main import Ui_MainWindow
 
-# Set up logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s %(levelname)s %(message)s',
-)
+from ui_main import Ui_MainWindow
 
 
 class Worker(QThread):
     """
-    Worker thread class for running
+    Worker thread class for running methods.main
     """
     finished = Signal()
 
-    def __init__(self, hold_place):
+    def __init__(self, folder_path, output_folder, csv_path, complete):
         super().__init__()
-        self.hold_place = hold_place
+        self.folder_path = folder_path
+        self.output_folder = output_folder
+        self.csv_path = csv_path
+        self.complete = complete
 
     def run(self):
         """
         Run the worker thread.
         """
-        self.hold_place.main_loop()
+        main(
+            self.folder_path,
+            self.output_folder,
+            self.csv_path,
+            self.complete
+        )
         self.finished.emit()
-
-    def terminate(self):
-        """
-        Terminate the worker thread.
-        """
-        print('terminating')
-        self.hold_place.terminate()
 
 
 class MainWindow(QMainWindow):
@@ -88,6 +87,10 @@ class MainWindow(QMainWindow):
     """
 
     def __init__(self):
+
+        # Set the base path and image path to None
+        self.base_path = None
+        self.image_path = None
 
         # Call the parent class constructor
         QMainWindow.__init__(self)
@@ -105,17 +108,13 @@ class MainWindow(QMainWindow):
         self.update_button_states()
 
         # Hide the error QLabel
-        self.user_interface.file_label_error.hide()
+        self.user_interface.run_label_error.hide()
         
         # Remove standard title bar
         self.user_interface_functions.remove_title_bar(True)
 
         # Set the window title
         self.setWindowTitle('PoreSippr')
-        self.user_interface_functions.label_title(text='PoreSippr')
-        self.user_interface_functions.label_description(
-            text='Graphical User Interface for PoreSippr'
-        )
 
         # Get the screen that contains the application window
         screen = QApplication.screenAt(self.geometry().topLeft())
@@ -129,7 +128,7 @@ class MainWindow(QMainWindow):
         screen_size = screen.availableGeometry()
 
         # Calculate 75% of the screen dimensions
-        start_width = int(screen_size.width() * 0.60)
+        start_width = int(screen_size.width() * 0.45)
         start_height = int(screen_size.height() * 0.60)
         start_size = QSize(start_width, start_height)
 
@@ -200,9 +199,6 @@ class MainWindow(QMainWindow):
             self.select_file
         )
 
-        # Hide the QLineEdit initially
-        self.user_interface.file_selection_label.hide()
-
         # Create a timer to show the elapsed time of the run
         self.timer = QTimer()
 
@@ -239,8 +235,23 @@ class MainWindow(QMainWindow):
         # Initialise the Worker instance
         self.worker = None
 
+        # Initialise the data dictionary
+        self.data_dict = {}
+
         # Show the main window
         self.show()
+
+    def mousePressEvent(self, event):
+        """
+        Handles the event when the mouse button is pressed.
+
+        Parameters:
+        event (QMouseEvent): The mouse event triggered by the user.
+        """
+        # If the left mouse button is pressed, update the drag position
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            self.drag_pos = event.globalPosition().toPoint()
+            event.accept()
 
     def select_file(self):
         """
@@ -270,53 +281,33 @@ class MainWindow(QMainWindow):
             df = read_csv_file(file_name)
 
             # Parse the DataFrame
-            data_dict = parse_dataframe(df)
+            self.data_dict = parse_dataframe(df)
 
             # Validate the headers
-            missing_headers = validate_headers(data_dict)
+            missing_headers = validate_headers(self.data_dict)
             if missing_headers:
-                print(missing_headers)
 
                 # Update the QLabel text with the error message
-                self.user_interface.file_label_error.setText(missing_headers)
-                self.user_interface.file_label_error.show()  # Show the QLabel
+                self.user_interface.run_label_error.setText(missing_headers)
+                self.user_interface.run_label_error.show()  # Show the QLabel
                 return
 
             # Validate the data
-            errors = validate_data_dict(data_dict)
+            errors = validate_data_dict(self.data_dict)
             if errors:
-                print(errors)
-
                 # Update the QLabel text with the error message
-                self.user_interface.file_label_error.setText(errors)
-                self.user_interface.file_label_error.show()  # Show the QLabel
+                self.user_interface.run_label_error.setText(errors)
+                self.user_interface.run_label_error.show()  # Show the QLabel
                 return
+            else:
+                # Hide the error QLabel
+                self.user_interface.run_label_error.hide()
 
-            # Set the text of the QLabel to the selected file name
-            self.user_interface.file_selection_label.setText(
-                f'PoreSippr configuration file:\n {file_name}'
-            )
+            # Extract the base path from the output directory
+            self.base_path = os.path.dirname(self.data_dict['output_dir'])
 
-            # Show the QLabel
-            self.user_interface.file_selection_label.show()
-
-            # Hide the error QLabel
-            self.user_interface.file_label_error.hide()
-
-            # Get the font metrics of the QLabel
-            font_metrics = \
-                self.user_interface.file_selection_label.fontMetrics()
-
-            # Calculate the width of the text
-            text_width = font_metrics.horizontalAdvance(file_name)
-
-            # Add a buffer to the width
-            buffer = 30
-            total_width = text_width + buffer
-
-            # Set the minimum width of the QLabel
-            self.user_interface.file_selection_label.setMinimumWidth(
-                total_width)
+            # Set the image path
+            self.image_path = os.path.join(self.base_path, 'images')
 
             # Enable the run button and make it checkable
             self.user_interface.run_button.setEnabled(True)
@@ -330,7 +321,7 @@ class MainWindow(QMainWindow):
         :return: A list of images in the current directory.
         """
         # Find all the images in the directory
-        images = self.get_images()
+        images = self.get_images(path=self.image_path)
 
         # If there are no images, disable both buttons
         if not images:
@@ -383,7 +374,7 @@ class MainWindow(QMainWindow):
         This method updates the LCD with the elapsed time.
 
         It increments the current time by one second, sets the LCD
-        style to flat, sets the number of digits on the LCD to 8, and
+        style to flat, sets the number of digits on the LCD to eight, and
         then displays the updated time on the LCD in the format
         'hh:mm:ss'.
         """
@@ -399,10 +390,7 @@ class MainWindow(QMainWindow):
         self.user_interface.run_button.setChecked(False)
         self.user_interface.run_label_error.setText(
             "Your PoreSippr run has been successfully terminated")
-        self.user_interface.run_label_error.setStyleSheet(
-            u"color:rgb(34,139,34);")
-
-        # Stop the timer
+        self.user_interface.run_label_error.show()
         self.timer.stop()
 
         # Rechecks the button to false; ensures we don't loop
@@ -430,25 +418,34 @@ class MainWindow(QMainWindow):
         )
 
     @staticmethod
-    def get_images():
+    def get_images(path=None):
         """
         Gathers all available images in the current directory and puts them
         in a sorted list.
-        """
-        return sorted(glob('*.png'))
 
-    def add_image_to_gui(self, image_path):
+        :param path: The path to the directory containing the images.
         """
-        Adds an image to the GUI.
+        # If the path is not provided, return None
+        if path is None:
+            return None
 
-        This method creates a new QWidget, adds it to the progress_widget, and
-        then creates a QLabel to display the image. The QLabel is added to the
-        QVBoxLayout of the new QWidget. The QPixmap of the image is set as the
-        pixmap of the QLabel.
+        return sorted(glob(os.path.join(path, '*.html')))
 
-        Parameters:
-        image_path (str): The path to the image file.
+    def add_html_to_gui(self, html_path):
         """
+        Adds HTML to the GUI.
+        """
+
+        # Wait for the image file to be fully written
+        while True:
+            try:
+                size1 = os.path.getsize(html_path)
+                time.sleep(1)
+                size2 = os.path.getsize(html_path)
+                if size1 == size2:
+                    break
+            except FileNotFoundError:
+                time.sleep(1)
 
         # Create a new QWidget
         new_page = QWidget()
@@ -456,23 +453,37 @@ class MainWindow(QMainWindow):
         # Add the new QWidget to the progress_widget
         self.user_interface.progress_widget.addWidget(new_page)
 
-        # Create a QLabel to display the image
-        image_label = QLabel(new_page)
-        image_label.setObjectName(u"imageLabel")
-        image_label.setAlignment(Qt.AlignCenter)
+        # Set the new QWidget as the current widget
+        self.user_interface.progress_widget.setCurrentWidget(new_page)
+
+        # Update the page label and button states
+        self.update_page_label()
+        self.update_button_states()
+
+        # Create a QTextBrowser to display the HTML
+        text_browser = QTextBrowser(new_page)
+        text_browser.setObjectName(u"textBrowser")
+        text_browser.setAlignment(Qt.AlignCenter)
+
+        # Load the HTML file into the QTextBrowser
+        with open(html_path, 'r') as f:
+            html_content = f.read()
+        text_browser.setHtml(html_content)
+
+        # Set the size policy of the QTextBrowser to allow it to expand freely
+        text_browser.setSizePolicy(QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
 
         # Create a QVBoxLayout for the new QWidget
         vertical_layout = QVBoxLayout(new_page)
         vertical_layout.setObjectName(u"verticalLayout")
 
-        # Add the QLabel to the QVBoxLayout
-        vertical_layout.addWidget(image_label)
+        # Set the contents margins and spacing of the QVBoxLayout
+        vertical_layout.setContentsMargins(0, 0, 0, 0)
+        vertical_layout.setSpacing(0)
 
-        # Create a QPixmap from the image file
-        qpixmap = QPixmap(image_path)
-
-        # Set the QPixmap as the pixmap of the QLabel
-        image_label.setPixmap(qpixmap)
+        # Add the QTextBrowser to the QVBoxLayout
+        vertical_layout.addWidget(text_browser)
 
     def run_clicker(self):
         """
@@ -518,6 +529,7 @@ class MainWindow(QMainWindow):
 
             # Resets the error text to nothing
             self.user_interface.run_label_error.setText("")
+            self.user_interface.run_label_error.hide()
 
             # Resets the time to 0:00:00
             self.time = QTime(0, 0, 0)
@@ -540,13 +552,18 @@ class MainWindow(QMainWindow):
             complete = multiprocessing.Value('b', False)
             self.complete = False
 
-            # Create a HoldPlace instance and pass the shared complete
-            # flag to it
-            self.hold_place = HoldPlace(complete)
+            # Create variables for the folder path, output folder, and csv path
+            folder_path = os.path.join(self.base_path, 'output')
+            csv_path = os.path.join(self.base_path, 'poresippr_out')
 
             # Create a Worker instance and connect its finished signal to a
             # slot method
-            self.worker = Worker(self.hold_place)
+            self.worker = Worker(
+                folder_path=folder_path,
+                output_folder=self.image_path,
+                csv_path=csv_path,
+                complete=complete
+            )
             self.worker.finished.connect(self.on_worker_finished)
             self.worker.start()
 
@@ -574,17 +591,16 @@ class MainWindow(QMainWindow):
                 QtCore.QCoreApplication.processEvents()
 
                 # Gets all the images in the current directory
-                images = self.get_images()
+                images = self.get_images(path=self.image_path)
 
                 # Updates the state of the left and right buttons based on the
                 # current page index
-                self.update_button_states()
+                # self.update_button_states()
 
                 # If there are new images, add them to the GUI
                 if len(images) > number_of_images:
                     for image_path in images[number_of_images:]:
-                        self.add_image_to_gui(image_path)
-
+                        self.add_html_to_gui(image_path)
                 # Updates the number of images added
                 number_of_images = len(images)
 
@@ -629,11 +645,11 @@ class MainWindow(QMainWindow):
         Handles the event when a dialog button is clicked.
 
         If the "Yes" button is clicked, the run is stopped and the
-        complete flag is set to True. The run button is unchecked, and a
-        message is displayed to the user indicating that the process has
+        complete flag is set to True. The uncheck the run button, and display a
+        message to the user indicating that the process has
         been terminated
 
-        If the "Cancel" button is clicked, a message box is displayed to the
+        If the user clicks the "Cancel" button, display a message box to the
         user indicating that the application will continue to read images.
 
         Parameters:
@@ -652,8 +668,10 @@ class MainWindow(QMainWindow):
             # Display a message indicating the run has been stopped
             self.user_interface.run_label_error.setText(
                 "Your PoreSippr run has been successfully terminated")
-            self.user_interface.run_label_error.setStyleSheet(
-                u"color:rgb(34,139,34);")
+
+            # Show the message
+            self.user_interface.run_label_error.show()
+
             # Stop the timer
             self.timer.stop()
 
@@ -673,15 +691,14 @@ class MainWindow(QMainWindow):
             self.update_button_states()
 
             # Get the list of images after the dialog box is closed
-            images = self.get_images()
+            images = self.get_images(path=self.image_path)
 
             # If there are new images, add them to the GUI
             if len(images) > self.user_interface.progress_widget.count():
                 for image_path in \
                         images[
                         self.user_interface.progress_widget.count():]:
-                    self.add_image_to_gui(image_path)
-
+                    self.add_html_to_gui(image_path)
         # Check if the "Cancel" button was clicked
         elif response == QMessageBox.Cancel:
             # Create a new message box
@@ -960,7 +977,21 @@ class UIFunctions:
 
 
 if __name__ == "__main__":
+    # Create a function to handle SIGINT
+    def sigint_handler(_, __):
+        """Handler for the SIGINT signal."""
+        QCoreApplication.quit()
+
+    # Register the signal handler
+    signal.signal(signal.SIGINT, sigint_handler)
+
     app = QApplication(sys.argv)
+
+    # Ensure that the event loop is interrupted by SIGINT
+    timer = QTimer()
+    timer.start(500)  # Every 500ms, the event loop will be interrupted
+    timer.timeout.connect(lambda: None)
+
     QtGui.QFontDatabase.addApplicationFont('fonts/segoeui.ttf')
     QtGui.QFontDatabase.addApplicationFont('fonts/segoeuib.ttf')
     window = MainWindow()

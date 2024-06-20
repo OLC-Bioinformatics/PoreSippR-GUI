@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASEcqeaAm.ui'
+## Form generated from reading UI file 'GUI_BASEWnWzqF.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.7.0
 ##
@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1000, 720)
+        MainWindow.resize(1000, 1088)
         MainWindow.setMinimumSize(QSize(1000, 720))
         palette = QPalette()
         brush = QBrush(QColor(255, 255, 255, 255))
@@ -548,19 +548,6 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_8.addWidget(self.label_top_info_1)
 
-        self.label_top_info_2 = QLabel(self.frame_top_info)
-        self.label_top_info_2.setObjectName(u"label_top_info_2")
-        self.label_top_info_2.setMinimumSize(QSize(0, 0))
-        self.label_top_info_2.setMaximumSize(QSize(250, 20))
-        font3 = QFont()
-        font3.setFamilies([u"Segoe UI"])
-        font3.setBold(True)
-        self.label_top_info_2.setFont(font3)
-        self.label_top_info_2.setStyleSheet(u"color: rgb(98, 103, 111);")
-        self.label_top_info_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.horizontalLayout_8.addWidget(self.label_top_info_2)
-
 
         self.verticalLayout_2.addWidget(self.frame_top_info)
 
@@ -603,9 +590,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_9.setContentsMargins(5, 5, 5, 5)
         self.stackedWidget = QStackedWidget(self.frame_content)
         self.stackedWidget.setObjectName(u"stackedWidget")
-        font4 = QFont()
-        font4.setPointSize(7)
-        self.stackedWidget.setFont(font4)
+        font3 = QFont()
+        font3.setPointSize(7)
+        self.stackedWidget.setFont(font3)
         self.stackedWidget.setStyleSheet(u"background: transparent;")
         self.run_page = QWidget()
         self.run_page.setObjectName(u"run_page")
@@ -622,16 +609,6 @@ class Ui_MainWindow(object):
         self.frame_div_content_10.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout_6 = QVBoxLayout(self.frame_div_content_10)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.label_8 = QLabel(self.frame_div_content_10)
-        self.label_8.setObjectName(u"label_8")
-        font5 = QFont()
-        font5.setFamilies([u"Segoe UI"])
-        font5.setPointSize(26)
-        self.label_8.setFont(font5)
-        self.label_8.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.verticalLayout_6.addWidget(self.label_8)
-
         self.lcd_display = QLCDNumber(self.frame_div_content_10)
         self.lcd_display.setObjectName(u"lcd_display")
         self.lcd_display.setStyleSheet(u"QLCDNumber {\n"
@@ -646,46 +623,48 @@ class Ui_MainWindow(object):
         brush15 = QBrush(QColor(190, 9, 9, 255))
         brush15.setStyle(Qt.SolidPattern)
         palette1.setBrush(QPalette.Active, QPalette.WindowText, brush15)
-        brush16 = QBrush(QColor(41, 45, 56, 255))
-        brush16.setStyle(Qt.SolidPattern)
-        palette1.setBrush(QPalette.Active, QPalette.Button, brush16)
+        palette1.setBrush(QPalette.Active, QPalette.Button, brush1)
         palette1.setBrush(QPalette.Active, QPalette.Text, brush15)
         palette1.setBrush(QPalette.Active, QPalette.ButtonText, brush15)
-        palette1.setBrush(QPalette.Active, QPalette.Base, brush16)
-        palette1.setBrush(QPalette.Active, QPalette.Window, brush16)
+        palette1.setBrush(QPalette.Active, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Active, QPalette.Window, brush1)
+        brush16 = QBrush(QColor(190, 9, 9, 128))
+        brush16.setStyle(Qt.NoBrush)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush16)
+#endif
+        palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
+        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush15)
+        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush15)
+        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush1)
         brush17 = QBrush(QColor(190, 9, 9, 128))
         brush17.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Active, QPalette.PlaceholderText, brush17)
+        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush17)
 #endif
-        palette1.setBrush(QPalette.Inactive, QPalette.WindowText, brush15)
-        palette1.setBrush(QPalette.Inactive, QPalette.Button, brush16)
-        palette1.setBrush(QPalette.Inactive, QPalette.Text, brush15)
-        palette1.setBrush(QPalette.Inactive, QPalette.ButtonText, brush15)
-        palette1.setBrush(QPalette.Inactive, QPalette.Base, brush16)
-        palette1.setBrush(QPalette.Inactive, QPalette.Window, brush16)
+        palette1.setBrush(QPalette.Disabled, QPalette.WindowText, brush15)
+        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush15)
+        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush15)
+        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush1)
+        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush1)
         brush18 = QBrush(QColor(190, 9, 9, 128))
         brush18.setStyle(Qt.NoBrush)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Inactive, QPalette.PlaceholderText, brush18)
-#endif
-        palette1.setBrush(QPalette.Disabled, QPalette.WindowText, brush15)
-        palette1.setBrush(QPalette.Disabled, QPalette.Button, brush16)
-        palette1.setBrush(QPalette.Disabled, QPalette.Text, brush15)
-        palette1.setBrush(QPalette.Disabled, QPalette.ButtonText, brush15)
-        palette1.setBrush(QPalette.Disabled, QPalette.Base, brush16)
-        palette1.setBrush(QPalette.Disabled, QPalette.Window, brush16)
-        brush19 = QBrush(QColor(190, 9, 9, 128))
-        brush19.setStyle(Qt.NoBrush)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush19)
+        palette1.setBrush(QPalette.Disabled, QPalette.PlaceholderText, brush18)
 #endif
         self.run_label_error.setPalette(palette1)
-        font6 = QFont()
-        font6.setFamilies([u"Segoe UI"])
-        font6.setPointSize(9)
-        self.run_label_error.setFont(font6)
-        self.run_label_error.setStyleSheet(u"color:rgb(190, 9, 9);")
+        self.run_label_error.setFont(font2)
+        self.run_label_error.setStyleSheet(u"QLabel {\n"
+"    color: #FF6347; /* Tomato color for the text */\n"
+"    background-color: transparent; /* Transparent background */\n"
+"    border: 2px solid #FF6347; /* Tomato border */\n"
+"    border-radius: 5px; /* Rounded corners */\n"
+"    padding: 5px; /* Some padding */\n"
+"    font-size: 16px; /* Increase font size */\n"
+"}")
         self.run_label_error.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.verticalLayout_6.addWidget(self.run_label_error)
@@ -696,59 +675,42 @@ class Ui_MainWindow(object):
         self.file_selection_button = QPushButton(self.run_page)
         self.file_selection_button.setObjectName(u"file_selection_button")
         self.file_selection_button.setStyleSheet(u"QPushButton {\n"
-"    border: 3px solid rgb(255, 255, 255); /* White border */\n"
+"    border: 3px solid rgb(0, 0, 255); /* Blue border */\n"
 "    border-radius: 5px;\n"
 "    background-color: rgb(0, 0, 255); /* Blue background */\n"
 "    color: rgb(255, 255, 255); /* White text */\n"
-"    font-size: 16px; /* Larger font size */\n"
-"    padding: 10px; /* Padding around the text */\n"
+"    padding: 5px; /* Padding around the text */\n"
+"    font-weight: bold; /* Bold font */\n"
 "}\n"
 "QPushButton:hover {\n"
 "    background-color: rgb(0, 0, 200); /* Darker blue when hovered */\n"
-"    border: 3px solid rgb(255, 255, 255); /* White border when hovered */\n"
+"    border: 3px solid rgb(0, 0, 200); /* Darker blue border when hovered */\n"
+"    font-weight: bold; /* Bold font */\n"
 "}\n"
 "QPushButton:pressed {\n"
 "    background-color: rgb(0, 0, 150); /* Even darker blue when pressed */\n"
-"    border: 3px solid rgb(255, 255, 255); /* White border when pressed */\n"
+"    border: 3px solid rgb(0, 0, 150); /* Even darker blue border when pressed */\n"
+"    font-weight: bold; /* Bold font */\n"
 "}\n"
 "QPushButton:disabled {\n"
 "    background-color: rgb(128, 128, 128); /* Grey background when disabled */\n"
-"    border: 3px solid rgb(255, 255, 255); /* White border when disabled */\n"
-"    color: rgb(255, 255, 255); /* White text when disabled */\n"
+"    border: 3px solid rgb(128, 128, 128); /* Grey border when disabled */\n"
+"    color: rgb(255, 255, 255); /* White text when d"
+                        "isabled */\n"
 "}")
         icon3 = QIcon(QIcon.fromTheme(u"system-search"))
         self.file_selection_button.setIcon(icon3)
 
-        self.verticalLayout_20.addWidget(self.file_selection_button, 0, Qt.AlignmentFlag.AlignHCenter)
+        self.verticalLayout_20.addWidget(self.file_selection_button, 0, Qt.AlignmentFlag.AlignRight)
 
-        self.file_label_error = QLabel(self.run_page)
-        self.file_label_error.setObjectName(u"file_label_error")
-        self.file_label_error.setStyleSheet(u"QLabel {\n"
-"    color: #FF6347; /* Tomato color for the text */\n"
-"    background-color: transparent; /* Transparent background */\n"
-"    border: 2px solid #FF6347; /* Tomato border */\n"
-"    border-radius: 5px; /* Rounded corners */\n"
-"    padding: 5px; /* Some padding */\n"
-"    font-size: 16px; /* Increase font size */\n"
-"}")
-
-        self.verticalLayout_20.addWidget(self.file_label_error, 0, Qt.AlignmentFlag.AlignHCenter)
-
-        self.file_selection_label = QLabel(self.run_page)
-        self.file_selection_label.setObjectName(u"file_selection_label")
-        self.file_selection_label.setStyleSheet(u"QLabel {\n"
-"    color: rgb(255, 255, 255); /* White text color */\n"
-"    background-color: rgb(70, 70, 70); /* Dark grey background */\n"
-"    border: 2px solid rgb(255, 255, 255); /* White border */\n"
-"    border-radius: 5px; /* Rounded corners */\n"
-"    padding: 5px; /* Padding around the text */\n"
-"    font-size: 14px; /* Font size */\n"
-"    font-weight: bold; /* Bold font */\n"
-"}")
-
-        self.verticalLayout_20.addWidget(self.file_selection_label, 0, Qt.AlignmentFlag.AlignRight)
-
-        self.run_button = QPushButton(self.run_page)
+        self.frame_2 = QFrame(self.run_page)
+        self.frame_2.setObjectName(u"frame_2")
+        self.frame_2.setMinimumSize(QSize(0, 50))
+        self.frame_2.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_2.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_12 = QHBoxLayout(self.frame_2)
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.run_button = QPushButton(self.frame_2)
         self.run_button.setObjectName(u"run_button")
         sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         sizePolicy3.setHorizontalStretch(0)
@@ -756,61 +718,78 @@ class Ui_MainWindow(object):
         sizePolicy3.setHeightForWidth(self.run_button.sizePolicy().hasHeightForWidth())
         self.run_button.setSizePolicy(sizePolicy3)
         self.run_button.setMinimumSize(QSize(150, 30))
-        self.run_button.setFont(font6)
+        font4 = QFont()
+        font4.setFamilies([u"Segoe UI"])
+        font4.setPointSize(9)
+        font4.setBold(True)
+        self.run_button.setFont(font4)
         self.run_button.setStyleSheet(u"QPushButton {\n"
-"	border: 2px solid rgb(34, 139, 34); /* Green border */\n"
-"	border-radius: 5px;	\n"
-"	background-color: rgb(34, 139, 34); /* Green background */\n"
+"    border: 2px solid rgb(34, 139, 34); /* Green border */\n"
+"    border-radius: 5px;\n"
+"    background-color: rgb(34, 139, 34); /* Green background */\n"
+"    font-weight: bold; /* Bold font */\n"
+"    text-align: center; /* Centered text */\n"
 "}\n"
 "QPushButton:hover {\n"
-"	background-color: rgb(50, 205, 50); /* Lighter green when hovered */\n"
-"	border: 2px solid rgb(34, 139, 34); /* Green border when hovered */\n"
+"    background-color: rgb(50, 205, 50); /* Lighter green when hovered */\n"
+"    border: 2px solid rgb(34, 139, 34); /* Green border when hovered */\n"
+"    font-weight: bold; /* Bold font */\n"
 "}\n"
-"QPushButton:pressed {	\n"
-"	background-color: rgb(0, 100, 0); /* Darker green when pressed */\n"
-"	border: 2px solid rgb(34, 139, 34); /* Green border when pressed */\n"
+"QPushButton:pressed {\n"
+"    background-color: rgb(0, 100, 0); /* Darker green when pressed */\n"
+"    border: 2px solid rgb(34, 139, 34); /* Green border when pressed */\n"
+"    font-weight: bold; /* Bold font */\n"
 "}\n"
 "QPushButton:disabled {\n"
 "    background-color: rgb(128, 128, 128); /* Grey background when disabled */\n"
 "    border: 2px solid rgb(128, 128, 128); /* Grey border when disabled */\n"
+"    font-weight: bold; /* Bold font */\n"
 "}")
         icon4 = QIcon()
         icon4.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Normal, QIcon.Off)
         self.run_button.setIcon(icon4)
         self.run_button.setCheckable(True)
 
-        self.verticalLayout_20.addWidget(self.run_button, 0, Qt.AlignmentFlag.AlignRight)
+        self.horizontalLayout_12.addWidget(self.run_button)
 
-        self.cancel_button = QPushButton(self.run_page)
+        self.cancel_button = QPushButton(self.frame_2)
         self.cancel_button.setObjectName(u"cancel_button")
         sizePolicy3.setHeightForWidth(self.cancel_button.sizePolicy().hasHeightForWidth())
         self.cancel_button.setSizePolicy(sizePolicy3)
         self.cancel_button.setMinimumSize(QSize(150, 30))
-        self.cancel_button.setFont(font6)
+        self.cancel_button.setFont(font4)
         self.cancel_button.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.cancel_button.setStyleSheet(u"QPushButton {\n"
 " border: 2px solid rgb(139, 0, 0); /* Red border */\n"
 " border-radius: 5px;\n"
 " background-color: rgb(139, 0, 0); /* Red background */\n"
+" font-weight: bold; /* Bold font */\n"
+" text-align: center; /* Centered text */\n"
 "}\n"
 "QPushButton:hover {\n"
 " background-color: rgb(205, 92, 92); /* Lighter red when hovered */\n"
 " border: 2px solid rgb(139, 0, 0); /* Red border when hovered */\n"
+" font-weight: bold; /* Bold font */\n"
 "}\n"
 "QPushButton:pressed {\n"
 " background-color: rgb(165, 42, 42); /* Darker red when pressed */\n"
 " border: 2px solid rgb(139, 0, 0); /* Red border when pressed */\n"
+" font-weight: bold; /* Bold font */\n"
 "}\n"
 "QPushButton:disabled {\n"
 "    background-color: rgb(128, 128, 128); /* Grey background when disabled */\n"
 "    border: 2px solid rgb(128, 128, 128); /* Grey border when disabled */\n"
+"    font-weight: bold; /* Bold font */\n"
 "}")
         icon5 = QIcon()
         icon5.addFile(u":/16x16/icons/16x16/cil-ban.png", QSize(), QIcon.Normal, QIcon.Off)
         self.cancel_button.setIcon(icon5)
         self.cancel_button.setCheckable(True)
 
-        self.verticalLayout_20.addWidget(self.cancel_button, 0, Qt.AlignmentFlag.AlignRight)
+        self.horizontalLayout_12.addWidget(self.cancel_button)
+
+
+        self.verticalLayout_20.addWidget(self.frame_2, 0, Qt.AlignmentFlag.AlignRight)
 
         self.frame = QFrame(self.run_page)
         self.frame.setObjectName(u"frame")
@@ -831,43 +810,48 @@ class Ui_MainWindow(object):
         self.frame_div_content_11.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout_7 = QVBoxLayout(self.frame_div_content_11)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.pageLabel = QLabel(self.frame_div_content_11)
-        self.pageLabel.setObjectName(u"pageLabel")
-        font7 = QFont()
-        font7.setPointSize(12)
-        self.pageLabel.setFont(font7)
-
-        self.verticalLayout_7.addWidget(self.pageLabel)
-
 
         self.horizontalLayout_9.addWidget(self.frame_div_content_11)
+
+        self.pageLabel = QLabel(self.frame)
+        self.pageLabel.setObjectName(u"pageLabel")
+        font5 = QFont()
+        font5.setPointSize(12)
+        self.pageLabel.setFont(font5)
+
+        self.horizontalLayout_9.addWidget(self.pageLabel)
 
         self.right_button = QPushButton(self.frame)
         self.right_button.setObjectName(u"right_button")
         self.right_button.setMinimumSize(QSize(150, 30))
+        font6 = QFont()
+        font6.setFamilies([u"Segoe UI"])
+        font6.setPointSize(9)
         self.right_button.setFont(font6)
         self.right_button.setStyleSheet(u"QPushButton {\n"
-"	border: 2px solid rgb(52, 59, 72);\n"
+"	border: 2px solid rgb(255, 255, 255);\n"
 "	border-radius: 5px;	\n"
 "	background-color: rgb(52, 59, 72);\n"
+"	color: rgb(255, 255, 255);  /* Add this line to change the text color */\n"
 "}\n"
 "QPushButton:hover {\n"
 "	background-color: rgb(57, 65, 80);\n"
-"	border: 2px solid rgb(61, 70, 86);\n"
+"	border: 2px solid rgb(255, 255, 255);\n"
 "}\n"
 "QPushButton:pressed {	\n"
 "	background-color: rgb(35, 40, 49);\n"
-"	border: 2px solid rgb(43, 50, 61);\n"
+"	border: 2px solid rgb(255, 255, 255);\n"
 "}\n"
 "QPushButton:disabled {\n"
 "	background-color: rgb(84, 84, 84);\n"
 "	border: 2px solid rgb(84, 84, 84);\n"
+"	color: rgb(128, 128, 128);  /* Add this line to change the text color */\n"
 "}")
         icon6 = QIcon()
         icon6.addFile(u":/16x16/icons/16x16/cil-arrow-circle-right.png", QSize(), QIcon.Normal, QIcon.Off)
         self.right_button.setIcon(icon6)
 
-        self.horizontalLayout_9.addWidget(self.right_button)
+        self.horizontalLayout_9.addWidget(self.right_button, 0, Qt.AlignmentFlag.AlignLeft)
 
         self.left_button = QPushButton(self.frame)
         self.left_button.setObjectName(u"left_button")
@@ -875,21 +859,23 @@ class Ui_MainWindow(object):
         self.left_button.setFont(font6)
         self.left_button.setLayoutDirection(Qt.LayoutDirection.LeftToRight)
         self.left_button.setStyleSheet(u"QPushButton {\n"
-"	border: 2px solid rgb(52, 59, 72);\n"
+"	border: 2px solid rgb(255, 255, 255);\n"
 "	border-radius: 5px;	\n"
 "	background-color: rgb(52, 59, 72);\n"
+"	color: rgb(255, 255, 255);  /* Add this line to change the text color */\n"
 "}\n"
 "QPushButton:hover {\n"
 "	background-color: rgb(57, 65, 80);\n"
-"	border: 2px solid rgb(61, 70, 86);\n"
+"	border: 2px solid rgb(255, 255, 255);\n"
 "}\n"
 "QPushButton:pressed {	\n"
 "	background-color: rgb(35, 40, 49);\n"
-"	border: 2px solid rgb(43, 50, 61);\n"
+"	border: 2px solid rgb(255, 255, 255);\n"
 "}\n"
 "QPushButton:disabled {\n"
 "	background-color: rgb(84, 84, 84);\n"
 "	border: 2px solid rgb(84, 84, 84);\n"
+"	color: rgb(128, 128, 128);  /* Add this line to change the text color */\n"
 "}")
         icon7 = QIcon()
         icon7.addFile(u":/16x16/icons/16x16/cil-arrow-circle-left.png", QSize(), QIcon.Normal, QIcon.Off)
@@ -907,7 +893,7 @@ class Ui_MainWindow(object):
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.frame_4.sizePolicy().hasHeightForWidth())
         self.frame_4.setSizePolicy(sizePolicy4)
-        self.frame_4.setMinimumSize(QSize(0, 40))
+        self.frame_4.setMinimumSize(QSize(400, 600))
         self.frame_4.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame_4.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_11 = QHBoxLayout(self.frame_4)
@@ -933,10 +919,10 @@ class Ui_MainWindow(object):
         self.label_user_icon.setSizePolicy(sizePolicy5)
         self.label_user_icon.setMinimumSize(QSize(60, 60))
         self.label_user_icon.setMaximumSize(QSize(60, 60))
-        font8 = QFont()
-        font8.setFamilies([u"Segoe UI"])
-        font8.setPointSize(12)
-        self.label_user_icon.setFont(font8)
+        font7 = QFont()
+        font7.setFamilies([u"Segoe UI"])
+        font7.setPointSize(12)
+        self.label_user_icon.setFont(font7)
         self.label_user_icon.setStyleSheet(u"QLabel {\n"
 "	border-radius: 30px;\n"
 "	background-color: rgb(44, 49, 60);\n"
@@ -1035,7 +1021,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.label_title_bar_top.setText(QCoreApplication.translate("MainWindow", u"Main Window", None))
+        self.label_title_bar_top.setText(QCoreApplication.translate("MainWindow", u"PoreSippr", None))
 #if QT_CONFIG(tooltip)
         self.minimize_button.setToolTip(QCoreApplication.translate("MainWindow", u"Minimize", None))
 #endif // QT_CONFIG(tooltip)
@@ -1048,13 +1034,9 @@ class Ui_MainWindow(object):
         self.close_button.setToolTip(QCoreApplication.translate("MainWindow", u"Close", None))
 #endif // QT_CONFIG(tooltip)
         self.close_button.setText("")
-        self.label_top_info_1.setText(QCoreApplication.translate("MainWindow", u"C:\\Program Files\\Blender Foundation\\Blender 2.82", None))
-        self.label_top_info_2.setText(QCoreApplication.translate("MainWindow", u"| HOME", None))
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"PoreSippr", None))
+        self.label_top_info_1.setText(QCoreApplication.translate("MainWindow", u"Graphical User Interface for PoreSippr", None))
         self.run_label_error.setText("")
         self.file_selection_button.setText(QCoreApplication.translate("MainWindow", u" Browse for PoreSippr run configuration file", None))
-        self.file_label_error.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.file_selection_label.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.run_button.setText(QCoreApplication.translate("MainWindow", u" Begin Run", None))
         self.cancel_button.setText(QCoreApplication.translate("MainWindow", u" Stop Processing", None))
         self.pageLabel.setText("")
