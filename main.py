@@ -61,29 +61,39 @@ class Worker(QThread):
     """
     finished = Signal()
 
-    def __init__(self, folder_path, output_folder, csv_path, complete):
+    # Signal for errors
+    error = Signal(str)
+
+    def __init__(
+            self, folder_path, output_folder, csv_path, complete, file_name):
         super().__init__()
         self.folder_path = folder_path
         self.output_folder = output_folder
         self.csv_path = csv_path
         self.complete = complete
+        self.file_name = file_name
 
     def run(self):
         """
         Run the worker thread.
         """
-        main(
-            self.folder_path,
-            self.output_folder,
-            self.csv_path,
-            self.complete
-        )
-        self.finished.emit()
+        try:
+            main(
+                folder_path=self.folder_path,
+                output_folder=self.output_folder,
+                csv_path=self.csv_path,
+                complete=self.complete,
+                config_file=self.file_name
+            )
+        except Exception as exc:
+            self.error.emit(str(exc))
+        else:
+            self.finished.emit()
 
 
 class MainWindow(QMainWindow):
     """
-    Main window class for the PoreSippR GUI application.
+    Main window class for the PoreSippr GUI application.
     """
 
     def __init__(self):
@@ -202,6 +212,9 @@ class MainWindow(QMainWindow):
         # Create a timer to show the elapsed time of the run
         self.timer = QTimer()
 
+        # Initialize a flag to track if the signal is connected
+        self.is_lcd_number_connected = False
+
         # Initialise the timer to 0:00:00
         self.time = QTime(0, 0)
 
@@ -235,6 +248,9 @@ class MainWindow(QMainWindow):
         # Initialise the Worker instance
         self.worker = None
 
+        # Initialise the file name
+        self.file_name = None
+
         # Initialise the data dictionary
         self.data_dict = {}
 
@@ -264,21 +280,18 @@ class MainWindow(QMainWindow):
         # Set the file dialog to read-only
         options |= QFileDialog.ReadOnly
 
-        # Set the default directory path
-        default_dir = "/home/adamkoziol/Bioinformatics/poresippr_gui/"
-
         # Get the file name and directory from the file dialog
-        file_name, _ = QFileDialog.getOpenFileName(
+        self.file_name, _ = QFileDialog.getOpenFileName(
             self, caption="Select File",
-            dir=default_dir,
+            dir='test_files/',
             filter="CSV Files (*.csv)",  # Filter for CSV files
             options=options
         )
 
         # Check if a file was selected
-        if file_name:
+        if self.file_name:
             # Read the CSV file
-            df = read_csv_file(file_name)
+            df = read_csv_file(self.file_name)
 
             # Parse the DataFrame
             self.data_dict = parse_dataframe(df)
@@ -364,8 +377,12 @@ class MainWindow(QMainWindow):
 
         # If the left mouse button is pressed, move the window
         if event.buttons() == Qt.MouseButton.LeftButton:
-            self.move(
-                self.pos() + event.globalPosition().toPoint() - self.drag_pos)
+            # Calculate the difference between the current mouse position and
+            # the position where the drag started
+            diff = event.globalPosition().toPoint() - self.drag_pos
+            # Add the difference to the current position of the window
+            self.move(self.pos() + diff)
+            # Update the position where the drag started
             self.drag_pos = event.globalPosition().toPoint()
             event.accept()
 
@@ -535,15 +552,15 @@ class MainWindow(QMainWindow):
             self.time = QTime(0, 0, 0)
 
             # Disconnect the timeout signal from the lcd_number slot
-            try:
+            # Check the flag before disconnecting
+            if self.is_lcd_number_connected:
                 self.timer.timeout.disconnect(self.lcd_number)
-            except TypeError:
-                # Ignore the TypeError that occurs if the timeout signal is
-                # not connected to the lcd_number slot
-                pass
+                # Set the flag to False when the signal is disconnected
+                self.is_lcd_number_connected = False
 
             # Reconnect the timeout signal to the lcd_number slot
             self.timer.timeout.connect(self.lcd_number)
+            self.is_lcd_number_connected = True
 
             # Start the timer
             self.timer.start(1000)
@@ -562,7 +579,8 @@ class MainWindow(QMainWindow):
                 folder_path=folder_path,
                 output_folder=self.image_path,
                 csv_path=csv_path,
-                complete=complete
+                complete=complete,
+                file_name=self.file_name
             )
             self.worker.finished.connect(self.on_worker_finished)
             self.worker.start()

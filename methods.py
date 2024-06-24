@@ -6,12 +6,13 @@ Methods for the PoreSippr-GUI
 
 # Standard imports
 from collections import defaultdict
+import csv
 import glob
 import multiprocessing
 import os
 import re
 import shutil
-import time
+import subprocess
 
 # Third-party imports
 from bs4 import BeautifulSoup
@@ -241,53 +242,82 @@ def create_data_dict(df, csv_file):
         errors='coerce'
     )
 
-    # Extract the necessary information
+    # Serotype
     o_type = df[df['gene_name'].str.contains('O/')]
+
+    # Extract the O-type from the 'gene_name' column
+    df['O_type'] = df['gene_name'].str.extract(r'O/.*?(\d+)')
+
+    # Group the DataFrame by 'O_type' and sum 'number_of_reads_mapped'
+    grouped_o_type = df.groupby('O_type')[
+        'number_of_reads_mapped'].sum().reset_index()
+
+    # Filter the groups based on the sum of 'number_of_reads_mapped'
+    o_type_with_reads = grouped_o_type[
+        grouped_o_type['number_of_reads_mapped'] > 1]
+
+    #
     h_type = df[df['gene_name'].str.contains('H/')]
+
+    # Extract the H-type from the 'gene_name' column
+    df['H_type'] = df['gene_name'].str.extract(r'H/.*?(\d+)')
+
+    # Group the DataFrame by 'H_type' and sum 'number_of_reads_mapped'
+    grouped_h_type = df.groupby('H_type')[
+        'number_of_reads_mapped'].sum().reset_index()
+
+    # Filter the groups based on the sum of 'number_of_reads_mapped'
+    h_type_with_reads = grouped_h_type[
+        grouped_h_type['number_of_reads_mapped'] > 1]
+
+    # stx genes
+    stx1_genes = df[df['gene_name'].str.contains('Stx1')]
+    stx2_genes = df[df['gene_name'].str.contains('Stx2')]
+
+    # Group the DataFrame by 'gene_name' and sum 'number_of_reads_mapped'
+    grouped_stx1 = stx1_genes.groupby('gene_name')[
+        'number_of_reads_mapped'].sum().reset_index()
+    grouped_stx2 = stx2_genes.groupby('gene_name')[
+        'number_of_reads_mapped'].sum().reset_index()
+
+    # Filter the groups based on the sum of 'number_of_reads_mapped'
+    stx1_with_reads = grouped_stx1[grouped_stx1['number_of_reads_mapped'] > 1]
+    stx2_with_reads = grouped_stx2[grouped_stx2['number_of_reads_mapped'] > 1]
+
+    # Virulence genes
     eae = df[df['gene_name'].str.contains('eae')]
-    hlya = df[df['gene_name'].str.contains('hlyA')]
+    ehxa = df[df['gene_name'].str.contains('ehxA')]
     aggr = df[df['gene_name'].str.contains('aggR')]
     aaic = df[df['gene_name'].str.contains('aaiC')]
+    uida = df[df['gene_name'].str.contains('uidA')]
+
+    # Filter eae genes to only include those with at least two reads
+    eae_with_reads = eae[eae['number_of_reads_mapped'] > 1]
+
+    # Filter ehxA genes to only include those with at least two reads
+    ehxa_with_reads = ehxa[ehxa['number_of_reads_mapped'] > 1]
+
+    # Filter aggR genes to only include those with at least two reads
+    aggr_with_reads = aggr[aggr['number_of_reads_mapped'] > 1]
+
+    # Filter aaiC genes to only include those with at least two reads
+    aaic_with_reads = aaic[aaic['number_of_reads_mapped'] > 1]
+
+    # Filter uidA genes to only include those with at least two reads
+    uida_with_reads = uida[uida['number_of_reads_mapped'] > 1]
+
+    # GDCS genes
     gdcs_genes = df[~df['gene_name'].str.contains(
-        'O/|H/|Stx|eae|hlyA|aggR|aaiC'
+        'O/|H/|Stx|eae|ehxA|aggR|aaiC|uidA'
     )]
+
+    # Filter GDCS genes to only include those with at least two reads
     gdcs_genes_with_reads = \
-        gdcs_genes[gdcs_genes['number_of_reads_mapped'] > 0]
+        gdcs_genes[gdcs_genes['number_of_reads_mapped'] > 1]
     coverage = df[df['gene_name'] == 'mock_coverage']
 
     # Extract the barcode name from the CSV file name
     barcode_name = os.path.basename(csv_file).split('_')[0]
-
-    # Create a sorted list of all formatted stx genes returned
-    stx_genes = df[df['gene_name'].str.contains('Stx')].copy()
-    stx_genes['formatted_gene_name'] = \
-        stx_genes['gene_name'].apply(lambda x: x.split('_')[0])
-
-    # Calculate the threshold for the number of mapped reads
-    other_genes = df[~df['gene_name'].str.contains('Stx')]
-    threshold = other_genes['number_of_reads_mapped'].mean()
-
-    # Adjust the threshold to be 25% of the original threshold
-    threshold *= 0.15
-
-    # Filter the stx genes based on the threshold
-    stx_genes = stx_genes[stx_genes['number_of_reads_mapped'] >= threshold]
-
-    stx_genes_sorted = stx_genes.sort_values(
-        by='number_of_reads_mapped',
-        ascending=False
-    )
-
-    # Convert the list to a set and then back to a list to remove duplicates
-    stx_genes_list = list(
-        set(
-            stx_genes_sorted['formatted_gene_name'].tolist()
-        )
-    )
-
-    # Join the stx_genes_list into a sorted, comma-separated string
-    stx_genes_str = ', '.join(
-        sorted(stx_genes_list)) if stx_genes_list else '-'
 
     # Extract the coverage value
     coverage_value = coverage['number_of_reads_mapped'].values[
@@ -303,16 +333,45 @@ def create_data_dict(df, csv_file):
 
     # Create a dictionary with the extracted information
     data_dict = {
-        'Barcode': barcode_name,
-        'O-Type': o_type['gene_name'].values[0].split('/')[1].split('-')[
-            0] if not o_type.empty else '-',
-        'H-Type': h_type['gene_name'].values[0].split('/')[1].split('-')[
-            0] if not h_type.empty else '-',
-        'stx genes': stx_genes_str,  # Use the sorted, comma-separated string
-        'eae': eae['gene_name'].values[0] if not eae.empty else '-',
-        'hlyA': hlya['gene_name'].values[0] if not hlya.empty else '-',
-        'aggR': aggr['gene_name'].values[0] if not aggr.empty else '-',
-        'aaiC': aaic['gene_name'].values[0] if not aaic.empty else '-',
+        'Strain Name': barcode_name,
+        'O-Type':
+            f"{o_type['gene_name'].values[0].split('/')[1].split('-')[0]} "
+            f"({int(o_type_with_reads['number_of_reads_mapped'].sum())})"
+            if not o_type.empty and o_type_with_reads[
+                'number_of_reads_mapped'].sum() > 0 else '-',
+        'H-Type':
+            f"{h_type['gene_name'].values[0].split('/')[1].split('-')[0]} "
+            f"({int(h_type_with_reads['number_of_reads_mapped'].sum())})"
+            if not h_type.empty and h_type_with_reads[
+                'number_of_reads_mapped'].sum() > 0 else '-',
+        'stx1': int(
+            stx1_with_reads['number_of_reads_mapped'].sum()
+            ) if not stx1_genes.empty and stx1_with_reads[
+            'number_of_reads_mapped'].sum() > 0 else '-',
+        'stx2': int(
+            stx2_with_reads['number_of_reads_mapped'].sum()
+            ) if not stx2_genes.empty and stx2_with_reads[
+            'number_of_reads_mapped'].sum() > 0 else '-',
+        'eae': int(
+            eae_with_reads['number_of_reads_mapped'].sum()
+            ) if not eae.empty and eae_with_reads[
+            'number_of_reads_mapped'].sum() > 0 else '-',
+        'ehxA': int(
+            ehxa_with_reads['number_of_reads_mapped'].sum()
+            ) if not ehxa.empty and ehxa_with_reads[
+            'number_of_reads_mapped'].sum() > 0 else '-',
+        'aggR': int(
+            aggr_with_reads['number_of_reads_mapped'].sum()
+            ) if not aggr.empty and aggr_with_reads[
+            'number_of_reads_mapped'].sum() > 0 else '-',
+        'aaiC': int(
+            aaic_with_reads['number_of_reads_mapped'].sum()
+            ) if not aaic.empty and aaic_with_reads[
+            'number_of_reads_mapped'].sum() > 0 else '-',
+        'uidA': int(
+            uida_with_reads['number_of_reads_mapped'].sum()
+            ) if not uida.empty and uida_with_reads[
+            'number_of_reads_mapped'].sum() > 0 else '-',
         'GDCS': f"{len(gdcs_genes_with_reads)}/330",
         'Coverage': coverage_value  # Use the modified coverage value
     }
@@ -418,7 +477,7 @@ def remove_index_from_html(html_file_path):
         f.write(str(soup))
 
 
-def main(folder_path, output_folder, csv_path, complete):
+def main(folder_path, output_folder, csv_path, complete, config_file=None):
     """
     Main function to process all CSV files in a folder grouped by iteration.
 
@@ -427,8 +486,15 @@ def main(folder_path, output_folder, csv_path, complete):
     output_folder (str): The path to the output folder.
     csv_path (str): The path to the PoreSIPPR outputs.
     complete (multiprocessing.Value): A flag to indicate if the process should
-    be stopped.
+        be stopped.
+    config_file (str): The path to the configuration file. Default is None.
     """
+    # Read the config file and extract the barcode_values
+    with open(config_file, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            barcode_values = row['barcode_values'].split(',')
+
     # Delete the output_folder if it exists and recreate it
     if os.path.exists(output_folder):
         shutil.rmtree(output_folder)
@@ -440,92 +506,108 @@ def main(folder_path, output_folder, csv_path, complete):
         shutil.rmtree(processed_folder)
     os.makedirs(processed_folder, exist_ok=True)
 
-    # Get all CSV files in the csv_path
-    all_csv_files = glob.glob(os.path.join(csv_path, '*.csv'))
+    # Run PoreSippr using subprocess.Popen
+    worker_process = subprocess.Popen([
+        'python',
+        'poresippr_placeholder.py',
+        config_file
+    ])
 
-    # Group the CSV files by iteration
-    csv_files_by_iteration = defaultdict(list)
-    for csv_file in all_csv_files:
-        iteration_match = re.search(r'iteration(\d+)', csv_file)
-        if iteration_match:
-            iteration = int(iteration_match.group(1))
-            csv_files_by_iteration[iteration].append(csv_file)
-
-    # Sort the iterations
-    sorted_iterations = sorted(csv_files_by_iteration.keys())
-
-    # Initialize the current iteration and the all_data list
-    current_iteration = None
-    all_data = []
-
-    for iteration in sorted_iterations:
+    while True:
         # Check if the process should be stopped
         if complete.value:
+            worker_process.terminate()
             break
 
-        # Copy the CSV files for the current iteration to folder_path
-        for csv_file in csv_files_by_iteration[iteration]:
-            shutil.copy(csv_file, folder_path)
+        # Check if the worker process is still running
+        if worker_process.poll() is not None:
+            break
 
-        # Get the copied CSV files in folder_path
-        csv_files = glob.glob(os.path.join(
-            folder_path, f'*iteration{iteration}.csv')
-        )
+        # Get all CSV files in the csv_path
+        all_csv_files = glob.glob(os.path.join(csv_path, '*.csv'))
 
-        # Extract barcode from each CSV file name
-        csv_files_info = []
-        for csv_file in csv_files:
-            barcode_match = re.search(r'barcode(\d+)', csv_file)
-            if barcode_match:
-                csv_files_info.append(
-                    (
-                        csv_file, iteration,
-                        int(barcode_match.group(1))
-                    )
+        # Group the CSV files by iteration
+        csv_files_by_iteration = defaultdict(list)
+        for csv_file in all_csv_files:
+            iteration_match = re.search(r'iteration(\d+)', csv_file)
+            if iteration_match:
+                iteration = int(iteration_match.group(1))
+                csv_files_by_iteration[iteration].append(csv_file)
+
+        # Sort the iterations
+        sorted_iterations = sorted(csv_files_by_iteration.keys())
+
+        # Initialize the current iteration and the all_data list
+        current_iteration = None
+        all_data = []
+
+        for iteration in sorted_iterations:
+            # Check if the process should be stopped
+            if complete.value:
+                break
+
+            # Check if all barcodes are present in the CSV files for
+            # the iteration
+            csv_files_for_iteration = csv_files_by_iteration[iteration]
+            barcodes_for_iteration = [
+                re.search(r'barcode(\d+)', csv_file).group(1)
+                for csv_file in csv_files_for_iteration
+            ]
+            if not all(barcode in barcodes_for_iteration for barcode in
+                       barcode_values):
+                continue
+
+            # If the iteration has changed, clear all_data
+            if iteration != current_iteration:
+                all_data = []
+
+            for csv_file in sorted(csv_files_for_iteration):
+                # Check if the CSV file has already been processed
+                if os.path.exists(
+                        os.path.join(
+                            processed_folder,
+                            os.path.basename(csv_file))):
+                    continue
+
+                # Process the CSV file
+                df = parse_csv_file(csv_file)
+                data_dict = create_data_dict(df, csv_file)
+                all_data.append(data_dict)
+
+                # Create the output path
+                output_path = os.path.join(
+                    output_folder, f'iteration_{iteration}.html'
                 )
 
-        # Sort the CSV files by barcode
-        csv_files_info.sort(key=lambda x: x[2])
+                visualize_data(pd.DataFrame(all_data), output_path)
 
-        # If the iteration has changed, clear all_data
-        if iteration != current_iteration:
-            all_data = []
+                remove_index_from_html(output_path)
 
-        for csv_file, _, _ in csv_files_info:
-            df = parse_csv_file(csv_file)
-            data_dict = create_data_dict(df, csv_file)
-            all_data.append(data_dict)
+                # Move the processed CSV file to a different folder
+                shutil.move(csv_file, processed_folder)
 
-            # Create the output path
-            output_path = os.path.join(
-                output_folder, f'iteration_{iteration}.html'
-            )
-
-            visualize_data(pd.DataFrame(all_data), output_path)
-
-            remove_index_from_html(output_path)
-
-        # Update the current iteration
-        current_iteration = iteration
-
-        # Move the processed CSV files to a different folder
-        processed_folder = os.path.join(folder_path, 'processed')
-        os.makedirs(processed_folder, exist_ok=True)
-        for csv_file in csv_files:
-            shutil.move(csv_file, processed_folder)
-
-        # Wait for 10 seconds
-        time.sleep(5)
+            # Update the current iteration
+            current_iteration = iteration
 
 
 if __name__ == "__main__":
     # Create a shared value for the complete flag
     process_complete = multiprocessing.Value('b', False)
 
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+
+    # Construct the paths to the folders in the "test_files" directory
+    test_files_dir = os.path.join(script_dir, 'test_files')
+    local_csv_path = os.path.join(test_files_dir, 'poresippr_out')
+    local_folder_path = os.path.join(test_files_dir, 'output')
+    local_output_folder = os.path.join(test_files_dir, 'images')
+    local_config_file = os.path.join(test_files_dir, 'input.csv')
+
     main(
-        csv_path='/home/adamkoziol/Bioinformatics/'
-                 'poresippr_gui/poresippr_out/',
-        folder_path='/home/adamkoziol/Bioinformatics/poresippr_gui/output/',
-        output_folder='/home/adamkoziol/Bioinformatics/poresippr_gui/images',
-        complete=process_complete
+        csv_path=local_csv_path,
+        folder_path=local_folder_path,
+        output_folder=local_output_folder,
+        complete=process_complete,
+        config_file=local_config_file
     )
