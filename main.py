@@ -571,7 +571,7 @@ class MainWindow(QMainWindow):
 
             # Create variables for the folder path, output folder, and csv path
             folder_path = os.path.join(self.base_path, 'output')
-            csv_path = os.path.join(self.base_path, 'poresippr_out')
+            csv_path = os.path.join(self.data_dict['output_dir'])
 
             # Create a Worker instance and connect its finished signal to a
             # slot method
