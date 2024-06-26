@@ -314,7 +314,7 @@ def create_data_dict(df, csv_file):
     # Filter GDCS genes to only include those with at least two reads
     gdcs_genes_with_reads = \
         gdcs_genes[gdcs_genes['number_of_reads_mapped'] > 1]
-    coverage = df[df['gene_name'] == 'mock_coverage']
+    coverage = df[df['gene_name'] == 'genome_coverage']
 
     # Extract the barcode name from the CSV file name
     barcode_name = os.path.basename(csv_file).split('_')[0]
