@@ -5,6 +5,7 @@ Methods for the PoreSippr-GUI
 """
 
 # Standard imports
+import argparse
 from collections import defaultdict
 import csv
 import glob
@@ -127,7 +128,7 @@ def validate_or_create_directory(directory_path, header):
             os.makedirs(directory_path)
         except Exception as exc:
             return (
-                f"Could not create {header} directory at {directory_path}. " 
+                f"Could not create {header} directory at {directory_path}. "
                 f"Error: {str(exc)}"
             )
     return None
@@ -223,7 +224,6 @@ def parse_csv_file(csv_file):
     df = pd.read_csv(csv_file)
     return df
 
-
 def create_data_dict(df, csv_file):
     """
     Create a dictionary of data from a DataFrame.
@@ -236,12 +236,12 @@ def create_data_dict(df, csv_file):
     dict: A dictionary where the keys are the column headers and the values
     are the values in the first row.
     """
-    # Convert 'number_of_reads_mapped' to numeric
+   # Remove 'X' from 'number_of_reads_mapped' values and convert to numeric
     df['number_of_reads_mapped'] = pd.to_numeric(
-        df['number_of_reads_mapped'],
+        df['number_of_reads_mapped'].str.replace('X', ''),
         errors='coerce'
     )
-
+    
     # Serotype
     o_type = df[df['gene_name'].str.contains('O/')]
 
@@ -314,22 +314,19 @@ def create_data_dict(df, csv_file):
     # Filter GDCS genes to only include those with at least two reads
     gdcs_genes_with_reads = \
         gdcs_genes[gdcs_genes['number_of_reads_mapped'] > 1]
-    coverage = df[df['gene_name'] == 'genome_coverage']
-
+    
     # Extract the barcode name from the CSV file name
     barcode_name = os.path.basename(csv_file).split('_')[0]
 
+    # Find the genome coverage
+    coverage = df[df['gene_name'].str.contains('genome_coverage')]
+    
     # Extract the coverage value
     coverage_value = coverage['number_of_reads_mapped'].values[
         0] if not coverage.empty else '-'
 
-    # Check if the coverage value ends with 'X'
-    if isinstance(coverage_value, str) and coverage_value.endswith('X'):
-        # Remove the 'X' and convert the remaining part to a float
-        coverage_value = float(coverage_value.rstrip('X'))
-    elif isinstance(coverage_value, (int, float)):
-        # Convert the coverage value to a float
-        coverage_value = float(coverage_value)
+    # Convert the coverage value to a float and round to two decimal places
+    coverage_value = round(float(coverage_value), 2)
 
     # Create a dictionary with the extracted information
     data_dict = {
@@ -346,31 +343,31 @@ def create_data_dict(df, csv_file):
                 'number_of_reads_mapped'].sum() > 0 else '-',
         'stx1': int(
             stx1_with_reads['number_of_reads_mapped'].sum()
-            ) if not stx1_genes.empty and stx1_with_reads[
+        ) if not stx1_genes.empty and stx1_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'stx2': int(
             stx2_with_reads['number_of_reads_mapped'].sum()
-            ) if not stx2_genes.empty and stx2_with_reads[
+        ) if not stx2_genes.empty and stx2_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'eae': int(
             eae_with_reads['number_of_reads_mapped'].sum()
-            ) if not eae.empty and eae_with_reads[
+        ) if not eae.empty and eae_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'ehxA': int(
             ehxa_with_reads['number_of_reads_mapped'].sum()
-            ) if not ehxa.empty and ehxa_with_reads[
+        ) if not ehxa.empty and ehxa_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'aggR': int(
             aggr_with_reads['number_of_reads_mapped'].sum()
-            ) if not aggr.empty and aggr_with_reads[
+        ) if not aggr.empty and aggr_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'aaiC': int(
             aaic_with_reads['number_of_reads_mapped'].sum()
-            ) if not aaic.empty and aaic_with_reads[
+        ) if not aaic.empty and aaic_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'uidA': int(
             uida_with_reads['number_of_reads_mapped'].sum()
-            ) if not uida.empty and uida_with_reads[
+        ) if not uida.empty and uida_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'GDCS': f"{len(gdcs_genes_with_reads)}/330",
         'Coverage': coverage_value  # Use the modified coverage value
@@ -387,7 +384,6 @@ def visualize_data(all_data_df, output_path):
     all_data_df (pd.DataFrame): The DataFrame to visualize.
     output_path (str): The path to the output file.
     """
-
     def color_cells(val):
         """
         Apply color formatting to the cells in the DataFrame.
@@ -402,7 +398,7 @@ def visualize_data(all_data_df, output_path):
             # Grey color for "misses"
             background_color = '#D3D3D3'
             font_color = 'black'
-        elif isinstance(val, float) and val < 7.5:
+        elif isinstance(val, str) and val.replace('.', '', 1).isdigit() and float(val) < 7.5:
             background_color = '#D3D3D3'
             font_color = 'black'
         else:
@@ -410,13 +406,16 @@ def visualize_data(all_data_df, output_path):
             font_color = 'white'
         return f'background-color: {background_color}; color: {font_color}'
 
+    # Round the 'Coverage' column to two decimal places and convert to string
+    all_data_df['Coverage'] = all_data_df['Coverage'].round(2).astype(str)
+
     # Apply the color formatting to the DataFrame
     styled_df = all_data_df.style.map(color_cells)
 
     # Apply a different style to the 'Barcode' column
     styled_df = styled_df.apply(
         lambda x: ['background-color: white; color: black'
-                   if x.name == 'Barcode' else '' for _ in x], axis=0
+                if x.name == 'Barcode' else '' for _ in x], axis=0
     )
 
     # Define CSS
@@ -509,8 +508,8 @@ def main(folder_path, output_folder, csv_path, complete, config_file=None):
     # Run PoreSippr using subprocess.Popen
     worker_process = subprocess.Popen([
         'python',
-        'poresippr_placeholder.py',
-        config_file
+        '/home/olcbio/code_github/poresippr_code/poresippr_basecall_scheduler.py',
+        config_file,
     ])
 
     while True:
@@ -525,7 +524,7 @@ def main(folder_path, output_folder, csv_path, complete, config_file=None):
 
         # Get all CSV files in the csv_path
         all_csv_files = glob.glob(os.path.join(csv_path, '*.csv'))
-
+        
         # Group the CSV files by iteration
         csv_files_by_iteration = defaultdict(list)
         for csv_file in all_csv_files:
@@ -568,7 +567,7 @@ def main(folder_path, output_folder, csv_path, complete, config_file=None):
                             processed_folder,
                             os.path.basename(csv_file))):
                     continue
-
+                
                 # Process the CSV file
                 df = parse_csv_file(csv_file)
                 data_dict = create_data_dict(df, csv_file)
@@ -599,10 +598,27 @@ if __name__ == "__main__":
 
     # Construct the paths to the folders in the "test_files" directory
     test_files_dir = os.path.join(script_dir, 'test_files')
-    local_csv_path = os.path.join(test_files_dir, 'poresippr_out')
-    local_folder_path = os.path.join(test_files_dir, 'output')
-    local_output_folder = os.path.join(test_files_dir, 'images')
-    local_config_file = os.path.join(test_files_dir, 'input.csv')
+
+    # Create the parser and add arguments
+    parser = argparse.ArgumentParser(description='Run PoreSippr tests.')
+    parser.add_argument('mode', type=str, nargs='?', 
+                        choices=['prod', 'test'], default='prod',
+                        help='an optional argument to set the mode (default: prod)')
+
+    # Parse the command line arguments
+    args = parser.parse_args()
+
+    # Check if a specific command line argument is provided
+    if args.mode == 'test':
+        local_csv_path = os.path.join(test_files_dir, 'poresippr_out')
+        local_folder_path = os.path.join(test_files_dir, 'output')
+        local_output_folder = os.path.join(test_files_dir, 'images')
+        local_config_file = os.path.join(test_files_dir, 'input.csv')
+    else:
+        local_csv_path = '/home/olcbio/Downloads/240125_MC26299/test_out'
+        local_folder_path = '/home/olcbio/Downloads/240125_MC26299/output'
+        local_output_folder = '/home/olcbio/Downloads/240125_MC26299/images'
+        local_config_file = '/home/olcbio/PoreSippR-GUI/input.csv'
 
     main(
         csv_path=local_csv_path,
