@@ -73,10 +73,12 @@ def copy_csv_files(output_dir, parent_folder):
     sorted_iterations = sorted(csv_files_by_iteration.keys())
 
     for iteration in sorted_iterations:
-        print(f"Iteration: {iteration}.")
-        print(f"CSV files grouped by iteration: {
-            sorted(csv_files_by_iteration[iteration])
-        }")
+        print(
+            f"Iteration: {iteration}.")
+        print(
+            f"CSV files grouped by iteration: "
+            f"{sorted(csv_files_by_iteration[iteration])}"
+        )
         # Copy the CSV files for the current iteration to output_dir
         for csv_file in sorted(csv_files_by_iteration[iteration]):
             try:
