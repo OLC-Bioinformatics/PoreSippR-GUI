@@ -283,7 +283,7 @@ class MainWindow(QMainWindow):
         # Get the file name and directory from the file dialog
         self.file_name, _ = QFileDialog.getOpenFileName(
             self, caption="Select File",
-            dir='test_files/',
+            dir='.',
             filter="CSV Files (*.csv)",  # Filter for CSV files
             options=options
         )

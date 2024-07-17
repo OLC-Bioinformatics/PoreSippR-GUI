@@ -4,6 +4,9 @@
 # Caches
 __pychache__/
 
+# Idea
+.idea/
+
 # Temporary test files
 test_files/images/
 test_files/output/
