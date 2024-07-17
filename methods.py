@@ -13,6 +13,7 @@ import os
 import re
 import shutil
 import subprocess
+from time import sleep
 
 # Third-party imports
 from bs4 import BeautifulSoup
@@ -477,7 +478,13 @@ def remove_index_from_html(html_file_path):
         f.write(str(soup))
 
 
-def main(folder_path, output_folder, csv_path, complete, config_file=None):
+def main(
+            folder_path,
+            output_folder,
+            csv_path,
+            complete,
+            config_file=None,
+            sleep_time=20):
     """
     Main function to process all CSV files in a folder grouped by iteration.
 
@@ -488,6 +495,7 @@ def main(folder_path, output_folder, csv_path, complete, config_file=None):
     complete (multiprocessing.Value): A flag to indicate if the process should
         be stopped.
     config_file (str): The path to the configuration file. Default is None.
+    sleep_time (int): The time to sleep between iterations. Default is 20.
     """
     # Read the config file and extract the barcode_values
     with open(config_file, 'r') as f:
@@ -510,10 +518,16 @@ def main(folder_path, output_folder, csv_path, complete, config_file=None):
     worker_process = subprocess.Popen([
         'python',
         'poresippr_placeholder.py',
-        config_file
+        config_file,
+        '--sleep_time',
+        '600'
     ])
 
     while True:
+
+        # Sleep for 1 second to allow the worker process to run
+        sleep(1)
+
         # Check if the process should be stopped
         if complete.value:
             worker_process.terminate()
@@ -609,5 +623,6 @@ if __name__ == "__main__":
         folder_path=local_folder_path,
         output_folder=local_output_folder,
         complete=process_complete,
-        config_file=local_config_file
+        config_file=local_config_file,
+        sleep_time=600
     )

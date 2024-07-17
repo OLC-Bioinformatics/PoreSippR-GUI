@@ -46,14 +46,14 @@ def process_config_file(config_file):
     return output_dir, parent_folder
 
 
-def copy_csv_files(output_dir, parent_folder):
+def copy_csv_files(output_dir, parent_folder, sleep_time=20):
     """
     Copy CSV files from the csv_holding folder to the output_dir. This function
     groups the CSV files by iteration and sorts the iterations before copying
-    the CSV files.
+    the CSV files. Includes a countdown during sleep for better UX.
     :param output_dir: The output directory where the CSV files will be copied
     :param parent_folder: The parent folder of the output_dir
-    :return:
+    :param sleep_time: The time to sleep between iterations. Default is 20
     """
     # Construct the csv_path
     csv_path = os.path.join(parent_folder, 'csv_holding')
@@ -73,12 +73,9 @@ def copy_csv_files(output_dir, parent_folder):
     sorted_iterations = sorted(csv_files_by_iteration.keys())
 
     for iteration in sorted_iterations:
-        print(
-            f"Iteration: {iteration}.")
-        print(
-            f"CSV files grouped by iteration: "
-            f"{sorted(csv_files_by_iteration[iteration])}"
-        )
+        print(f"Iteration: {iteration}.")
+        print(f"CSV files grouped by iteration: "
+              f"{sorted(csv_files_by_iteration[iteration])}")
         # Copy the CSV files for the current iteration to output_dir
         for csv_file in sorted(csv_files_by_iteration[iteration]):
             try:
@@ -86,8 +83,13 @@ def copy_csv_files(output_dir, parent_folder):
             except shutil.Error:
                 pass
 
-        # Sleep for 20 seconds
-        time.sleep(20)
+        # Implement countdown for sleep_time
+        for remaining in range(sleep_time, 0, -1):
+            print(f"Sleeping for {remaining} seconds...", end="\r")
+            time.sleep(1)
+
+        # Clear line after countdown
+        print("Sleep complete. Continuing...       ")
 
 
 # Create a shared value for the complete flag
@@ -115,6 +117,12 @@ if __name__ == "__main__":
         type=str,
         help='Path to the CSV config file'
     )
+    parser.add_argument(
+        '--sleep_time',
+        type=int,
+        default=20,
+        help='Time to sleep between iterations in seconds'
+    )
 
     args = parser.parse_args()
 
@@ -122,10 +130,11 @@ if __name__ == "__main__":
 
     out_dir, parent_dir = process_config_file(args.config_file)
 
-    # Create a subprocess for the copy_csv_files function
+    # Create a subprocess for the copy_csv_files function, including
+    # sleep_time in the arguments
     p = multiprocessing.Process(
         target=copy_csv_files,
-        args=(out_dir, parent_dir)
+        args=(out_dir, parent_dir, args.sleep_time)
     )
 
     # Register the signal handler for SIGINT (Ctrl+C) and SIGTERM
