@@ -225,6 +225,7 @@ def parse_csv_file(csv_file):
     df = pd.read_csv(csv_file)
     return df
 
+
 def create_data_dict(df, csv_file):
     """
     Create a dictionary of data from a DataFrame.
@@ -237,7 +238,7 @@ def create_data_dict(df, csv_file):
     dict: A dictionary where the keys are the column headers and the values
     are the values in the first row.
     """
-   # Remove 'X' from 'number_of_reads_mapped' values and convert to numeric
+    # Remove 'X' from 'number_of_reads_mapped' values and convert to numeric
     df['number_of_reads_mapped'] = pd.to_numeric(
         df['number_of_reads_mapped'].str.replace('X', ''),
         errors='coerce'
@@ -324,7 +325,7 @@ def create_data_dict(df, csv_file):
     
     # Extract the coverage value
     coverage_value = coverage['number_of_reads_mapped'].values[
-        0] if not coverage.empty else '-'
+        0] if not coverage.empty else 0
 
     # Convert the coverage value to a float and round to two decimal places
     coverage_value = round(float(coverage_value), 2)
@@ -344,33 +345,33 @@ def create_data_dict(df, csv_file):
                 'number_of_reads_mapped'].sum() > 0 else '-',
         'stx1': int(
             stx1_with_reads['number_of_reads_mapped'].sum()
-        ) if not stx1_genes.empty and stx1_with_reads[
+            ) if not stx1_genes.empty and stx1_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'stx2': int(
             stx2_with_reads['number_of_reads_mapped'].sum()
-        ) if not stx2_genes.empty and stx2_with_reads[
+            ) if not stx2_genes.empty and stx2_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'eae': int(
             eae_with_reads['number_of_reads_mapped'].sum()
-        ) if not eae.empty and eae_with_reads[
+            ) if not eae.empty and eae_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
-        'ehxA': int(
+        'hylA': int(
             ehxa_with_reads['number_of_reads_mapped'].sum()
-        ) if not ehxa.empty and ehxa_with_reads[
+            ) if not ehxa.empty and ehxa_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'aggR': int(
             aggr_with_reads['number_of_reads_mapped'].sum()
-        ) if not aggr.empty and aggr_with_reads[
+            ) if not aggr.empty and aggr_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'aaiC': int(
             aaic_with_reads['number_of_reads_mapped'].sum()
-        ) if not aaic.empty and aaic_with_reads[
+            ) if not aaic.empty and aaic_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
         'uidA': int(
             uida_with_reads['number_of_reads_mapped'].sum()
-        ) if not uida.empty and uida_with_reads[
+            ) if not uida.empty and uida_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
-        'GDCS': f"{len(gdcs_genes_with_reads)}/330",
+        'GDCS': f"{len(gdcs_genes_with_reads)}/324",
         'Coverage': coverage_value  # Use the modified coverage value
     }
 
@@ -379,12 +380,10 @@ def create_data_dict(df, csv_file):
 
 def visualize_data(all_data_df, output_path):
     """
-    Visualize the data in a DataFrame as a table and save it to a file.
-
-    Parameters:
-    all_data_df (pd.DataFrame): The DataFrame to visualize.
-    output_path (str): The path to the output file.
+    Visualize the data in a DataFrame as a table and save it to a file with inline CSS for QTextBrowser compatibility,
+    including conditional formatting for each cell.
     """
+
     def color_cells(val):
         """
         Apply color formatting to the cells in the DataFrame.
@@ -392,63 +391,77 @@ def visualize_data(all_data_df, output_path):
         :return: The CSS style string.
         """
         if pd.isnull(val) or val == '-':
-            background_color = 'white'
-            font_color = 'black'
-        elif isinstance(val, str) and '/' in val and \
-                int(val.split('/')[0]) < 320:
-            # Grey color for "misses"
-            background_color = '#D3D3D3'
-            font_color = 'black'
-        elif isinstance(val, str) and val.replace('.', '', 1).isdigit() and float(val) < 7.5:
-            background_color = '#D3D3D3'
-            font_color = 'black'
+            return 'background-color: white; color: black;'
+        elif isinstance(val, str) and '/' in val and int(
+                val.split('/')[0]) < 320:
+            return 'background-color: #D3D3D3; color: black;'
+        elif (isinstance(val, str) and val.replace('.', '',
+                                                   1).isdigit() and float(
+                val) < 7.5) or (isinstance(val, float) and val < 7.5):
+            return 'background-color: #D3D3D3; color: black;'
         else:
-            background_color = 'blue'
-            font_color = 'white'
-        return f'background-color: {background_color}; color: {font_color}'
+            return 'background-color: blue; color: white;'
 
-    # Round the 'Coverage' column to two decimal places and convert to string
-    all_data_df['Coverage'] = all_data_df['Coverage'].round(2).astype(str)
-
-    # Apply the color formatting to the DataFrame
-    styled_df = all_data_df.style.map(color_cells)
-
-    # Apply a different style to the 'Barcode' column
-    styled_df = styled_df.apply(
-        lambda x: ['background-color: white; color: black'
-                if x.name == 'Barcode' else '' for _ in x], axis=0
-    )
-
-    # Define CSS
-    css = """
+    # Define the start of the HTML file with styles including hover effects
+    html_str = """
+    <html>
+    <head>
     <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            font-family: Arial, sans-serif;
-            font-size: 40px;  /* Add this line to set the font size */
-        }
-        th {
-            background-color: #D3D3D3;
-            color: white;
-            text-align: left;
-            padding: 8px;
-        }
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;  /* Center the text in the cells */
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+    /* Global styles */
+    table {
+        border-collapse: separate;
+        width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 1rem;
+        border-spacing: 0;
+        margin-bottom: 1rem;
+        color: #212529;
+    }
+    th, td {
+        padding: 0.5rem;
+        border-top: 1px solid #dee2e6;
+        text-align: left;
+        vertical-align: bottom;
+    }
+    th {
+        border-bottom: 2px solid #dee2e6;
+        background-color: #e9ecef;
+        color: #495057;
+    }
+    /* Hover effect for table rows */
+    tr:hover {
+        background-color: #f5f5f5;
+    }
     </style>
+    </head>
+    <body>
+    <table>
     """
-    # Save the styled DataFrame to an HTML file
-    with open(output_path, 'w') as f:
-        f.write(css)
-        f.write(styled_df.to_html())
 
+    # Add headers with inline styles, starting with a non-breaking space in the first header for better rendering
+    html_str += "<thead><tr><th style='padding: 0.5rem; border-top: 1px solid #dee2e6; text-align: left; vertical-align: bottom; border-bottom: 2px solid #dee2e6; background-color: #e9ecef; color: #495057;'>&nbsp;</th>"
+    for header in all_data_df.columns:
+        html_str += f"<th style='padding: 0.5rem; border-top: 1px solid #dee2e6; text-align: left; vertical-align: bottom; border-bottom: 2px solid #dee2e6; background-color: #e9ecef; color: #495057;'>{header}</th>"
+    html_str += "</tr></thead>"
+
+    # Add body with conditional formatting for each cell, including specific styling for 'Strain Name' column
+    html_str += "<tbody>"
+    for index, row in all_data_df.iterrows():
+        html_str += "<tr>"
+        for col in all_data_df.columns:
+            cell_value = row[col]
+            # Check if the current column is 'Strain Name' and apply specific styling
+            if col == 'Strain Name':
+                style = 'background-color: white; color: black;'
+            else:
+                style = color_cells(cell_value)
+            html_str += f'<td style="{style} padding: 0.5rem; border-top: 1px solid #dee2e6; text-align: left;">{cell_value}</td>'
+        html_str += "</tr>"
+    html_str += "</tbody></table></body></html>"
+
+    # Save the constructed HTML to the specified output file
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html_str)
 
 def remove_index_from_html(html_file_path):
     """
@@ -522,7 +535,7 @@ def main(
             'poresippr_placeholder.py',
             config_file,
             '--sleep_time',
-            '600'
+            str(sleep_time)
         ])
     else:
         worker_process = subprocess.Popen([
@@ -572,11 +585,12 @@ def main(
             # the iteration
             csv_files_for_iteration = csv_files_by_iteration[iteration]
             barcodes_for_iteration = [
-                re.search(r'barcode(\d+)', csv_file).group(1)
+                re.search(r'iteration(\d+)', csv_file).group(1)
                 for csv_file in csv_files_for_iteration
             ]
-            if not all(barcode in barcodes_for_iteration for barcode in
-                       barcode_values):
+
+            # Skip the iteration if not all barcodes are present
+            if len(barcodes_for_iteration) < len(barcode_values):
                 continue
 
             # If the iteration has changed, clear all_data
@@ -624,9 +638,10 @@ if __name__ == "__main__":
 
     # Create the parser and add arguments
     parser = argparse.ArgumentParser(description='Run PoreSippr tests.')
-    parser.add_argument('mode', type=str, nargs='?', 
-                        choices=['prod', 'test'], default='prod',
-                        help='an optional argument to set the mode (default: prod)')
+    parser.add_argument(
+        'mode', type=str, nargs='?',
+        choices=['prod', 'test'], default='prod',
+        help='an optional argument to set the mode (default: prod)')
 
     # Parse the command line arguments
     args = parser.parse_args()
@@ -650,5 +665,5 @@ if __name__ == "__main__":
         complete=process_complete,
         config_file=local_config_file,
         test=True,
-        sleep_time=600
+        sleep_time=20
     )
