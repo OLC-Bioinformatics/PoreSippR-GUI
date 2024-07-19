@@ -310,7 +310,7 @@ def create_data_dict(df, csv_file):
 
     # GDCS genes
     gdcs_genes = df[~df['gene_name'].str.contains(
-        'O/|H/|Stx|eae|ehxA|aggR|aaiC|uidA'
+        'O/|H/|Stx|eae|ehxA|aggR|aaiC'
     )]
 
     # Filter GDCS genes to only include those with at least two reads
@@ -371,7 +371,7 @@ def create_data_dict(df, csv_file):
             uida_with_reads['number_of_reads_mapped'].sum()
             ) if not uida.empty and uida_with_reads[
             'number_of_reads_mapped'].sum() > 0 else '-',
-        'GDCS': f"{len(gdcs_genes_with_reads)}/324",
+        'GDCS': f"{len(gdcs_genes_with_reads)}/325",
         'Coverage': coverage_value  # Use the modified coverage value
     }
 
@@ -380,10 +380,12 @@ def create_data_dict(df, csv_file):
 
 def visualize_data(all_data_df, output_path):
     """
-    Visualize the data in a DataFrame as a table and save it to a file with inline CSS for QTextBrowser compatibility,
-    including conditional formatting for each cell.
-    """
+    Visualize the data in a DataFrame as a table and save it to a file.
 
+    Parameters:
+    all_data_df (pd.DataFrame): The DataFrame to visualize.
+    output_path (str): The path to the output file.
+    """
     def color_cells(val):
         """
         Apply color formatting to the cells in the DataFrame.
@@ -391,77 +393,66 @@ def visualize_data(all_data_df, output_path):
         :return: The CSS style string.
         """
         if pd.isnull(val) or val == '-':
-            return 'background-color: white; color: black;'
-        elif isinstance(val, str) and '/' in val and int(
-                val.split('/')[0]) < 320:
-            return 'background-color: #D3D3D3; color: black;'
-        elif (isinstance(val, str) and val.replace('.', '',
-                                                   1).isdigit() and float(
-                val) < 7.5) or (isinstance(val, float) and val < 7.5):
-            return 'background-color: #D3D3D3; color: black;'
+            background_color = 'white'
+            font_color = 'black'
+        elif isinstance(val, str) and '/' in val and \
+                int(val.split('/')[0]) < 320:
+            # Grey color for "misses"
+            background_color = '#D3D3D3'
+            font_color = 'black'
+        elif isinstance(val, str) and val.replace(
+                '.', '', 1).isdigit() and float(val) < 7.5:
+            background_color = '#D3D3D3'
+            font_color = 'black'
         else:
-            return 'background-color: blue; color: white;'
+            background_color = 'blue'
+            font_color = 'white'
+        return f'background-color: {background_color}; color: {font_color}'
 
-    # Define the start of the HTML file with styles including hover effects
-    html_str = """
-    <html>
-    <head>
+    # Round the 'Coverage' column to two decimal places and convert to string
+    all_data_df['Coverage'] = all_data_df['Coverage'].round(2).astype(str)
+
+    # Apply the color formatting to the DataFrame
+    styled_df = all_data_df.style.map(color_cells)
+
+    # Apply a different style to the 'Barcode' column
+    styled_df = styled_df.apply(
+        lambda x: [
+            'background-color: white; color: black'
+            if x.name == 'Strain Name' else '' for _ in x
+        ], axis=0
+    )
+
+    # Define CSS
+    css = """
     <style>
-    /* Global styles */
-    table {
-        border-collapse: separate;
-        width: 100%;
-        font-family: Arial, sans-serif;
-        font-size: 1rem;
-        border-spacing: 0;
-        margin-bottom: 1rem;
-        color: #212529;
-    }
-    th, td {
-        padding: 0.5rem;
-        border-top: 1px solid #dee2e6;
-        text-align: left;
-        vertical-align: bottom;
-    }
-    th {
-        border-bottom: 2px solid #dee2e6;
-        background-color: #e9ecef;
-        color: #495057;
-    }
-    /* Hover effect for table rows */
-    tr:hover {
-        background-color: #f5f5f5;
-    }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            font-size: 40px;  /* Add this line to set the font size */
+        }
+        th {
+            background-color: #D3D3D3;
+            color: white;
+            text-align: left;
+            padding: 8px;
+        }
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;  /* Center the text in the cells */
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
     </style>
-    </head>
-    <body>
-    <table>
     """
-
-    # Add headers with inline styles, starting with a non-breaking space in the first header for better rendering
-    html_str += "<thead><tr><th style='padding: 0.5rem; border-top: 1px solid #dee2e6; text-align: left; vertical-align: bottom; border-bottom: 2px solid #dee2e6; background-color: #e9ecef; color: #495057;'>&nbsp;</th>"
-    for header in all_data_df.columns:
-        html_str += f"<th style='padding: 0.5rem; border-top: 1px solid #dee2e6; text-align: left; vertical-align: bottom; border-bottom: 2px solid #dee2e6; background-color: #e9ecef; color: #495057;'>{header}</th>"
-    html_str += "</tr></thead>"
-
-    # Add body with conditional formatting for each cell, including specific styling for 'Strain Name' column
-    html_str += "<tbody>"
-    for index, row in all_data_df.iterrows():
-        html_str += "<tr>"
-        for col in all_data_df.columns:
-            cell_value = row[col]
-            # Check if the current column is 'Strain Name' and apply specific styling
-            if col == 'Strain Name':
-                style = 'background-color: white; color: black;'
-            else:
-                style = color_cells(cell_value)
-            html_str += f'<td style="{style} padding: 0.5rem; border-top: 1px solid #dee2e6; text-align: left;">{cell_value}</td>'
-        html_str += "</tr>"
-    html_str += "</tbody></table></body></html>"
-
-    # Save the constructed HTML to the specified output file
+    # Save the styled DataFrame to an HTML file
     with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(html_str)
+        f.write(css)
+        f.write(styled_df.to_html())
+
 
 def remove_index_from_html(html_file_path):
     """
@@ -497,7 +488,8 @@ def main(
             complete,
             config_file=None,
             test=False,
-            sleep_time=20):
+            sleep_time=20,
+            pid_store=None):
     """
     Main function to process all CSV files in a folder grouped by iteration.
 
@@ -543,6 +535,10 @@ def main(
             'poresippr_basecall_scheduler.py',
             config_file,
         ])
+
+    # Store the PID in pid_store if it's provided
+    if pid_store is not None:
+        pid_store.append(worker_process.pid)
 
     while True:
 
