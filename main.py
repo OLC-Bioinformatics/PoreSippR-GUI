@@ -9,6 +9,7 @@ processed in real-time. The GUI is created using PySide6 and Qt Designer.
 from glob import glob
 import multiprocessing
 import os
+import re
 import signal
 import sys
 import time
@@ -32,12 +33,21 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QApplication,
+    QDialog,
     QFileDialog,
     QGraphicsDropShadowEffect,
+    QHBoxLayout,
+    QHeaderView,
+    QLineEdit,
     QMainWindow,
     QMessageBox,
+    QPushButton,
     QSizeGrip,
     QSizePolicy,
+    QSpacerItem,
+    QStyledItemDelegate,
+    QTableWidget,
+    QTableWidgetItem,
     QTextBrowser,
     QVBoxLayout,
     QWidget
@@ -45,6 +55,7 @@ from PySide6.QtWidgets import (
 
 # Local imports
 from methods import (
+    get_sorted_barcode_values,
     main,
     parse_dataframe,
     read_csv_file,
@@ -96,6 +107,98 @@ class Worker(QThread):
             self.finished.emit()
 
 
+class CustomTableWidget(QTableWidget):
+    """
+    A subclass of QTableWidget that supports pasting multiple cells from the
+    clipboard. It overrides the keyPressEvent to handle Ctrl+V (paste) action
+    and inserts the clipboard content into the table starting from the current
+    cell position.
+    """
+
+    def keyPressEvent(self, event):
+        """
+        Handles key press events. Specifically, it intercepts the Ctrl+V
+        (paste) action to paste clipboard content into the table.
+
+        Parameters:
+            event (QKeyEvent): The event that triggered the keyPressEvent.
+        """
+        # Check if the pressed key is Ctrl+V (paste)
+        if (event.key() == Qt.Key_V and
+                event.modifiers() & Qt.ControlModifier):
+            # Access the clipboard
+            clipboard = QApplication.clipboard()
+            text = clipboard.text()  # Get text from clipboard
+            rows = text.split('\n')  # Split text into rows
+
+            # Get the current cell's row and column
+            currentRow = self.currentRow()
+            currentColumn = self.currentColumn()
+
+            # Iterate over each row in the clipboard content
+            for r, row in enumerate(rows):
+                if row:  # Check if row is not empty
+                    columns = row.split('\t')  # Split row into columns
+                    # Iterate over each column in the row
+                    for c, column in enumerate(columns):
+                        # Calculate where to insert the cell
+                        row_index = currentRow + r
+                        col_index = currentColumn + c
+
+                        # Ensure the table has enough rows and columns
+                        if row_index >= self.rowCount():
+                            self.insertRow(row_index)
+                        if col_index >= self.columnCount():
+                            self.insertColumn(col_index)
+
+                        # Insert the clipboard item into the table
+                        self.setItem(
+                            row_index, col_index, QTableWidgetItem(column)
+                        )
+        else:
+            # Handle other key events normally
+            super().keyPressEvent(event)
+
+
+class LargeEditorDelegate(QStyledItemDelegate):
+    """
+    A custom delegate that modifies the editor's properties, such as height,
+    for a better user experience.
+
+    This delegate is particularly useful for ensuring that the QLineEdit editor
+    within a QTableWidget has sufficient height to display text properly,
+    especially for characters with descenders.
+
+    Attributes:
+        None
+    """
+
+    def createEditor(self, parent, option, index):
+        """
+        Overrides the default editor creation process to adjust the editor's
+        properties, such as height.
+
+        This method is called by the Qt framework when an item is edited. It
+        creates a QLineEdit editor by default and adjusts its minimum height to
+        ensure all characters are displayed correctly.
+
+        Parameters:
+            parent (QWidget): The parent widget for the editor.
+            option (QStyleOptionViewItem): Provides style options for the item.
+            index (QModelIndex): The index of the item in the model.
+
+        Returns:
+            QWidget: An editor widget with modified properties. Specifically,
+            a QLineEdit with adjusted height.
+        """
+        # Create the default line edit editor
+        editor = super().createEditor(parent, option, index)
+        if isinstance(editor, QLineEdit):
+            # Adjust the editor's height if necessary
+            editor.setMinimumHeight(35)  # Adjust this value as needed
+        return editor
+
+
 class MainWindow(QMainWindow):
     """
     Main window class for the PoreSippr GUI application.
@@ -143,16 +246,16 @@ class MainWindow(QMainWindow):
             screen = QApplication.primaryScreen()
 
         # Get the screen size
-        screen_size = screen.availableGeometry()
+        self.screen_size = screen.availableGeometry()
 
         # Calculate 75% of the screen dimensions
-        start_width = int(screen_size.width() * 0.45)
-        start_height = int(screen_size.height() * 0.60)
+        start_width = int(self.screen_size.width() * 0.45)
+        start_height = int(self.screen_size.height() * 0.60)
         start_size = QSize(start_width, start_height)
 
         # Calculate the center position
-        x = int((screen_size.width() - start_size.width()) / 2)
-        y = int((screen_size.height() - start_size.height()) / 2)
+        x = int((self.screen_size.width() - start_size.width()) / 2)
+        y = int((self.screen_size.height() - start_size.height()) / 2)
 
         # Set the window size and position
         self.setGeometry(x, y, start_size.width(), start_size.height())
@@ -217,6 +320,12 @@ class MainWindow(QMainWindow):
             self.select_file
         )
 
+        # Connect the 'open_dialog' method to the 'clicked' signal of the
+        # 'sequence_info_button'.
+        self.user_interface.sequence_info_button.clicked.connect(
+            self.open_dialog
+        )
+
         # Create a timer to show the elapsed time of the run
         self.timer = QTimer()
 
@@ -262,13 +371,19 @@ class MainWindow(QMainWindow):
         # Initialise the data dictionary
         self.data_dict = {}
 
+        # Initialise the list of barcode values
+        self.barcodes = []
+
+        # Initialise a list to store barcode: seqid: olnid information
+        self.sequence_info = []
+
         # Initialise the list of external process PIDs
         self.pid_store = []
 
         # Show the main window
         self.show()
 
-    def signal_handler(self, sig, frame):
+    def signal_handler(self, _, __):
         """
         Handles the SIGINT signal (keyboard interrupt) and prompts the user
         to confirm application termination.
@@ -355,6 +470,9 @@ class MainWindow(QMainWindow):
                 # Hide the error QLabel
                 self.user_interface.run_label_error.hide()
 
+            # Extract all the barcode values from the dictionary
+            self.barcodes = get_sorted_barcode_values(self.data_dict)
+
             # Extract the base path from the output directory
             self.base_path = os.path.dirname(self.data_dict['output_dir'])
 
@@ -364,6 +482,238 @@ class MainWindow(QMainWindow):
             # Enable the run button and make it checkable
             self.user_interface.run_button.setEnabled(True)
             self.user_interface.run_button.setCheckable(True)
+
+    def open_dialog(self):
+        """
+        Opens a dialog window with a QTableWidget for user data entry.
+
+        This method creates and displays a QDialog containing a QTableWidget.
+        The table is populated with predefined barcode values in the first
+        column, allowing the user to enter corresponding SEQID and OLNID values
+        in the subsequent columns. The dialog is modal, meaning it will block
+        input to the main window until it is closed.
+        """
+        # Check if barcodes are populated
+        if not self.barcodes:
+            QMessageBox.warning(
+                self, "No Barcodes",
+                "No barcode values are available to populate the table."
+            )
+            return
+
+        # Create a QDialog instance as a child of the main window
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Enter Data")
+
+        # Create a QVBoxLayout for the dialog's layout
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(10, 10, 10, 10)  # Adjust margins if needed
+        layout.setSpacing(5)  # Adjust spacing if needed
+
+        # Initialize the QTableWidget within the dialog
+        table = CustomTableWidget(dialog)
+        table.setColumnCount(3)
+
+        # Define the headers for the table columns
+        table.setHorizontalHeaderLabels(["Barcode", "SEQID", "OLNID"])
+        table.setRowCount(len(self.barcodes))
+
+        # Apply the custom delegate to the SEQID and OLNID columns
+        delegate = LargeEditorDelegate(table)
+        table.setItemDelegateForColumn(1, delegate)
+        table.setItemDelegateForColumn(2, delegate)
+
+        # Populate the first column of the table with barcode values
+        for i, barcode in enumerate(self.barcodes):
+            table.setItem(i, 0, QTableWidgetItem(barcode))
+
+            #  SEQID column as empty
+            table.setItem(i, 1, QTableWidgetItem(""))
+
+            # OLNID column as empty
+            table.setItem(i, 2, QTableWidgetItem(""))
+
+        # Set initial widths for SEQID and OLNID columns
+        table.setColumnWidth(1, 150)
+        table.setColumnWidth(2, 150)
+
+        # After setting up the table and populating it with items
+        for i in range(table.rowCount()):
+            table.setRowHeight(
+                i, 30
+            )
+
+        table.setStyleSheet("""
+            QTableWidget {
+                border: 1px solid #ddd;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                color: #333;
+            }
+            QTableWidget::item {
+                border: 1px solid #ddd;
+                padding: 8px;
+                selection-background-color: #f5f5f5;
+            }
+            QTableWidget::item:selected {
+                background-color: #0275d8;
+                color: white;
+            }
+            QHeaderView::section {
+                background-color: #f7f7f7;
+                padding: 8px;
+                border: 1px solid #ddd;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QTableWidget::item:hover {
+                background-color: #f9f9f9;
+            }
+        """)
+
+        # Set the size policy of the table to Expanding
+        table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        # Add the table to the dialog's layout
+        layout.addWidget(table, 1)
+        table.resizeColumnsToContents()
+
+        # Create the "Validate" button
+        validate_button = QPushButton("Validate", dialog)
+
+        def validate_and_close():
+            """
+            Validates SEQID entries and closes the dialog if
+            validation is successful, showing a success message.
+            """
+            if self.validate_seqid_entries(table):
+                # Show a success message
+                QMessageBox.information(
+                    dialog, "Validation Successful",
+                    "All entries are valid."
+                )
+                # Close the dialog
+                dialog.accept()
+
+        validate_button.clicked.connect(validate_and_close)
+
+        validate_button.setStyleSheet("""
+            QPushButton {
+                border: 2px solid rgb(34, 139, 34); /* Green border */
+                border-radius: 5px;
+                background-color: rgb(34, 139, 34); /* Green background */
+                font-weight: bold; /* Bold font */
+                text-align: center; /* Centered text */
+                color: white; /* White text color */
+            }
+            QPushButton:hover {
+                background-color: rgb(50, 205, 50);
+                border: 2px solid rgb(34, 139, 34);
+            }
+            QPushButton:pressed {
+                background-color: rgb(0, 100, 0);
+                border: 2px solid rgb(34, 139, 34);
+            }
+        """)
+
+        # Create a QHBoxLayout for the button
+        button_layout = QHBoxLayout()
+
+        # Add a spacer to the left side
+        button_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+
+        # Add the validate button to the layout
+        button_layout.addWidget(validate_button)
+
+        # Add a spacer to the right side
+        button_layout.addItem(
+            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+
+        # Add the button layout to the main dialog layout
+        layout.addLayout(button_layout)
+
+        # Adjust the minimum size of the dialog
+        dialog.setMinimumSize(
+            int(self.screen_size.width() * 0.3),
+            int(self.screen_size.height() * 0.45)
+        )
+
+        # Display the dialog and block input to the main window until closed
+        dialog.exec()
+
+    def validate_seqid_entries(self, table):
+        """
+        Validates SEQID entries in the QTableWidget.
+
+        Ensures each SEQID entry matches the specified format and is unique.
+        The format is defined as four digits, followed by '-MIN-', and ending
+        with four digits. Displays a message box if any entry is invalid or
+        not unique, including if the SEQID is empty.
+
+        Parameters:
+            table (QTableWidget): The table containing SEQID entries.
+
+        Returns:
+            bool: True if all entries are valid and unique, False otherwise.
+        """
+
+        # Compile regex pattern for SEQID validation
+        seqid_pattern = re.compile(r"^\d{4}-MIN-\d{4}$")
+
+        # Initialize a dictionary to track SEQIDs and associated barcodes
+        seqid_to_barcodes = {}
+
+        # List to store messages for invalid SEQIDs
+        invalid_messages = []
+
+        # Reset sequence_info to avoid duplicates
+        self.sequence_info = []
+
+        for row in range(table.rowCount()):
+            # Retrieve SEQID, barcode, and OLNID from the table
+            seqid = table.item(row, 1).text().rstrip()
+            barcode = table.item(row, 0).text().rstrip()
+            olnid = table.item(row, 2).text().rstrip()
+
+            # Check if SEQID is empty
+            if seqid == "":
+                invalid_messages.append(
+                    f"SEQID for barcode '{barcode}' is missing.")
+            elif not seqid_pattern.match(seqid):
+                # Add message for invalid SEQID format
+                invalid_messages.append(
+                    f"SEQID '{seqid}' for barcode '{barcode}' is invalid.")
+            else:
+                # Handle non-unique SEQIDs
+                if seqid in seqid_to_barcodes:
+                    seqid_to_barcodes[seqid].append(barcode)
+                else:
+                    seqid_to_barcodes[seqid] = [barcode]
+                    self.sequence_info.append(
+                        {'barcode': barcode, 'SEQID': seqid, 'OLNID': olnid})
+
+        # Generate messages for non-unique SEQIDs
+        for seqid, barcodes in seqid_to_barcodes.items():
+            if len(barcodes) > 1:
+                invalid_messages.append(
+                    f"SEQID '{seqid}' is not unique, found in barcodes: "
+                    f"{', '.join(barcodes)}.")
+
+        # Display warning message if there are invalid SEQIDs
+        if invalid_messages:
+            QMessageBox.warning(
+                self, "Invalid SEQID(s)",
+                "The following SEQID(s) are invalid, not unique, or missing. "
+                "Please correct them:\n" +
+                "\n".join(invalid_messages) +
+                "\n\nRequired format for SEQID: ####-MIN-#### "
+                "(where # is a digit)."
+            )
+            return False
+        return True
 
     def update_button_states(self) -> list:
         """

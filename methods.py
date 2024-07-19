@@ -95,6 +95,39 @@ def validate_headers(data_dict):
     return None
 
 
+def get_sorted_barcode_values(data_dict):
+    """
+    Extracts and sorts the barcode values from the provided data dictionary,
+    maintaining their original string format with leading zeros.
+
+    Parameters:
+    data_dict (dict): The dictionary containing the key 'barcode_values' with
+        a string of comma-separated values or a single value.
+
+    Returns:
+    list: A sorted list of barcode values, maintaining their original string
+        format with leading zeros.
+    """
+    # Extract the barcode values string from the data dictionary and ensure
+    # it's a string
+    barcode_values_str = str(data_dict.get('barcode_values', ''))
+
+    # Return an empty list if barcode_values_str is empty
+    if not barcode_values_str:
+        return []
+
+    # Split the string into a list based on commas
+    barcode_values_list = barcode_values_str.split(',')
+
+    # Sort the list of strings based on their integer value
+    sorted_barcode_values = sorted(barcode_values_list, key=lambda x: int(x))
+
+    # Format each element to ensure leading zeros are preserved
+    formatted_barcode_values = [x.zfill(2) for x in sorted_barcode_values]
+
+    return formatted_barcode_values
+
+
 def validate_file_exists(file_path, header):
     """
     This function checks if a file exists at the given path.

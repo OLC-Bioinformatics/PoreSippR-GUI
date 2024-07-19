@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'GUI_BASEWnWzqF.ui'
+## Form generated from reading UI file 'GUI_BASEfGcZjr.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QLCDNumber,
-    QLabel, QMainWindow, QPushButton, QSizePolicy,
-    QStackedWidget, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QHBoxLayout,
+    QLCDNumber, QLabel, QMainWindow, QPushButton,
+    QSizePolicy, QStackedWidget, QVBoxLayout, QWidget)
 import files_rc
 
 class Ui_MainWindow(object):
@@ -473,7 +473,7 @@ class Ui_MainWindow(object):
 "	background-color: rgb(85, 170, 255);\n"
 "}")
         icon = QIcon()
-        icon.addFile(u":/16x16/icons/16x16/cil-window-minimize.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/16x16/icons/16x16/cil-window-minimize.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.minimize_button.setIcon(icon)
 
         self.horizontalLayout_5.addWidget(self.minimize_button)
@@ -495,7 +495,7 @@ class Ui_MainWindow(object):
 "	background-color: rgb(85, 170, 255);\n"
 "}")
         icon1 = QIcon()
-        icon1.addFile(u":/16x16/icons/16x16/cil-window-maximize.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u":/16x16/icons/16x16/cil-window-maximize.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.maximize_restore_button.setIcon(icon1)
 
         self.horizontalLayout_5.addWidget(self.maximize_restore_button)
@@ -517,7 +517,7 @@ class Ui_MainWindow(object):
 "	background-color: rgb(85, 170, 255);\n"
 "}")
         icon2 = QIcon()
-        icon2.addFile(u":/16x16/icons/16x16/cil-x.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u":/16x16/icons/16x16/cil-x.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.close_button.setIcon(icon2)
 
         self.horizontalLayout_5.addWidget(self.close_button)
@@ -672,7 +672,18 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_20.addWidget(self.frame_div_content_10)
 
-        self.file_selection_button = QPushButton(self.run_page)
+        self.frame_3 = QFrame(self.run_page)
+        self.frame_3.setObjectName(u"frame_3")
+        self.frame_3.setEnabled(True)
+        self.frame_3.setMinimumSize(QSize(0, 50))
+        self.frame_3.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_3.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_13 = QHBoxLayout(self.frame_3)
+        self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
+        self.file_selection_button = QPushButton(self.frame_3)
+        self.buttonGroup = QButtonGroup(MainWindow)
+        self.buttonGroup.setObjectName(u"buttonGroup")
+        self.buttonGroup.addButton(self.file_selection_button)
         self.file_selection_button.setObjectName(u"file_selection_button")
         self.file_selection_button.setStyleSheet(u"QPushButton {\n"
 "    border: 3px solid rgb(0, 0, 255); /* Blue border */\n"
@@ -701,11 +712,44 @@ class Ui_MainWindow(object):
         icon3 = QIcon(QIcon.fromTheme(u"system-search"))
         self.file_selection_button.setIcon(icon3)
 
-        self.verticalLayout_20.addWidget(self.file_selection_button, 0, Qt.AlignmentFlag.AlignRight)
+        self.horizontalLayout_13.addWidget(self.file_selection_button)
+
+        self.sequence_info_button = QPushButton(self.frame_3)
+        self.buttonGroup.addButton(self.sequence_info_button)
+        self.sequence_info_button.setObjectName(u"sequence_info_button")
+        self.sequence_info_button.setStyleSheet(u"QPushButton {\n"
+"    border: 3px solid rgb(0, 0, 255); /* Blue border */\n"
+"    border-radius: 5px;\n"
+"    background-color: rgb(0, 0, 255); /* Blue background */\n"
+"    color: rgb(255, 255, 255); /* White text */\n"
+"    padding: 5px; /* Padding around the text */\n"
+"    font-weight: bold; /* Bold font */\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: rgb(0, 0, 200); /* Darker blue when hovered */\n"
+"    border: 3px solid rgb(0, 0, 200); /* Darker blue border when hovered */\n"
+"    font-weight: bold; /* Bold font */\n"
+"}\n"
+"QPushButton:pressed {\n"
+"    background-color: rgb(0, 0, 150); /* Even darker blue when pressed */\n"
+"    border: 3px solid rgb(0, 0, 150); /* Even darker blue border when pressed */\n"
+"    font-weight: bold; /* Bold font */\n"
+"}\n"
+"QPushButton:disabled {\n"
+"    background-color: rgb(128, 128, 128); /* Grey background when disabled */\n"
+"    border: 3px solid rgb(128, 128, 128); /* Grey border when disabled */\n"
+"    color: rgb(255, 255, 255); /* White text when d"
+                        "isabled */\n"
+"}")
+
+        self.horizontalLayout_13.addWidget(self.sequence_info_button)
+
+
+        self.verticalLayout_20.addWidget(self.frame_3, 0, Qt.AlignmentFlag.AlignRight)
 
         self.frame_2 = QFrame(self.run_page)
         self.frame_2.setObjectName(u"frame_2")
-        self.frame_2.setMinimumSize(QSize(0, 50))
+        self.frame_2.setMinimumSize(QSize(0, 40))
         self.frame_2.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame_2.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout_12 = QHBoxLayout(self.frame_2)
@@ -746,7 +790,7 @@ class Ui_MainWindow(object):
 "    font-weight: bold; /* Bold font */\n"
 "}")
         icon4 = QIcon()
-        icon4.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon4.addFile(u":/16x16/icons/16x16/cil-lightbulb.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.run_button.setIcon(icon4)
         self.run_button.setCheckable(True)
 
@@ -782,7 +826,7 @@ class Ui_MainWindow(object):
 "    font-weight: bold; /* Bold font */\n"
 "}")
         icon5 = QIcon()
-        icon5.addFile(u":/16x16/icons/16x16/cil-ban.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon5.addFile(u":/16x16/icons/16x16/cil-ban.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.cancel_button.setIcon(icon5)
         self.cancel_button.setCheckable(True)
 
@@ -848,7 +892,7 @@ class Ui_MainWindow(object):
 "	color: rgb(128, 128, 128);  /* Add this line to change the text color */\n"
 "}")
         icon6 = QIcon()
-        icon6.addFile(u":/16x16/icons/16x16/cil-arrow-circle-right.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon6.addFile(u":/16x16/icons/16x16/cil-arrow-circle-right.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.right_button.setIcon(icon6)
 
         self.horizontalLayout_9.addWidget(self.right_button, 0, Qt.AlignmentFlag.AlignLeft)
@@ -878,7 +922,7 @@ class Ui_MainWindow(object):
 "	color: rgb(128, 128, 128);  /* Add this line to change the text color */\n"
 "}")
         icon7 = QIcon()
-        icon7.addFile(u":/16x16/icons/16x16/cil-arrow-circle-left.png", QSize(), QIcon.Normal, QIcon.Off)
+        icon7.addFile(u":/16x16/icons/16x16/cil-arrow-circle-left.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.left_button.setIcon(icon7)
 
         self.horizontalLayout_9.addWidget(self.left_button)
@@ -1037,6 +1081,7 @@ class Ui_MainWindow(object):
         self.label_top_info_1.setText(QCoreApplication.translate("MainWindow", u"Graphical User Interface for PoreSippr", None))
         self.run_label_error.setText("")
         self.file_selection_button.setText(QCoreApplication.translate("MainWindow", u" Browse for PoreSippr run configuration file", None))
+        self.sequence_info_button.setText(QCoreApplication.translate("MainWindow", u"Enter Sequence Information", None))
         self.run_button.setText(QCoreApplication.translate("MainWindow", u" Begin Run", None))
         self.cancel_button.setText(QCoreApplication.translate("MainWindow", u" Stop Processing", None))
         self.pageLabel.setText("")
