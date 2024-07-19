@@ -145,7 +145,7 @@ if __name__ == "__main__":
     p.start()
 
     # Wait for the subprocess to finish
-    while p.is_alive():
+    while not complete.value:
         try:
             p.join(timeout=1)
         except SystemExit:

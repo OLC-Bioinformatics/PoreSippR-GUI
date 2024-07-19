@@ -57,7 +57,7 @@ from ui_main import Ui_MainWindow
 
 class Worker(QThread):
     """
-    Worker thread class for running methods.main
+    Worker thread class for running the .main
     """
     finished = Signal()
 
@@ -65,13 +65,15 @@ class Worker(QThread):
     error = Signal(str)
 
     def __init__(
-            self, folder_path, output_folder, csv_path, complete, file_name):
+            self, folder_path, output_folder, csv_path, complete, file_name,
+            pid_store=None):
         super().__init__()
         self.folder_path = folder_path
         self.output_folder = output_folder
         self.csv_path = csv_path
         self.complete = complete
         self.file_name = file_name
+        self.pid_store = pid_store
 
     def run(self):
         """
@@ -83,7 +85,10 @@ class Worker(QThread):
                 output_folder=self.output_folder,
                 csv_path=self.csv_path,
                 complete=self.complete,
-                config_file=self.file_name
+                config_file=self.file_name,
+                test=True,
+                pid_store=self.pid_store
+
             )
         except Exception as exc:
             self.error.emit(str(exc))
@@ -105,6 +110,9 @@ class MainWindow(QMainWindow):
         # Call the parent class constructor
         QMainWindow.__init__(self)
         self.setWindowFlags(Qt.FramelessWindowHint)
+
+        # Setup the signal handler for SIGINT (Ctrl+C)
+        signal.signal(signal.SIGINT, self.signal_handler)
 
         # Create the user interface
         self.user_interface = Ui_MainWindow()
@@ -254,8 +262,39 @@ class MainWindow(QMainWindow):
         # Initialise the data dictionary
         self.data_dict = {}
 
+        # Initialise the list of external process PIDs
+        self.pid_store = []
+
         # Show the main window
         self.show()
+
+    def signal_handler(self, sig, frame):
+        """
+        Handles the SIGINT signal (keyboard interrupt) and prompts the user
+        to confirm application termination.
+        """
+        # Check if a run is in progress and prompt the user for confirmation
+        if self.user_interface.run_button.isChecked():
+            response = QMessageBox.question(
+                self, "Warning",
+                "A run is in progress. Are you sure you want to close the "
+                "application?",
+                QMessageBox.Yes | QMessageBox.Cancel
+            )
+            if response == QMessageBox.Yes:
+                self.complete = True
+                # Terminate the worker and any external processes
+                self.worker.terminate()
+                for pid in self.pid_store:
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+                sys.exit(0)  # Exit the application
+            else:
+                pass  # Do nothing, continue running
+        else:
+            sys.exit(0)  # Exit the application if no run is in progress
 
     def mousePressEvent(self, event):
         """
@@ -580,7 +619,8 @@ class MainWindow(QMainWindow):
                 output_folder=self.image_path,
                 csv_path=csv_path,
                 complete=complete,
-                file_name=self.file_name
+                file_name=self.file_name,
+                pid_store=self.pid_store
             )
             self.worker.finished.connect(self.on_worker_finished)
             self.worker.start()
@@ -705,6 +745,13 @@ class MainWindow(QMainWindow):
             # Terminate the worker thread
             self.worker.terminate()
 
+            # Terminate any external processes
+            for pid in self.pid_store:
+                try:
+                    os.kill(pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass  # Process might have already terminated
+
             # Update the number of pages
             self.update_button_states()
 
@@ -713,10 +760,11 @@ class MainWindow(QMainWindow):
 
             # If there are new images, add them to the GUI
             if len(images) > self.user_interface.progress_widget.count():
-                for image_path in \
-                        images[
-                        self.user_interface.progress_widget.count():]:
+                for image_path in images[
+                                  self.user_interface.progress_widget.count()
+                                  :]:
                     self.add_html_to_gui(image_path)
+
         # Check if the "Cancel" button was clicked
         elif response == QMessageBox.Cancel:
             # Create a new message box
@@ -770,6 +818,13 @@ class MainWindow(QMainWindow):
             if response == QMessageBox.Yes:
                 self.complete = True
                 self.worker.terminate()
+                # Additionally, terminate any external processes
+                for pid in self.pid_store:
+                    try:
+                        os.kill(pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass  # Process might have already terminated
+                event.accept()
             # If the user clicked 'Cancel', ignore the close event
             else:
                 event.ignore()
@@ -996,12 +1051,6 @@ class UIFunctions:
 
 if __name__ == "__main__":
     # Create a function to handle SIGINT
-    def sigint_handler(_, __):
-        """Handler for the SIGINT signal."""
-        QCoreApplication.quit()
-
-    # Register the signal handler
-    signal.signal(signal.SIGINT, sigint_handler)
 
     app = QApplication(sys.argv)
 
