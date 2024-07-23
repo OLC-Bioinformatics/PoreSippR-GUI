@@ -11,6 +11,12 @@
     <height>1088</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>1000</width>
@@ -1357,6 +1363,12 @@ QPushButton:pressed {
                    <layout class="QVBoxLayout" name="verticalLayout_20">
                     <item>
                      <widget class="QFrame" name="frame_div_content_10">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="minimumSize">
                        <size>
                         <width>0</width>
@@ -1383,6 +1395,12 @@ border-radius: 5px;
                       <layout class="QVBoxLayout" name="verticalLayout_6">
                        <item>
                         <widget class="QLCDNumber" name="lcd_display">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
                          <property name="styleSheet">
                           <string notr="true">QLCDNumber {
 	background-color: rgb(52, 59, 72)
@@ -1392,6 +1410,12 @@ border-radius: 5px;
                        </item>
                        <item>
                         <widget class="QLabel" name="run_label_error">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
                          <property name="palette">
                           <palette>
                            <active>
@@ -1603,7 +1627,7 @@ border-radius: 5px;
     background-color: transparent; /* Transparent background */
     border: 2px solid #FF6347; /* Tomato border */
     border-radius: 5px; /* Rounded corners */
-    padding: 5px; /* Some padding */
+    padding: 10px; /* Some padding */
     font-size: 16px; /* Increase font size */
 }</string>
                          </property>
@@ -1637,7 +1661,13 @@ border-radius: 5px;
                       </property>
                       <layout class="QHBoxLayout" name="horizontalLayout_13">
                        <item>
-                        <widget class="QPushButton" name="file_selection_button">
+                        <widget class="QPushButton" name="configuration_button">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>30</height>
+                          </size>
+                         </property>
                          <property name="styleSheet">
                           <string notr="true">QPushButton {
     border: 3px solid rgb(0, 0, 255); /* Blue border */
@@ -1664,10 +1694,7 @@ QPushButton:disabled {
 }</string>
                          </property>
                          <property name="text">
-                          <string> Browse for PoreSippr run configuration file</string>
-                         </property>
-                         <property name="icon">
-                          <iconset theme="system-search"/>
+                          <string>Configure PoreSippr Run</string>
                          </property>
                          <attribute name="buttonGroup">
                           <string notr="true">buttonGroup</string>
@@ -1676,6 +1703,12 @@ QPushButton:disabled {
                        </item>
                        <item>
                         <widget class="QPushButton" name="sequence_info_button">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>30</height>
+                          </size>
+                         </property>
                          <property name="styleSheet">
                           <string notr="true">QPushButton {
     border: 3px solid rgb(0, 0, 255); /* Blue border */

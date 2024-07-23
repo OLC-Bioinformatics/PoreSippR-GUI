@@ -14,9 +14,11 @@ import os
 import re
 import shutil
 import subprocess
+import threading
 from time import sleep
 
 # Third-party imports
+from Bio import SeqIO
 from bs4 import BeautifulSoup
 import pandas as pd
 
@@ -93,6 +95,26 @@ def validate_headers(data_dict):
             return f"Missing necessary headers: {', '.join(missing_headers)}"
 
     return None
+
+
+def is_valid_fasta(file_path):
+    """
+    This function checks if a file is a valid FASTA file.
+    :param file_path:
+    :return:
+    """
+    try:
+        # Attempt to parse the file as FASTA
+        records = list(SeqIO.parse(file_path, "fasta"))
+        # Check if there is at least one record
+        if len(records) > 0:
+            return True
+        else:
+            return False
+    except Exception as e:
+        # If parsing fails, the file is not a valid FASTA file
+        print(f"Error parsing file: {e}")
+        return False
 
 
 def get_sorted_barcode_values(data_dict):
@@ -259,13 +281,14 @@ def parse_csv_file(csv_file):
     return df
 
 
-def create_data_dict(df, csv_file):
+def create_data_dict(df, csv_file, metadata_dict):
     """
     Create a dictionary of data from a DataFrame.
 
     Parameters:
     df (pd.DataFrame): The DataFrame to parse.
     csv_file (str): The path to the CSV file.
+    metadata_dict (dict): A dictionary containing links for seqid:olnid:barcode
 
     Returns:
     dict: A dictionary where the keys are the column headers and the values
@@ -366,6 +389,7 @@ def create_data_dict(df, csv_file):
     # Create a dictionary with the extracted information
     data_dict = {
         'Strain Name': barcode_name,
+        'OLN ID': metadata_dict[barcode_name]['OLNID'],
         'O-Type':
             f"{o_type['gene_name'].values[0].split('/')[1].split('-')[0]} "
             f"({int(o_type_with_reads['number_of_reads_mapped'].sum())})"
@@ -514,12 +538,24 @@ def remove_index_from_html(html_file_path):
         f.write(str(soup))
 
 
+def handle_output(stream, capture_list):
+    """
+    Reads from a subprocess stream, line by line and prints to console.
+    """
+    for line in iter(stream.readline, ''):
+        # Remove trailing newline
+        line = line.rstrip()
+        print(line)
+        capture_list.append(line)
+
+
 def main(
             folder_path,
             output_folder,
             csv_path,
             complete,
             config_file=None,
+            metadata_file=None,
             test=False,
             sleep_time=20,
             pid_store=None):
@@ -542,6 +578,20 @@ def main(
         for row in reader:
             barcode_values = row['barcode_values'].split(',')
 
+    # Create a dictionary to store the links for seqid:olnid:barcode
+    link_dict = {}
+
+    # Read the metadata file, and extract the links for seqid:olnid:barcode
+    with open(metadata_file, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            # Populate link_dict with seqid as the key and a nested dictionary
+            # {olnid: barcode} as the value
+            link_dict[row['SEQID']] = {
+                "OLNID": row['OLNID'],
+                "Barcode": row['Barcode']
+            }
+
     # Delete the output_folder if it exists and recreate it
     if os.path.exists(output_folder):
         shutil.rmtree(output_folder)
@@ -553,21 +603,31 @@ def main(
         shutil.rmtree(processed_folder)
     os.makedirs(processed_folder, exist_ok=True)
 
-    # Run PoreSippr using subprocess.Popen
+    # Run PoreSippr using subprocess.Popen. Capture stdout and stderr
     if test:
-        worker_process = subprocess.Popen([
-            'python',
-            'poresippr_placeholder.py',
-            config_file,
-            '--sleep_time',
-            str(sleep_time)
-        ])
+        command = ['python', '-u', 'poresippr_placeholder.py', config_file,
+                   '--sleep_time', str(sleep_time)]
     else:
-        worker_process = subprocess.Popen([
-            'python',
-            'poresippr_basecall_scheduler.py',
-            config_file,
-        ])
+        command = ['python', '-u', 'poresippr_basecall_scheduler.py',
+                   config_file, metadata_file]
+
+    worker_process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE, text=True,
+                                      bufsize=1)
+
+    # Lists to capture stdout and stderr
+    stdout_capture = []
+    stderr_capture = []
+
+    # Create and start threads for handling stdout and stderr
+    stdout_thread = threading.Thread(
+        target=handle_output, args=(worker_process.stdout, stdout_capture)
+    )
+    stderr_thread = threading.Thread(
+        target=handle_output, args=(worker_process.stderr, stderr_capture)
+    )
+    stdout_thread.start()
+    stderr_thread.start()
 
     # Store the PID in pid_store if it's provided
     if pid_store is not None:
@@ -589,7 +649,7 @@ def main(
 
         # Get all CSV files in the csv_path
         all_csv_files = glob.glob(os.path.join(csv_path, '*.csv'))
-        
+
         # Group the CSV files by iteration
         csv_files_by_iteration = defaultdict(list)
         for csv_file in all_csv_files:
@@ -608,6 +668,7 @@ def main(
         for iteration in sorted_iterations:
             # Check if the process should be stopped
             if complete.value:
+                worker_process.terminate()
                 break
 
             # Check if all barcodes are present in the CSV files for
@@ -636,7 +697,11 @@ def main(
                 
                 # Process the CSV file
                 df = parse_csv_file(csv_file)
-                data_dict = create_data_dict(df, csv_file)
+                data_dict = create_data_dict(
+                    df=df,
+                    csv_file=csv_file,
+                    metadata_dict=link_dict
+                )
                 all_data.append(data_dict)
 
                 # Create the output path
@@ -653,6 +718,23 @@ def main(
 
             # Update the current iteration
             current_iteration = iteration
+
+            # Check if the worker process has completed
+            if worker_process.poll() is not None:
+                # Ensure all output is captured and printed by joining
+                # the threads
+                stdout_thread.join()
+                stderr_thread.join()
+
+                # Check if the subprocess exited with an error
+                if worker_process.returncode != 0:
+                    error_message = '\n'.join(
+                        stderr_capture
+                    ) if stderr_capture else 'An unknown error occurred'
+                    # Raise an exception with the error message
+                    raise RuntimeError(
+                        f"Subprocess failed with error: {error_message}")
+                break
 
 
 if __name__ == "__main__":
@@ -677,15 +759,28 @@ if __name__ == "__main__":
 
     # Check if a specific command line argument is provided
     if args.mode == 'test':
-        local_csv_path = os.path.join(test_files_dir, 'poresippr_out')
-        local_folder_path = os.path.join(test_files_dir, 'output')
-        local_output_folder = os.path.join(test_files_dir, 'images')
-        local_config_file = os.path.join(test_files_dir, 'input.csv')
+        # local_csv_path = os.path.join(test_files_dir, 'poresippr_out')
+        local_csv_path = \
+            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/' \
+            'MIN-20240515'
+        # local_folder_path = os.path.join(test_files_dir, 'output')
+        local_folder_path = \
+            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/output'
+        # local_output_folder = os.path.join(test_files_dir, 'images')
+        local_output_folder = \
+            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/images'
+        # local_config_file = os.path.join(test_files_dir, 'input.csv')
+        local_config_file = \
+            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/input.csv'
+        local_metadata_file = \
+            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/' \
+            'metadata.csv'
     else:
         local_csv_path = '/home/olcbio/Downloads/240125_MC26299/test_out'
         local_folder_path = '/home/olcbio/Downloads/240125_MC26299/output'
         local_output_folder = '/home/olcbio/Downloads/240125_MC26299/images'
         local_config_file = '/home/olcbio/PoreSippR-GUI/input.csv'
+        local_metadata_file = '/home/olcbio/PoreSippR-GUI/metadata.csv'
 
     main(
         csv_path=local_csv_path,
@@ -693,6 +788,7 @@ if __name__ == "__main__":
         output_folder=local_output_folder,
         complete=process_complete,
         config_file=local_config_file,
+        metadata_file=local_metadata_file,
         test=True,
         sleep_time=20
     )

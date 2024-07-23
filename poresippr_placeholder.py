@@ -41,6 +41,11 @@ def process_config_file(config_file):
         os.remove(csv_file)
 
     print(f"The output_dir is: {output_dir}")
+
+    # Make the output_dir if it doesn't exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     print(f"The parent folder of output_dir is: {parent_folder}")
 
     return output_dir, parent_folder

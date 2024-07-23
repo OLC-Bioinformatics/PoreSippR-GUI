@@ -6,6 +6,7 @@ PoreSippr, allowing users to start a run and view the summary as it is
 processed in real-time. The GUI is created using PySide6 and Qt Designer.
 """
 # Standard library imports
+import csv
 from glob import glob
 import multiprocessing
 import os
@@ -15,7 +16,6 @@ import sys
 import time
 
 # Third party imports
-from PySide6 import QtCore, QtGui
 from PySide6.QtCore import (
     QCoreApplication,
     QEvent,
@@ -29,16 +29,20 @@ from PySide6.QtCore import (
 )
 from PySide6.QtGui import (
     QColor,
+    QFontDatabase,
     QIcon,
 )
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
     QDialog,
     QFileDialog,
     QGraphicsDropShadowEffect,
     QHBoxLayout,
     QHeaderView,
+    QLabel,
     QLineEdit,
+    QListWidget,
     QMainWindow,
     QMessageBox,
     QPushButton,
@@ -55,12 +59,8 @@ from PySide6.QtWidgets import (
 
 # Local imports
 from methods import (
-    get_sorted_barcode_values,
+    is_valid_fasta,
     main,
-    parse_dataframe,
-    read_csv_file,
-    validate_data_dict,
-    validate_headers
 )
 
 from ui_main import Ui_MainWindow
@@ -76,32 +76,45 @@ class Worker(QThread):
     error = Signal(str)
 
     def __init__(
-            self, folder_path, output_folder, csv_path, complete, file_name,
-            pid_store=None):
+            self, folder_path, output_folder, csv_path, complete,
+            configuration_file, metadata_file, pid_store=None):
         super().__init__()
         self.folder_path = folder_path
         self.output_folder = output_folder
         self.csv_path = csv_path
         self.complete = complete
-        self.file_name = file_name
+        self.configuration_file = configuration_file
+        self.metadata_file = metadata_file
         self.pid_store = pid_store
+        self.error_message = str()
 
     def run(self):
         """
         Run the worker thread.
         """
         try:
+            print('folder_path', self.folder_path)
+            print('output_folder', self.output_folder)
+            print('csv_path', self.csv_path)
+            print('complete', self.complete)
+            print('configuration_file', self.configuration_file)
+            print('metadata_file', self.metadata_file)
+            print('pid_store', self.pid_store)
+
             main(
                 folder_path=self.folder_path,
                 output_folder=self.output_folder,
                 csv_path=self.csv_path,
                 complete=self.complete,
-                config_file=self.file_name,
+                config_file=self.configuration_file,
+                metadata_file=self.metadata_file,
                 test=True,
                 pid_store=self.pid_store
 
             )
+
         except Exception as exc:
+            self.error_message = str(exc)
             self.error.emit(str(exc))
         else:
             self.finished.emit()
@@ -168,9 +181,6 @@ class LargeEditorDelegate(QStyledItemDelegate):
     This delegate is particularly useful for ensuring that the QLineEdit editor
     within a QTableWidget has sufficient height to display text properly,
     especially for characters with descenders.
-
-    Attributes:
-        None
     """
 
     def createEditor(self, parent, option, index):
@@ -206,15 +216,14 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
 
-        # Set the base path and image path to None
-        self.base_path = None
+        # Set image path to None
         self.image_path = None
 
         # Call the parent class constructor
         QMainWindow.__init__(self)
         self.setWindowFlags(Qt.FramelessWindowHint)
 
-        # Setup the signal handler for SIGINT (Ctrl+C)
+        # Set up the signal handler for SIGINT (Ctrl+C)
         signal.signal(signal.SIGINT, self.signal_handler)
 
         # Create the user interface
@@ -314,10 +323,10 @@ class MainWindow(QMainWindow):
         # Disable the right button until images are added
         self.user_interface.right_button.setEnabled(False)
 
-        # Connect the 'select_file' method to the 'clicked' signal of the
-        # 'file_selection_button'.
-        self.user_interface.file_selection_button.clicked.connect(
-            self.select_file
+        # Connect the 'configure_run' method to the 'clicked' signal of the
+        # 'configuration_button'.
+        self.user_interface.configuration_button.clicked.connect(
+            self.configure_run
         )
 
         # Connect the 'open_dialog' method to the 'clicked' signal of the
@@ -325,6 +334,9 @@ class MainWindow(QMainWindow):
         self.user_interface.sequence_info_button.clicked.connect(
             self.open_dialog
         )
+
+        # Disable the sequence info button until a run is configured
+        self.user_interface.sequence_info_button.setEnabled(False)
 
         # Create a timer to show the elapsed time of the run
         self.timer = QTimer()
@@ -365,14 +377,32 @@ class MainWindow(QMainWindow):
         # Initialise the Worker instance
         self.worker = None
 
-        # Initialise the file name
-        self.file_name = None
+        # Initialise the reference file name/path
+        self.reference_file = None
 
-        # Initialise the data dictionary
-        self.data_dict = {}
+        # Initialise the parent directory of the reference file
+        self.working_dir = None
 
-        # Initialise the list of barcode values
-        self.barcodes = []
+        # Initialise the run name
+        self.run_name = None
+
+        # Initialise the barcode kit
+        self.barcode_kit = None
+
+        # Initialise the selected barcodes
+        self.selected_barcodes = []
+
+        # Initialise the fast5 directory
+        self.fast5_dir = None
+
+        # Initialise the CSV path
+        self.csv_path = None
+
+        # Initialise the configuration file
+        self.configuration_file = None
+
+        # Initialise the metadata CSV file
+        self.metadata_file = None
 
         # Initialise a list to store barcode: seqid: olnid information
         self.sequence_info = []
@@ -423,65 +453,280 @@ class MainWindow(QMainWindow):
             self.drag_pos = event.globalPosition().toPoint()
             event.accept()
 
-    def select_file(self):
+    def configure_run(self):
         """
-        Opens a file dialog to select a file.
-        :return:
+        Configures and displays a dialog for user input.
+
+        This method sets up a dialog with various widgets for user input,
+        including a file selection button, a text input field, a combo box
+        for selecting options, and a series of checkboxes. It also includes
+        a validation button that, when clicked, checks the inputs and closes
+        the dialog if everything is valid.
         """
-        # Set the options for the file dialog
-        options = QFileDialog.Options()
-
-        # Set the file dialog to read-only
-        options |= QFileDialog.ReadOnly
-
-        # Get the file name and directory from the file dialog
-        self.file_name, _ = QFileDialog.getOpenFileName(
-            self, caption="Select File",
-            dir='.',
-            filter="CSV Files (*.csv)",  # Filter for CSV files
-            options=options
+        # Initialize the dialog
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Enter PoreSippr Run Data")
+        dialog.setStyleSheet(
+            "QDialog { background-color: #f0f0f0; }"
+            "QPushButton { border: 1px solid #007bff; "
+            "border-radius: 4px; background-color: #007bff; "
+            "color: white; padding: 5px 10px; }"
+            "QLineEdit, QComboBox, QCheckBox { "
+            "border: 1px solid #ced4da; border-radius: 4px; "
+            "padding: 5px; }"
+            "QLabel { font-weight: bold; }"
         )
 
-        # Check if a file was selected
-        if self.file_name:
-            # Read the CSV file
-            df = read_csv_file(self.file_name)
+        # Set up the main layout
+        layout = QVBoxLayout(dialog)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
 
-            # Parse the DataFrame
-            self.data_dict = parse_dataframe(df)
+        # Reference file selection section
+        layout.addWidget(QLabel("Reference File"))
+        reference_button = QPushButton("Select Reference File", dialog)
+        reference_button.clicked.connect(
+            lambda: self.select_reference_file(dialog)
+        )
+        layout.addWidget(reference_button)
 
-            # Validate the headers
-            missing_headers = validate_headers(self.data_dict)
-            if missing_headers:
+        # Run name input section
+        layout.addWidget(QLabel("Run Name"))
+        run_name_input = QLineEdit(dialog)
 
-                # Update the QLabel text with the error message
-                self.user_interface.run_label_error.setText(missing_headers)
-                self.user_interface.run_label_error.show()  # Show the QLabel
-                return
+        # Set the placeholder text
+        run_name_input.setPlaceholderText("Enter run name e.g. MIN-YYYYMMDD")
 
-            # Validate the data
-            errors = validate_data_dict(self.data_dict)
-            if errors:
-                # Update the QLabel text with the error message
-                self.user_interface.run_label_error.setText(errors)
-                self.user_interface.run_label_error.show()  # Show the QLabel
-                return
+        layout.addWidget(run_name_input)
+
+        # Barcode kit selection section
+        layout.addWidget(QLabel("Barcode Kit"))
+        barcode_kit_input = QLineEdit(dialog)
+
+        # Set the placeholder text
+        barcode_kit_input.setPlaceholderText(
+            "Enter barcode kit e.g. SQK-RBK114-24")
+
+        layout.addWidget(barcode_kit_input)
+
+        # Enhanced barcode selection section with custom styling and tooltips
+        # Create the QLabel for "Barcodes" and set its tooltip
+        barcode_label = QLabel("Barcodes")
+        barcode_label.setToolTip("Select one or more barcodes")
+
+        # Add the QLabel to the layout
+        layout.addWidget(barcode_label)
+
+        # Continue with the QListWidget setup
+        barcode_list_widget = QListWidget(dialog)
+        barcode_list_widget.setSelectionMode(QAbstractItemView.MultiSelection)
+
+        barcode_list_widget.setStyleSheet("""
+            QListWidget {
+                border: 1px solid #007bff;
+                border-radius: 4px;
+                background-color: #f0f0f0;
+                color: #333;
+            }
+            QListWidget::item {
+                height: 15px; /* Increase item height */
+                padding: 5px; /* Add some padding for text */
+            }
+            QListWidget::item:selected {
+                background-color: #007bff;
+                color: white;
+            }
+        """)
+
+        # Add items to the list widget
+        for i in range(1, 25):
+            barcode_list_widget.addItem(f"{i:02}")
+
+        layout.addWidget(barcode_list_widget)
+
+        # Validate button section
+        validate_button = QPushButton("Validate", dialog)
+        validate_button.clicked.connect(
+            lambda: self.validate_and_close(
+                window_dialog=dialog,
+                run_name_input=run_name_input,
+                barcode_kit_input=barcode_kit_input,
+                barcode_list_widget=barcode_list_widget
+            )
+        )
+        layout.addWidget(validate_button)
+
+        # Adjust the dialog size to fit its contents
+        dialog.adjustSize()
+
+        # Execute the dialog
+        dialog.exec()
+
+    def select_reference_file(self, window_dialog):
+        """
+        Opens a file dialog to select a reference file and displays
+        a message box with the selected file's name.
+
+        :param window_dialog: The dialog window to open the file dialog.
+        """
+        self.reference_file, _ = QFileDialog.getOpenFileName(
+            window_dialog,
+            caption="Select Reference File",
+            dir="",
+            filter="All Files (*)"
+        )
+        if self.reference_file:
+            QMessageBox.information(
+                window_dialog, "File Selected", self.reference_file
+            )
+
+    def validate_and_close(
+            self, window_dialog, run_name_input, barcode_kit_input,
+            barcode_list_widget):
+        """
+        Validates the user inputs and closes the dialog if successful.
+
+        :param window_dialog: The dialog window to close.
+        :param run_name_input: The QLineEdit for the run name.
+        :param barcode_kit_input: The QLineEdit for the barcode kit.
+        :param barcode_list_widget: The QListWidget for the selected barcodes.
+        """
+        # Capture inputs
+        self.run_name = run_name_input.text().rstrip()
+        self.barcode_kit = barcode_kit_input.text().rstrip()
+        self.selected_barcodes = [
+            item.text() for item in barcode_list_widget.selectedItems()
+        ]
+
+        # Initialize a list to store messages for invalid inputs
+        invalid_messages = []
+
+        # Ensure a reference file is selected
+        if not self.reference_file:
+            invalid_messages.append("Reference file is required.")
+        else:
+            # Validate the reference file
+            if not is_valid_fasta(self.reference_file):
+                invalid_messages.append(
+                    "Reference file is not a valid FASTA file."
+                )
             else:
-                # Hide the error QLabel
-                self.user_interface.run_label_error.hide()
+                # Extract the parent directory of the reference file
+                self.working_dir = os.path.dirname(self.reference_file)
 
-            # Extract all the barcode values from the dictionary
-            self.barcodes = get_sorted_barcode_values(self.data_dict)
+        # Validate Run Name
+        if not self.run_name:
+            invalid_messages.append("Run Name cannot be blank.")
+        else:
+            run_name_pattern = re.compile(r"MIN-\d{8}")
+            if not run_name_pattern.match(self.run_name):
+                invalid_messages.append(
+                    "Run Name must be in the format MIN-YYYYMMDD.")
 
-            # Extract the base path from the output directory
-            self.base_path = os.path.dirname(self.data_dict['output_dir'])
+        # Validate Barcode Kit
+        if not self.barcode_kit:
+            invalid_messages.append("Barcode Kit cannot be blank.")
 
-            # Set the image path
-            self.image_path = os.path.join(self.base_path, 'images')
+        # Validate Selected Barcodes
+        if not self.selected_barcodes:
+            invalid_messages.append("At least one barcode must be selected.")
 
-            # Enable the run button and make it checkable
-            self.user_interface.run_button.setEnabled(True)
-            self.user_interface.run_button.setCheckable(True)
+        # Validate if fast5 directory exists
+        fast5_dir = os.path.join(
+            '/var/lib/minknow/data/', self.run_name, 'no_sample'
+        )
+
+        if not os.path.exists(fast5_dir):
+            invalid_messages.append(
+                f"Run directory {fast5_dir }does not exist. Please ensure "
+                f"that you supplied the correct run name, and that the run "
+                f"has started"
+            )
+        else:
+            # Check if the run-specific output folder exists
+            fast5_dirs = glob(os.path.join(fast5_dir, '*/'))
+            if not fast5_dirs:
+                invalid_messages.append(
+                    "No fast5 files found in the directory. Please wait for "
+                    "files to be produced. This can take up to 45 minutes "
+                    "after starting a run"
+                )
+
+            # Add 'fast5' to self.fast5_dir
+            self.fast5_dir = os.path.join(
+                fast5_dirs[0], 'fast5'
+            )
+
+        # Display warning message if there are invalid inputs
+        if invalid_messages:
+            QMessageBox.warning(
+                window_dialog, "Invalid Input(s)",
+                "Please correct the following issues before proceeding:\n" +
+                "\n".join(invalid_messages)
+            )
+        else:
+            # Assuming validation is successful
+            QMessageBox.information(
+                window_dialog,
+                "Validation Successful",
+                "All entries are valid."
+            )
+
+            # Write the run configuration information to a CSV file
+            self.create_input_csv()
+
+            # Update the path of the image directory
+            self.image_path = os.path.join(
+                self.working_dir, 'images'
+            )
+
+            # Enable the sequence info button
+            self.user_interface.sequence_info_button.setEnabled(True)
+
+            # Close the dialog
+            window_dialog.accept()
+
+    def create_input_csv(self):
+        """
+        Creates an input CSV file with the user inputs.
+        """
+        # Define the header and rows
+        header = ['reference', 'fast5_dir', 'output_dir', 'config', 'barcode',
+                  'barcode_values']
+        # Step 1: Sort the list of selected barcodes
+        sorted_barcodes = sorted(self.selected_barcodes)
+
+        # Step 2: Join the sorted list into a string, separated by commas
+        barcode_values_str = ",".join(sorted_barcodes)
+
+        # Step 3: Enclose the string in quotes
+        barcode_values_literal = f'"{barcode_values_str}"'
+
+        # Define the csv_path
+        self.csv_path = os.path.join(self.working_dir, self.run_name)
+
+        # Step 4: Create the row for the CSV file
+        row = [
+            self.reference_file,
+            self.fast5_dir,
+            self.csv_path,
+            'dna_r10.4.1_e8.2_260bps_fast.cfg',
+            self.barcode_kit,
+            barcode_values_literal
+        ]
+
+        # Set the name and path of the CSV file
+        self.configuration_file = os.path.join(
+            self.working_dir, 'input.csv'
+        )
+
+        # Create the CSV file
+        with open(
+                self.configuration_file,
+                'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(header)
+            writer.writerow(row)
 
     def open_dialog(self):
         """
@@ -494,7 +739,7 @@ class MainWindow(QMainWindow):
         input to the main window until it is closed.
         """
         # Check if barcodes are populated
-        if not self.barcodes:
+        if not self.selected_barcodes:
             QMessageBox.warning(
                 self, "No Barcodes",
                 "No barcode values are available to populate the table."
@@ -516,7 +761,7 @@ class MainWindow(QMainWindow):
 
         # Define the headers for the table columns
         table.setHorizontalHeaderLabels(["Barcode", "SEQID", "OLNID"])
-        table.setRowCount(len(self.barcodes))
+        table.setRowCount(len(self.selected_barcodes))
 
         # Apply the custom delegate to the SEQID and OLNID columns
         delegate = LargeEditorDelegate(table)
@@ -524,7 +769,7 @@ class MainWindow(QMainWindow):
         table.setItemDelegateForColumn(2, delegate)
 
         # Populate the first column of the table with barcode values
-        for i, barcode in enumerate(self.barcodes):
+        for i, barcode in enumerate(self.selected_barcodes):
             table.setItem(i, 0, QTableWidgetItem(barcode))
 
             #  SEQID column as empty
@@ -594,6 +839,14 @@ class MainWindow(QMainWindow):
                     dialog, "Validation Successful",
                     "All entries are valid."
                 )
+
+                # Write the metadata to the CSV file
+                self.write_metadata_table()
+
+                # Enable the run button and make it checkable
+                self.user_interface.run_button.setEnabled(True)
+                self.user_interface.run_button.setCheckable(True)
+
                 # Close the dialog
                 dialog.accept()
 
@@ -607,6 +860,7 @@ class MainWindow(QMainWindow):
                 font-weight: bold; /* Bold font */
                 text-align: center; /* Centered text */
                 color: white; /* White text color */
+                padding: 10px 15px; /* Increased padding */
             }
             QPushButton:hover {
                 background-color: rgb(50, 205, 50);
@@ -623,14 +877,18 @@ class MainWindow(QMainWindow):
 
         # Add a spacer to the left side
         button_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            QSpacerItem(
+                40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
 
         # Add the validate button to the layout
         button_layout.addWidget(validate_button)
 
         # Add a spacer to the right side
         button_layout.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            QSpacerItem(
+                40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        )
 
         # Add the button layout to the main dialog layout
         layout.addLayout(button_layout)
@@ -715,6 +973,28 @@ class MainWindow(QMainWindow):
             return False
         return True
 
+    def write_metadata_table(self):
+        """
+        Creates a metadata CSV file with the barcode, SEQID, and OLNID values.
+        """
+        # Define the header
+        header = ['Barcode', 'SEQID', 'OLNID']
+
+        # Define the rows
+        rows = []
+        for entry in self.sequence_info:
+            rows.append([entry['barcode'], entry['SEQID'], entry['OLNID']])
+
+        # Update the metadata file path
+        self.metadata_file = os.path.join(self.working_dir, 'metadata.csv')
+
+        # Write the metadata to the CSV file
+        with open(self.metadata_file, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(header)
+            for row in rows:
+                writer.writerow(row)
+
     def update_button_states(self) -> list:
         """
         Updates the state of the left and right buttons based on the current
@@ -747,6 +1027,19 @@ class MainWindow(QMainWindow):
             self.user_interface.right_button.setEnabled(True)
 
         return images
+
+    def update_error_label(self, message):
+        """
+        Updates the QLabel with the provided error message.
+
+        Parameters:
+        message (str): The error message to display.
+        """
+        # Set the error message
+        self.user_interface.run_label_error.setText(message)
+
+        # Make sure the QLabel is visible
+        self.user_interface.run_label_error.show()
 
     def move_window(self, event):
         """
@@ -794,9 +1087,6 @@ class MainWindow(QMainWindow):
         This method is called when the worker thread finishes.
         """
         self.user_interface.run_button.setChecked(False)
-        self.user_interface.run_label_error.setText(
-            "Your PoreSippr run has been successfully terminated")
-        self.user_interface.run_label_error.show()
         self.timer.stop()
 
         # Rechecks the button to false; ensures we don't loop
@@ -804,6 +1094,15 @@ class MainWindow(QMainWindow):
 
         # Enables the run button again after the run is finished or cancelled
         self.user_interface.run_button.setEnabled(True)
+
+        # Check if there was an error and display the appropriate message
+        if self.worker.error_message:
+            self.update_error_label(self.worker.error_message)
+        else:
+            self.user_interface.run_label_error.setText(
+                "Your PoreSippr run has been successfully terminated")
+            self.user_interface.run_label_error.show()
+
         self.worker.terminate()
 
     def update_page_label(self):
@@ -877,8 +1176,10 @@ class MainWindow(QMainWindow):
         text_browser.setHtml(html_content)
 
         # Set the size policy of the QTextBrowser to allow it to expand freely
-        text_browser.setSizePolicy(QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
+        text_browser.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding
+        )
 
         # Create a QVBoxLayout for the new QWidget
         vertical_layout = QVBoxLayout(new_page)
@@ -930,8 +1231,11 @@ class MainWindow(QMainWindow):
             # Disables the run button to prevent starting another run
             self.user_interface.run_button.setEnabled(False)
 
-            # Disable the file_selection_button
-            self.user_interface.file_selection_button.setEnabled(False)
+            # Disable the configuration_button
+            self.user_interface.configuration_button.setEnabled(False)
+
+            # Disable the sequence_info_button
+            self.user_interface.sequence_info_button.setEnabled(False)
 
             # Resets the error text to nothing
             self.user_interface.run_label_error.setText("")
@@ -958,22 +1262,25 @@ class MainWindow(QMainWindow):
             complete = multiprocessing.Value('b', False)
             self.complete = False
 
-            # Create variables for the folder path, output folder, and csv path
-            folder_path = os.path.join(self.base_path, 'output')
-            csv_path = os.path.join(self.data_dict['output_dir'])
+            # Create variable for the folder path
+            folder_path = os.path.join(self.working_dir, 'output')
 
             # Create a Worker instance and connect its finished signal to a
             # slot method
             self.worker = Worker(
                 folder_path=folder_path,
                 output_folder=self.image_path,
-                csv_path=csv_path,
+                csv_path=self.csv_path,
                 complete=complete,
-                file_name=self.file_name,
+                configuration_file=self.configuration_file,
+                metadata_file=self.metadata_file,
                 pid_store=self.pid_store
             )
             self.worker.finished.connect(self.on_worker_finished)
             self.worker.start()
+
+            # Connect the Worker's error signal to the update_error_label slot
+            self.worker.error.connect(self.update_error_label)
 
             # Allows the button to be toggleable
             self.user_interface.cancel_button.setCheckable(True)
@@ -996,7 +1303,7 @@ class MainWindow(QMainWindow):
             # Always adds the last image to the GUI
             while not self.complete:
                 # Process events to keep the GUI responsive
-                QtCore.QCoreApplication.processEvents()
+                QCoreApplication.processEvents()
 
                 # Gets all the images in the current directory
                 images = self.get_images(path=self.image_path)
@@ -1039,14 +1346,14 @@ class MainWindow(QMainWindow):
                     self.dialog_clicked(response)
 
                     # Process all pending events
-                    QtCore.QCoreApplication.processEvents()
+                    QCoreApplication.processEvents()
 
             # Enable the run button again after the run is finished or
             # cancelled
             self.user_interface.run_button.setEnabled(True)
 
-            # Enable the file_selection_button
-            self.user_interface.file_selection_button.setEnabled(True)
+            # Enable the configuration_button
+            self.user_interface.configuration_button.setEnabled(True)
 
     def dialog_clicked(self, response):
         """
@@ -1089,8 +1396,8 @@ class MainWindow(QMainWindow):
             # Disable the cancel button
             self.user_interface.cancel_button.setEnabled(False)
 
-            # Enable the file_selection_button
-            self.user_interface.file_selection_button.setEnabled(True)
+            # Enable the configuration_button
+            self.user_interface.configuration_button.setEnabled(True)
 
             # Terminate the worker thread
             self.worker.terminate()
@@ -1409,7 +1716,7 @@ if __name__ == "__main__":
     timer.start(500)  # Every 500ms, the event loop will be interrupted
     timer.timeout.connect(lambda: None)
 
-    QtGui.QFontDatabase.addApplicationFont('fonts/segoeui.ttf')
-    QtGui.QFontDatabase.addApplicationFont('fonts/segoeuib.ttf')
+    QFontDatabase.addApplicationFont('fonts/segoeui.ttf')
+    QFontDatabase.addApplicationFont('fonts/segoeuib.ttf')
     window = MainWindow()
     app.exec()
