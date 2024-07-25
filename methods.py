@@ -604,11 +604,11 @@ def main(
     os.makedirs(processed_folder, exist_ok=True)
 
     # Run PoreSippr using subprocess.Popen. Capture stdout and stderr
-    if test:
-        command = ['python', '-u', 'poresippr_placeholder.py', config_file,
-                   '--sleep_time', str(sleep_time)]
-    else:
-        command = ['python', '-u', 'poresippr_basecall_scheduler.py',
+   # if test:
+   #     command = ['python', '-u', 'poresippr_placeholder.py', config_file,
+    #               '--sleep_time', str(sleep_time)]
+   # else:
+    command = ['python', '-u', 'poresippr_basecall_scheduler.py',
                    config_file, metadata_file]
 
     worker_process = subprocess.Popen(command, stdout=subprocess.PIPE,
@@ -748,41 +748,41 @@ if __name__ == "__main__":
     test_files_dir = os.path.join(script_dir, 'test_files')
 
     # Create the parser and add arguments
-    parser = argparse.ArgumentParser(description='Run PoreSippr tests.')
-    parser.add_argument(
-        'mode', type=str, nargs='?',
-        choices=['prod', 'test'], default='prod',
-        help='an optional argument to set the mode (default: prod)')
+   ## parser = argparse.ArgumentParser(description='Run PoreSippr tests.')
+  ##  parser.add_argument(
+   ##     'mode', type=str, nargs='?',
+    ##    choices=['prod', 'test'], default='prod',
+    ##    help='an optional argument to set the mode (default: prod)')
 
     # Parse the command line arguments
-    args = parser.parse_args()
+  ##  args = parser.parse_args()
 
     # Check if a specific command line argument is provided
-    if args.mode == 'test':
+   #   if args.mode == 'test':
         # local_csv_path = os.path.join(test_files_dir, 'poresippr_out')
-        local_csv_path = \
-            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/' \
-            'MIN-20240515'
+        #local_csv_path = \
+        #    '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/' \
+       #     'MIN-20240515'
         # local_folder_path = os.path.join(test_files_dir, 'output')
-        local_folder_path = \
-            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/output'
+        #local_folder_path = \
+         #   '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/output'
         # local_output_folder = os.path.join(test_files_dir, 'images')
-        local_output_folder = \
-            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/images'
+      #  local_output_folder = \
+      #      '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/images'
         # local_config_file = os.path.join(test_files_dir, 'input.csv')
-        local_config_file = \
-            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/input.csv'
-        local_metadata_file = \
-            '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/' \
-            'metadata.csv'
-        local_test = True
-    else:
-        local_csv_path = '/home/olcbio/Downloads/240125_MC26299/test_out'
-        local_folder_path = '/home/olcbio/Downloads/240125_MC26299/output'
-        local_output_folder = '/home/olcbio/Downloads/240125_MC26299/images'
-        local_config_file = '/home/olcbio/PoreSippR-GUI/input.csv'
-        local_metadata_file = '/home/olcbio/PoreSippR-GUI/metadata.csv'
-        local_test = False
+        #local_config_file = \
+         #   '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/input.csv'
+       # local_metadata_file = \
+        #    '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/' \
+        #    'metadata.csv'
+     #   local_test = True
+    #else:
+    local_csv_path = '/home/olcbio/Downloads/240125_MC26299/test_out'
+    local_folder_path = '/home/olcbio/Downloads/240125_MC26299/output'
+    local_output_folder = '/home/olcbio/Downloads/240125_MC26299/images'
+    local_config_file = '/home/olcbio/PoreSippR-GUI/input.csv'
+    local_metadata_file = '/home/olcbio/PoreSippR-GUI/metadata.csv'
+    local_test = False
 
     main(
         csv_path=local_csv_path,
@@ -793,4 +793,4 @@ if __name__ == "__main__":
         metadata_file=local_metadata_file,
         test=local_test,
         sleep_time=20
-    )
+      )
