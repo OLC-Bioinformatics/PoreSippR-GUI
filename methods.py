@@ -775,12 +775,14 @@ if __name__ == "__main__":
         local_metadata_file = \
             '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/' \
             'metadata.csv'
+        local_test = True
     else:
         local_csv_path = '/home/olcbio/Downloads/240125_MC26299/test_out'
         local_folder_path = '/home/olcbio/Downloads/240125_MC26299/output'
         local_output_folder = '/home/olcbio/Downloads/240125_MC26299/images'
         local_config_file = '/home/olcbio/PoreSippR-GUI/input.csv'
         local_metadata_file = '/home/olcbio/PoreSippR-GUI/metadata.csv'
+        local_test = False
 
     main(
         csv_path=local_csv_path,
@@ -789,6 +791,6 @@ if __name__ == "__main__":
         complete=process_complete,
         config_file=local_config_file,
         metadata_file=local_metadata_file,
-        test=True,
+        test=local_test,
         sleep_time=20
     )
