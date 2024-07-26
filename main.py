@@ -116,7 +116,7 @@ class Worker(QThread):
                 metadata_file=self.metadata_file,
                 lab_name=self.lab_name,
                 run_name=self.run_name,
-                test=True,
+                test=False,
                 pid_store=self.pid_store
 
             )
