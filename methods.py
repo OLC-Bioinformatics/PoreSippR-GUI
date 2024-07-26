@@ -6,8 +6,10 @@ Methods for the PoreSippr-GUI
 
 # Standard imports
 import argparse
+import base64
 from collections import defaultdict
 import csv
+from datetime import datetime
 import glob
 import multiprocessing
 import os
@@ -20,7 +22,12 @@ from time import sleep
 # Third-party imports
 from Bio import SeqIO
 from bs4 import BeautifulSoup
+from jinja2 import (
+    Environment,
+    FileSystemLoader
+)
 import pandas as pd
+import weasyprint
 
 
 def read_csv_file(file_path):
@@ -538,6 +545,68 @@ def remove_index_from_html(html_file_path):
         f.write(str(soup))
 
 
+def image_to_base64(image_path):
+    """
+    Convert an image to a base64 string.
+    :param image_path: Path to the image file.
+    :return: base64 string. of the image
+    """
+    with open(image_path, 'rb') as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+
+def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
+                      run_name, version):
+    """
+    Create a PDF report from provided information and HTML table.
+    """
+
+    # Create the report folder if it doesn't exist
+    os.makedirs(report_folder, exist_ok=True)
+
+    # Define the lookup dictionary
+    lab_info = {
+        'GTA': ('2301 Midland Ave., Scarborough, ON, M1P 4R7', ''),
+        'BUR': ('3155 Willington Green, Burnaby, BC, V5G 4P2', ''),
+        'OLC': ('960 Carling Ave, Building 22 CEF, Ottawa, ON, K1A 0Y9', ''),
+        'FFFM': ('960 Carling Ave, Building 22 CEF, Ottawa, ON, K1A 0Y9', ''),
+        'DAR': ('1992 Agency Dr., Dartmouth, NS, B2Y 3Z7', ''),
+        'CAL': ('3650 36 Street NW, Calgary, AB, T2L 2L1', ''),
+        'STH': ('3400 Casavant Boulevard W., St. Hyacinthe, QC, J2S 8E3', '')
+    }
+
+    # Extract the laboratory information from the dictionary
+    lab_details = lab_info.get(lab_name, ('', ''))[0]
+
+    # Load the HTML table from the file
+    with open(html_file_path, 'r') as file:
+        table_html = file.read()
+
+    # Load the HTML template
+    env = Environment(loader=FileSystemLoader('.'))
+    template = env.get_template('report_template.html')
+
+    # Convert image to Base64
+    image_base64 = image_to_base64('CFIA_logo.png')
+
+    # Render the HTML content with dynamic data
+    html_content = template.render(
+        lab_name=lab_name,
+        lab_address=lab_details,
+        number=num_strains,
+        version=version,
+        table_html=table_html,
+        date=datetime.today().strftime('%Y-%m-%d'),
+        image_base64=image_base64  # Use Base64 string
+    )
+
+    # Convert HTML to PDF with landscape orientation and small margins
+    weasyprint.HTML(string=html_content).write_pdf(
+        os.path.join(report_folder, f'{run_name}_report.pdf'),
+        stylesheets=[weasyprint.CSS(string='@page { size: letter landscape; margin: 0.5cm; }')]
+    )
+
+
 def handle_output(stream, capture_list):
     """
     Reads from a subprocess stream, line by line and prints to console.
@@ -558,6 +627,8 @@ def main(
             metadata_file=None,
             test=False,
             sleep_time=20,
+            lab_name='OLC',
+            run_name='None',
             pid_store=None):
     """
     Main function to process all CSV files in a folder grouped by iteration.

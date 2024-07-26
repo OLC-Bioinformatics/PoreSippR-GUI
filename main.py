@@ -35,6 +35,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
+    QComboBox,
     QDialog,
     QFileDialog,
     QGraphicsDropShadowEffect,
@@ -77,7 +78,8 @@ class Worker(QThread):
 
     def __init__(
             self, folder_path, output_folder, csv_path, complete,
-            configuration_file, metadata_file, pid_store=None):
+            configuration_file, metadata_file, lab_name, run_name,
+            pid_store=None):
         super().__init__()
         self.folder_path = folder_path
         self.output_folder = output_folder
@@ -85,6 +87,8 @@ class Worker(QThread):
         self.complete = complete
         self.configuration_file = configuration_file
         self.metadata_file = metadata_file
+        self.lab_name = lab_name
+        self.run_name = run_name
         self.pid_store = pid_store
         self.error_message = str()
 
@@ -99,6 +103,8 @@ class Worker(QThread):
             print('complete', self.complete)
             print('configuration_file', self.configuration_file)
             print('metadata_file', self.metadata_file)
+            print('lab_name', self.lab_name)
+            print('run_name', self.run_name)
             print('pid_store', self.pid_store)
 
             main(
@@ -108,6 +114,8 @@ class Worker(QThread):
                 complete=self.complete,
                 config_file=self.configuration_file,
                 metadata_file=self.metadata_file,
+                lab_name=self.lab_name,
+                run_name=self.run_name,
                 test=True,
                 pid_store=self.pid_store
 
@@ -377,6 +385,9 @@ class MainWindow(QMainWindow):
         # Initialise the Worker instance
         self.worker = None
 
+        # Initialise the lab name
+        self.lab_name = None
+
         # Initialise the reference file name/path
         self.reference_file = None
 
@@ -482,6 +493,25 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(10)
 
+        # Lab name input section
+        layout.addWidget(QLabel("Lab Name"))
+        lab_name_dropdown = QComboBox(dialog)
+        lab_name_dropdown.addItems(
+            ["BUR", "CAL", "DAR", "FFFM", "GTA", "OLC", "STH"])
+        lab_name_dropdown.setStyleSheet(
+            "QComboBox { border: 1px solid #007bff; border-radius: 4px; "
+            "padding: 5px; }"
+            "QComboBox::drop-down { border: 0px; }"
+            "QComboBox::down-arrow { image: url(icons/20x20/cil-chevron-bottom.png); }"
+            "QComboBox::down-arrow { width: 14px; height: 14px; }"
+            "QComboBox::down-arrow { subcontrol-origin: padding; subcontrol-position: center right; right: 5px; }"
+            "QComboBox QAbstractItemView::item { height: 25px; }"
+            "QComboBox QAbstractItemView::item:selected { background-color: #007bff; color: white; }"
+            "QComboBox QAbstractItemView::item:hover { background-color: #007bff; color: white; }"
+            "QComboBox QAbstractItemView { selection-background-color: #007bff; selection-color: white; }"
+        )
+        layout.addWidget(lab_name_dropdown)
+
         # Reference file selection section
         layout.addWidget(QLabel("Reference File"))
         reference_button = QPushButton("Select Reference File", dialog)
@@ -551,7 +581,8 @@ class MainWindow(QMainWindow):
                 window_dialog=dialog,
                 run_name_input=run_name_input,
                 barcode_kit_input=barcode_kit_input,
-                barcode_list_widget=barcode_list_widget
+                barcode_list_widget=barcode_list_widget,
+                lab_name_dropdown=lab_name_dropdown
             )
         )
         layout.addWidget(validate_button)
@@ -582,7 +613,7 @@ class MainWindow(QMainWindow):
 
     def validate_and_close(
             self, window_dialog, run_name_input, barcode_kit_input,
-            barcode_list_widget):
+            barcode_list_widget, lab_name_dropdown):
         """
         Validates the user inputs and closes the dialog if successful.
 
@@ -590,16 +621,22 @@ class MainWindow(QMainWindow):
         :param run_name_input: The QLineEdit for the run name.
         :param barcode_kit_input: The QLineEdit for the barcode kit.
         :param barcode_list_widget: The QListWidget for the selected barcodes.
+        :param lab_name_dropdown: The QComboBox for the lab name.
         """
         # Capture inputs
+        self.lab_name = lab_name_dropdown.currentText().rstrip()
         self.run_name = run_name_input.text().rstrip()
         self.barcode_kit = barcode_kit_input.text().rstrip()
-        self.selected_barcodes = [
+        self.selected_barcodes = sorted([
             item.text() for item in barcode_list_widget.selectedItems()
-        ]
+        ])
 
         # Initialize a list to store messages for invalid inputs
         invalid_messages = []
+
+        # Validate Lab Name
+        if not self.lab_name:
+            invalid_messages.append("Lab Name cannot be blank.")
 
         # Ensure a reference file is selected
         if not self.reference_file:
@@ -1274,6 +1311,8 @@ class MainWindow(QMainWindow):
                 complete=complete,
                 configuration_file=self.configuration_file,
                 metadata_file=self.metadata_file,
+                lab_name=self.lab_name,
+                run_name=self.run_name,
                 pid_store=self.pid_store
             )
             self.worker.finished.connect(self.on_worker_finished)

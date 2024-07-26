@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px; /* Reduced padding */
+        }
+        .header img {
+            height: 20px; /* Adjust the height as needed */
+        }
+        .header .date {
+            font-size: 14px;
+        }
+        .header-line {
+            border-top: 3px solid black; /* Bold line */
+            margin-top: 5px;
+        }
+        .content {
+            padding: 5px;
+        }
+        .table-container {
+            margin-top: 5px;
+            width: 100%; /* Set width to 100% */
+            margin-left: 0; /* Left-justify the table */
+            font-size: 15px; /* Decrease font size */
+        }
+        .table-container table {
+            font-size: inherit; /* Inherit font size from .table-container */
+        }
+        .tombstone-table-container {
+            margin-top: 5px;
+            max-width: 350px; /* Shrink tombstone table */
+            margin-left: 0; /* Left-justify the table */
+        }
+        .tombstone-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px; /* Slightly smaller font */
+        }
+        .tombstone-table th, .tombstone-table td {
+            padding: 3px;
+            text-align: left;
+        }
+        .tombstone-table th {
+            font-weight: bold;
+            border-bottom: 2px solid black; /* Bold line at the top */
+        }
+        .tombstone-table tr:last-child td {
+            border-top: 2px solid black; /* Bold line at the bottom */
+        }
+        .identification-summary {
+            font-size: 12px; /* Slightly smaller font size */
+        }
+        .footer {
+            font-size: 12px; /* Match font size with identification-summary */
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="data:image/png;base64,{{ image_base64 }}" alt="CFIA Logo">
+        <div class="date">Date Report Issued: {{ date }}</div>
+    </div>
+    <div class="header-line"></div>
+    <div class="content">
+        <h3>Report of PoreSippr Analysis</h3>
+        <div class="identification-summary">
+            <p><strong>Identification Summary</strong></p>
+            <p>PoreSippr analyses were conducted on <em>{{ number }}</em> Escherichia coli strain{% if number > 1 %}s{% endif %}. Strains are confirmed <em>Escherichia coli</em> based on the presence of the <em>uidA</em> marker.</p>
+        </div>
+        <div class="tombstone-table-container">
+            <table class="tombstone-table">
+                <tr>
+                    <th>Laboratory</th>
+                    <th>Address</th>
+                </tr>
+                <tr>
+                    <td>{{ lab_name }}</td>
+                    <td>{{ lab_address }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="table-container">
+            {{ table_html | safe }}
+        </div>
+    </div>
+    <div class="footer">
+        <p>Data interpretation guidelines can be found in RDIMS document ID: XXXX</p>
+        <p>This report was generated with PoreSippr ROPA {{ version }}</p>
+    </div>
+</body>
+</html>
