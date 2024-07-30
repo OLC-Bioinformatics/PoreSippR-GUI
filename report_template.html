@@ -33,7 +33,7 @@
             margin-top: 5px;
             width: 100%; /* Set width to 100% */
             margin-left: 0; /* Left-justify the table */
-            font-size: 15px; /* Decrease font size */
+            font-size: 9px; /* Decrease font size */
         }
         .table-container table {
             font-size: inherit; /* Inherit font size from .table-container */
@@ -78,7 +78,7 @@
         <h3>Report of PoreSippr Analysis</h3>
         <div class="identification-summary">
             <p><strong>Identification Summary</strong></p>
-            <p>PoreSippr analyses were conducted on <em>{{ number }}</em> Escherichia coli strain{% if number > 1 %}s{% endif %}. Strains are confirmed <em>Escherichia coli</em> based on the presence of the <em>uidA</em> marker.</p>
+            <p>PoreSippr analyses were conducted on {{ number }} <em>Escherichia coli</em> strain{% if number > 1 %}s{% endif %}. Strains are confirmed <em>Escherichia coli</em> based on the presence of the <em>uidA</em> marker.</p>
         </div>
         <div class="tombstone-table-container">
             <table class="tombstone-table">
