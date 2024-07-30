@@ -29,6 +29,9 @@ from jinja2 import (
 import pandas as pd
 import weasyprint
 
+# Local imports
+from version import __version__
+
 
 def read_csv_file(file_path):
     """
@@ -336,8 +339,8 @@ def create_data_dict(df, csv_file, metadata_dict):
         grouped_h_type['number_of_reads_mapped'] > 1]
 
     # stx genes
-    stx1_genes = df[df['gene_name'].str.contains('Stx1')]
-    stx2_genes = df[df['gene_name'].str.contains('Stx2')]
+    stx1_genes = df[df['gene_name'].str.contains('Stx1', case=False)]
+    stx2_genes = df[df['gene_name'].str.contains('Stx2', case=False)]
 
     # Group the DataFrame by 'gene_name' and sum 'number_of_reads_mapped'
     grouped_stx1 = stx1_genes.groupby('gene_name')[
@@ -373,13 +376,13 @@ def create_data_dict(df, csv_file, metadata_dict):
 
     # GDCS genes
     gdcs_genes = df[~df['gene_name'].str.contains(
-        'O/|H/|Stx|eae|ehxA|aggR|aaiC'
+        'O/|H/|Stx|eae|ehxA|aggR|aaiC|#', case=False
     )]
 
     # Filter GDCS genes to only include those with at least two reads
     gdcs_genes_with_reads = \
         gdcs_genes[gdcs_genes['number_of_reads_mapped'] > 1]
-    
+
     # Extract the barcode name from the CSV file name
     barcode_name = os.path.basename(csv_file).split('_')[0]
 
@@ -395,7 +398,7 @@ def create_data_dict(df, csv_file, metadata_dict):
 
     # Create a dictionary with the extracted information
     data_dict = {
-        'Strain Name': barcode_name,
+        'SEQID': barcode_name,
         'OLN ID': metadata_dict[barcode_name]['OLNID'],
         'O-Type':
             f"{o_type['gene_name'].values[0].split('/')[1].split('-')[0]} "
@@ -494,7 +497,7 @@ def visualize_data(all_data_df, output_path):
             border-collapse: collapse;
             width: 100%;
             font-family: Arial, sans-serif;
-            font-size: 40px;  /* Add this line to set the font size */
+            font-size: 30px;  /* Add this line to set the font size */
         }
         th {
             background-color: #D3D3D3;
@@ -608,13 +611,22 @@ def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
         image_base64=image_base64  # Use Base64 string
     )
 
-    # Convert HTML to PDF with landscape orientation and small margins
-    weasyprint.HTML(string=html_content).write_pdf(
-        os.path.join(report_folder, f'{run_name}_report.pdf'),
-        stylesheets=[weasyprint.CSS(
-            string='@page { size: letter landscape; margin: 0.5cm; }'
-        )]
-    )
+    # Save the rendered HTML to a temporary file
+    temp_html_path = os.path.join(report_folder, f'{run_name}_temp.html')
+    with open(temp_html_path, 'w') as temp_html_file:
+        temp_html_file.write(html_content)
+
+    # Convert HTML to PDF using a system call to weasyprint
+    output_pdf_path = os.path.join(report_folder, f'{run_name}_report.pdf')
+    try:
+        subprocess.run(
+            ['weasyprint', temp_html_path, output_pdf_path], check=True
+        )
+    except subprocess.CalledProcessError as exc:
+        print(f"Error creating PDF: {exc}")
+    finally:
+        # Clean up the temporary HTML file
+        os.remove(temp_html_path)
 
 
 def handle_output(stream, capture_list):
@@ -768,6 +780,20 @@ def main(
             if iteration != current_iteration:
                 all_data = []
 
+            # Create the output path
+            output_path = os.path.join(
+                output_folder, f'iteration_{iteration}.html'
+            )
+
+            # Extract the parent directory of folder_path
+            parent_folder = os.path.dirname(folder_path)
+
+            # Define the report folder inside the parent directory
+            report_folder = os.path.join(parent_folder, 'reports')
+
+            # Create the report folder if it doesn't exist
+            os.makedirs(report_folder, exist_ok=True)
+
             for csv_file in sorted(csv_files_for_iteration):
                 # Check if the CSV file has already been processed
                 if os.path.exists(
@@ -785,17 +811,29 @@ def main(
                 )
                 all_data.append(data_dict)
 
-                # Create the output path
-                output_path = os.path.join(
-                    output_folder, f'iteration_{iteration}.html'
+                # Create the HTML table
+                visualize_data(
+                    all_data_df=pd.DataFrame(all_data),
+                    output_path=output_path
                 )
 
-                visualize_data(pd.DataFrame(all_data), output_path)
-
-                remove_index_from_html(output_path)
+                # Remove the index column from the HTML file
+                remove_index_from_html(
+                    html_file_path=output_path
+                )
 
                 # Move the processed CSV file to a different folder
                 shutil.move(csv_file, processed_folder)
+
+            # Create the PDF report
+            create_pdf_report(
+                html_file_path=output_path,
+                lab_name=lab_name,
+                num_strains=len(barcode_values),
+                report_folder=report_folder,
+                run_name=run_name,
+                version=__version__
+            )
 
             # Update the current iteration
             current_iteration = iteration
@@ -857,6 +895,9 @@ if __name__ == "__main__":
             '/home/adamkoziol/PycharmProjects/PoreSippR-GUI/config/' \
             'metadata.csv'
         local_test = True
+
+        local_run_name = 'MIN-20240515'
+        local_lab_name = 'STH'
     else:
         local_csv_path = '/home/olcbio/Downloads/240125_MC26299/test_out'
         local_folder_path = '/home/olcbio/Downloads/240125_MC26299/output'
@@ -864,6 +905,8 @@ if __name__ == "__main__":
         local_config_file = '/home/olcbio/PoreSippR-GUI/input.csv'
         local_metadata_file = '/home/olcbio/PoreSippR-GUI/metadata.csv'
         local_test = False
+        local_run_name = '240125_MC26299'
+        local_lab_name = 'OLC'
 
     main(
         csv_path=local_csv_path,
@@ -873,5 +916,7 @@ if __name__ == "__main__":
         config_file=local_config_file,
         metadata_file=local_metadata_file,
         test=local_test,
-        sleep_time=20
+        sleep_time=20,
+        run_name=local_run_name,
+        lab_name=local_lab_name
       )
