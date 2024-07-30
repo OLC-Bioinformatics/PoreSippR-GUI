@@ -63,8 +63,8 @@ from methods import (
     is_valid_fasta,
     main,
 )
-
 from ui_main import Ui_MainWindow
+from version import __version__
 
 
 class Worker(QThread):
@@ -179,6 +179,59 @@ class CustomTableWidget(QTableWidget):
         else:
             # Handle other key events normally
             super().keyPressEvent(event)
+
+
+class CustomMessageBox(QMessageBox):
+    """
+    A custom QMessageBox class that applies a specific stylesheet to all
+    instances of QMessageBox, giving it a modern/bootstrap look without icons.
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the CustomMessageBox with the specified stylesheet.
+
+        :param args: Positional arguments passed to the parent QMessageBox.
+        :param kwargs: Keyword arguments passed to the parent QMessageBox.
+        """
+        super().__init__(*args, **kwargs)
+        self.setStyleSheet(
+            """
+            QPushButton {
+                border: 1px solid #007bff;  /* Blue border */
+                border-radius: 4px;         /* Rounded corners */
+                background-color: #007bff;  /* Blue background */
+                color: white;               /* White text */
+                padding: 5px 10px;          /* Padding */
+                font: bold;                 /* Bold font */
+            }
+            QPushButton:hover {
+                background-color: #0056b3;  /* Darker blue on hover */
+            }
+            QPushButton:pressed {
+                background-color: #003f7f;  /* Even darker blue on press */
+            }
+            QPushButton#Yes {
+                background-color: #28a745;  /* Green for Yes */
+                border: 1px solid #28a745;  /* Green border */
+            }
+            QPushButton#Yes:hover {
+                background-color: #218838;  /* Darker green on hover */
+            }
+            QPushButton#Yes:pressed {
+                background-color: #1e7e34;  /* Even darker green on press */
+            }
+            QPushButton#Cancel {
+                background-color: #dc3545;  /* Red for Cancel */
+                border: 1px solid #dc3545;  /* Red border */
+            }
+            QPushButton#Cancel:hover {
+                background-color: #c82333;  /* Darker red on hover */
+            }
+            QPushButton#Cancel:pressed {
+                background-color: #bd2130;  /* Even darker red on press */
+            }
+            """
+        )
 
 
 class LargeEditorDelegate(QStyledItemDelegate):
@@ -346,6 +399,9 @@ class MainWindow(QMainWindow):
         # Disable the sequence info button until a run is configured
         self.user_interface.sequence_info_button.setEnabled(False)
 
+        # Set the version
+        self.user_interface.label_version.setText(f"Version: {__version__}")
+
         # Create a timer to show the elapsed time of the run
         self.timer = QTimer()
 
@@ -431,7 +487,7 @@ class MainWindow(QMainWindow):
         """
         # Check if a run is in progress and prompt the user for confirmation
         if self.user_interface.run_button.isChecked():
-            response = QMessageBox.question(
+            response = CustomMessageBox.question(
                 self, "Warning",
                 "A run is in progress. Are you sure you want to close the "
                 "application?",
@@ -502,21 +558,43 @@ class MainWindow(QMainWindow):
             "QComboBox { border: 1px solid #007bff; border-radius: 4px; "
             "padding: 5px; }"
             "QComboBox::drop-down { border: 0px; }"
-            "QComboBox::down-arrow { image: url(icons/20x20/cil-chevron-bottom.png); }"
+            "QComboBox::down-arrow { image: "
+            "url(icons/20x20/cil-chevron-bottom.png); }"
             "QComboBox::down-arrow { width: 14px; height: 14px; }"
-            "QComboBox::down-arrow { subcontrol-origin: padding; subcontrol-position: center right; right: 5px; }"
+            "QComboBox::down-arrow { subcontrol-origin: padding; "
+            "subcontrol-position: center right; right: 5px; }"
             "QComboBox QAbstractItemView::item { height: 25px; }"
-            "QComboBox QAbstractItemView::item:selected { background-color: #007bff; color: white; }"
-            "QComboBox QAbstractItemView::item:hover { background-color: #007bff; color: white; }"
-            "QComboBox QAbstractItemView { selection-background-color: #007bff; selection-color: white; }"
+            "QComboBox QAbstractItemView::item:selected { background-color: "
+            "#007bff; color: white; }"
+            "QComboBox QAbstractItemView::item:hover { background-color: "
+            "#007bff; color: white; }"
+            "QComboBox QAbstractItemView { selection-background-color: "
+            "#007bff; selection-color: white; }"
         )
         layout.addWidget(lab_name_dropdown)
 
         # Reference file selection section
         layout.addWidget(QLabel("Reference File"))
         reference_button = QPushButton("Select Reference File", dialog)
+        reference_button.setStyleSheet(
+            """
+            QPushButton {
+                border: 1px solid #007bff;  /* Blue border */
+                border-radius: 4px;         /* Rounded corners */
+                background-color: #007bff;  /* Blue background */
+                color: white;               /* White text */
+                padding: 5px 10px;          /* Padding */
+            }
+            QPushButton:hover {
+                background-color: #0056b3;  /* Darker blue on hover */
+            }
+            QPushButton:pressed {
+                background-color: #003f7f;  /* Even darker blue on press */
+            }
+            """
+        )
         reference_button.clicked.connect(
-            lambda: self.select_reference_file(dialog)
+            lambda: self.select_reference_file(dialog, reference_button)
         )
         layout.addWidget(reference_button)
 
@@ -576,6 +654,13 @@ class MainWindow(QMainWindow):
 
         # Validate button section
         validate_button = QPushButton("Validate", dialog)
+        validate_button.setStyleSheet(
+            "QPushButton { border: 1px solid #007bff; "
+            "border-radius: 4px; background-color: #007bff; "
+            "color: white; padding: 5px 10px; }"
+            "QPushButton:hover { background-color: #0056b3; }"
+            "QPushButton:pressed { background-color: #003f7f; }"
+        )
         validate_button.clicked.connect(
             lambda: self.validate_and_close(
                 window_dialog=dialog,
@@ -593,12 +678,14 @@ class MainWindow(QMainWindow):
         # Execute the dialog
         dialog.exec()
 
-    def select_reference_file(self, window_dialog):
+    def select_reference_file(self, window_dialog, button):
         """
-        Opens a file dialog to select a reference file and displays
-        a message box with the selected file's name.
+        Opens a file dialog to select a reference file and updates the button
+        with the selected file's name and green styling.
 
         :param window_dialog: The dialog window to open the file dialog.
+        :param button: The button to update with the selected file's name
+        and style.
         """
         self.reference_file, _ = QFileDialog.getOpenFileName(
             window_dialog,
@@ -607,8 +694,27 @@ class MainWindow(QMainWindow):
             filter="All Files (*)"
         )
         if self.reference_file:
-            QMessageBox.information(
-                window_dialog, "File Selected", self.reference_file
+            # Extract the file name from the path
+            file_name = os.path.basename(self.reference_file)
+
+            # Update the button text and style
+            button.setText(file_name)
+            button.setStyleSheet(
+                """
+                QPushButton {
+                    border: 1px solid #28a745;  /* Green border */
+                    border-radius: 4px;         /* Rounded corners */
+                    background-color: #28a745;  /* Green background */
+                    color: white;               /* White text */
+                    padding: 5px 10px;          /* Padding */
+                }
+                QPushButton:hover {
+                    background-color: #218838;  /* Darker green on hover */
+                }
+                QPushButton:pressed {
+                    background-color: #1e7e34;  /* Darker still on press */
+                }
+                """
             )
 
     def validate_and_close(
@@ -675,7 +781,7 @@ class MainWindow(QMainWindow):
 
         if not os.path.exists(fast5_dir):
             invalid_messages.append(
-                f"Run directory {fast5_dir }does not exist. Please ensure "
+                f"Run directory {fast5_dir} does not exist. Please ensure "
                 f"that you supplied the correct run name, and that the run "
                 f"has started"
             )
@@ -696,18 +802,16 @@ class MainWindow(QMainWindow):
 
         # Display warning message if there are invalid inputs
         if invalid_messages:
-            QMessageBox.warning(
+            CustomMessageBox.warning(
                 window_dialog, "Invalid Input(s)",
                 "Please correct the following issues before proceeding:\n" +
                 "\n".join(invalid_messages)
             )
         else:
             # Assuming validation is successful
-            QMessageBox.information(
-                window_dialog,
-                "Validation Successful",
-                "All entries are valid."
-            )
+            msg_box = CustomMessageBox(window_dialog)
+            msg_box.setText("Validation Successful\nAll entries are valid.")
+            msg_box.exec()
 
             # Write the run configuration information to a CSV file
             self.create_input_csv()
@@ -777,7 +881,7 @@ class MainWindow(QMainWindow):
         """
         # Check if barcodes are populated
         if not self.selected_barcodes:
-            QMessageBox.warning(
+            CustomMessageBox.warning(
                 self, "No Barcodes",
                 "No barcode values are available to populate the table."
             )
@@ -872,11 +976,10 @@ class MainWindow(QMainWindow):
             """
             if self.validate_seqid_entries(table):
                 # Show a success message
-                QMessageBox.information(
-                    dialog, "Validation Successful",
-                    "All entries are valid."
-                )
-
+                msg_box = CustomMessageBox(dialog)
+                msg_box.setText(
+                    "Validation Successful\nAll entries are valid.")
+                msg_box.exec()
                 # Write the metadata to the CSV file
                 self.write_metadata_table()
 
@@ -891,21 +994,19 @@ class MainWindow(QMainWindow):
 
         validate_button.setStyleSheet("""
             QPushButton {
-                border: 2px solid rgb(34, 139, 34); /* Green border */
-                border-radius: 5px;
-                background-color: rgb(34, 139, 34); /* Green background */
+                border: 1px solid #007bff; /* Blue border */
+                border-radius: 4px; /* Rounded corners */
+                background-color: #007bff; /* Blue background */
+                color: white; /* White text */
+                padding: 5px 10px; /* Padding */
                 font-weight: bold; /* Bold font */
                 text-align: center; /* Centered text */
-                color: white; /* White text color */
-                padding: 10px 15px; /* Increased padding */
             }
             QPushButton:hover {
-                background-color: rgb(50, 205, 50);
-                border: 2px solid rgb(34, 139, 34);
+                background-color: #0056b3; /* Darker blue on hover */
             }
             QPushButton:pressed {
-                background-color: rgb(0, 100, 0);
-                border: 2px solid rgb(34, 139, 34);
+                background-color: #003f7f; /* Even darker blue on press */
             }
         """)
 
@@ -999,7 +1100,7 @@ class MainWindow(QMainWindow):
 
         # Display warning message if there are invalid SEQIDs
         if invalid_messages:
-            QMessageBox.warning(
+            CustomMessageBox.warning(
                 self, "Invalid SEQID(s)",
                 "The following SEQID(s) are invalid, not unique, or missing. "
                 "Please correct them:\n" +
@@ -1247,7 +1348,7 @@ class MainWindow(QMainWindow):
             # If a run has been previously started and stopped
             if self.worker is not None and not self.worker.isRunning():
                 # Create a message box
-                message = QMessageBox()
+                message = CustomMessageBox()
                 message.setIcon(QMessageBox.Warning)
                 message.setWindowTitle("Warning")
                 message.setText(
@@ -1363,7 +1464,7 @@ class MainWindow(QMainWindow):
 
                     # Create a message box to confirm the user wants to stop
                     # the run
-                    message = QMessageBox()
+                    message = CustomMessageBox()
                     message.setWindowTitle("Warning")
                     message.setText("Are you sure you want to stop the run?")
                     message.setIcon(QMessageBox.Warning)
@@ -1423,6 +1524,15 @@ class MainWindow(QMainWindow):
             self.user_interface.run_label_error.setText(
                 "Your PoreSippr run has been successfully terminated")
 
+            # Apply the CSS to the button
+            self.user_interface.run_button.setStyleSheet(
+                "QPushButton { border: 1px solid #007bff; "
+                "border-radius: 4px; background-color: #007bff; "
+                "color: white; padding: 5px 10px; }"
+                "QPushButton:hover { background-color: #0056b3; }"
+                "QPushButton:pressed { background-color: #003f7f; }"
+            )
+
             # Show the message
             self.user_interface.run_label_error.show()
 
@@ -1457,17 +1567,17 @@ class MainWindow(QMainWindow):
             # If there are new images, add them to the GUI
             if len(images) > self.user_interface.progress_widget.count():
                 for image_path in images[
-                                  self.user_interface.progress_widget.count()
-                                  :]:
+                                  self.user_interface.progress_widget
+                                  .count():]:
                     self.add_html_to_gui(image_path)
 
         # Check if the "Cancel" button was clicked
         elif response == QMessageBox.Cancel:
             # Create a new message box
-            message = QMessageBox()
+            message = CustomMessageBox()
 
             # Set the title of the message box
-            message.setWindowTitle("CONTINUED")
+            message.setWindowTitle("Not cancelled")
 
             # Set the text of the message box
             message.setText("Application will continue to read images")
@@ -1494,7 +1604,7 @@ class MainWindow(QMainWindow):
         # If a run is in progress (i.e., the run button is checked)
         if self.user_interface.run_button.isChecked():
             # Create a message box
-            message = QMessageBox()
+            message = CustomMessageBox()
             message.setIcon(QMessageBox.Warning)
             message.setWindowTitle("Warning")
             message.setText(
