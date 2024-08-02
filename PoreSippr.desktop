@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=PoreSippr
+Comment=Run PoreSippr Application
+Exec=~/PycharmProjects/PoreSippR-GUI/run_poresippr.sh
+Icon=~/PycharmProjects/PoreSippR-GUI/cfia.jpg
+Terminal=false
+Type=Application
+Categories=Utility;
