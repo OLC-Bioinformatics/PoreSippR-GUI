@@ -16,6 +16,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import threading
 from time import sleep
 
@@ -27,10 +28,29 @@ from jinja2 import (
     FileSystemLoader
 )
 import pandas as pd
-import weasyprint
 
 # Local imports
 from version import __version__
+
+
+def determine_script_path():
+    """
+    Determine the base path of the current Python file or executable.
+    """
+    # Attempt to determine the script path using __file__
+    script_path = os.path.dirname(os.path.abspath(__file__))
+    image_path = os.path.join(script_path, 'cfia.jpg')
+
+    if not os.path.exists(image_path):
+        # If the image file does not exist, attempt to determine the script
+        # path using sys.executable
+        script_path = os.path.dirname(sys.executable)
+        image_path = os.path.join(script_path, 'cfia.jpg')
+
+        if not os.path.exists(image_path):
+            raise SystemExit('Cannot determine path')
+
+    return script_path
 
 
 def read_csv_file(file_path):
@@ -593,12 +613,15 @@ def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
     with open(html_file_path, 'r') as file:
         table_html = file.read()
 
+    # Get the script path
+    script_path = determine_script_path()
+
     # Load the HTML template
-    env = Environment(loader=FileSystemLoader('.'))
+    env = Environment(loader=FileSystemLoader(script_path))
     template = env.get_template('report_template.html')
 
     # Convert image to Base64
-    image_base64 = image_to_base64('CFIA_logo.png')
+    image_base64 = image_to_base64(os.path.join(script_path, 'CFIA_logo.png'))
 
     # Render the HTML content with dynamic data
     html_content = template.render(
@@ -696,17 +719,35 @@ def main(
         shutil.rmtree(processed_folder)
     os.makedirs(processed_folder, exist_ok=True)
 
+    # Determine the path of the script
+    script_path = os.path.dirname(os.path.abspath(__file__))
+
     # Run PoreSippr using subprocess.Popen. Capture stdout and stderr
     if test:
-        command = ['python', '-u', 'poresippr_placeholder.py', config_file,
-                  '--sleep_time', str(sleep_time)]
+        command = [
+            'python',
+            '-u',
+            os.path.join(script_path, 'poresippr_placeholder.py'),
+            config_file,
+            '--sleep_time',
+            str(sleep_time)
+        ]
     else:
-        command = ['python', '-u', 'poresippr_basecall_scheduler.py',
-                       config_file, metadata_file]
+        command = [
+            'python',
+            '-u',
+            os.path.join(script_path, 'poresippr_basecall_scheduler.py'),
+            config_file,
+            metadata_file
+        ]
 
-    worker_process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                                      stderr=subprocess.PIPE, text=True,
-                                      bufsize=1)
+    worker_process = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1
+    )
 
     # Lists to capture stdout and stderr
     stdout_capture = []
