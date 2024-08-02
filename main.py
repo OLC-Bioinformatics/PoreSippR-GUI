@@ -31,6 +31,8 @@ from PySide6.QtGui import (
     QColor,
     QFontDatabase,
     QIcon,
+    QImageReader,
+    QPixmap
 )
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -60,6 +62,7 @@ from PySide6.QtWidgets import (
 
 # Local imports
 from methods import (
+    determine_script_path,
     is_valid_fasta,
     main,
 )
@@ -97,6 +100,12 @@ class Worker(QThread):
         Run the worker thread.
         """
         try:
+            # Determine the script path
+            script_path = os.path.abspath(__file__)
+
+            # Enable test mode if the script is run by 'adamkoziol'
+            test_mode = 'adamkoziol' in script_path
+
             print('folder_path', self.folder_path)
             print('output_folder', self.output_folder)
             print('csv_path', self.csv_path)
@@ -106,6 +115,7 @@ class Worker(QThread):
             print('lab_name', self.lab_name)
             print('run_name', self.run_name)
             print('pid_store', self.pid_store)
+            print('test_mode', test_mode)
 
             main(
                 folder_path=self.folder_path,
@@ -116,9 +126,8 @@ class Worker(QThread):
                 metadata_file=self.metadata_file,
                 lab_name=self.lab_name,
                 run_name=self.run_name,
-                test=False,
+                test=test_mode,
                 pid_store=self.pid_store
-
             )
 
         except Exception as exc:
@@ -282,7 +291,7 @@ class MainWindow(QMainWindow):
 
         # Call the parent class constructor
         QMainWindow.__init__(self)
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
 
         # Set up the signal handler for SIGINT (Ctrl+C)
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -345,9 +354,31 @@ class MainWindow(QMainWindow):
         # Load the user interface definitions
         self.user_interface_functions.user_interface_definitions()
 
+        # Determine the base path of the current Python file
+        script_path = determine_script_path()
+
         # Set the application icon for the system taskbar
-        app_icon = QIcon("cfia.jpg")
-        self.setWindowIcon(app_icon)
+        image_path = os.path.join(script_path, 'cfia.jpg')
+        if os.path.exists(image_path):
+            if QImageReader(image_path).canRead():
+                app_icon = QIcon(image_path)
+                self.setWindowIcon(app_icon)
+                QApplication.setWindowIcon(app_icon)
+
+        # Set the user icon for the label
+        user_icon_path = os.path.join(
+            script_path,
+            'icons/24x24/olcConfindrLogo.png'
+        )
+
+        if os.path.exists(user_icon_path):
+            self.user_interface.label_user_icon.setPixmap(
+                QPixmap(user_icon_path)
+            )
+            self.user_interface.label_user_icon.setScaledContents(True)
+            self.user_interface.label_user_icon.setAlignment(
+                Qt.AlignmentFlag.AlignCenter
+            )
 
         # Set the run button to be uncheckable and disable it initially
         self.user_interface.run_button.setCheckable(False)
@@ -478,6 +509,7 @@ class MainWindow(QMainWindow):
         self.pid_store = []
 
         # Show the main window
+        self.setWindowTitle('PoreSippr')
         self.show()
 
     def signal_handler(self, _, __):
@@ -1856,8 +1888,18 @@ class UIFunctions:
 
 
 if __name__ == "__main__":
-    # Create a function to handle SIGINT
 
+    # # Print the $PATH environment variable
+    # print("Current $PATH:", os.environ['PATH'])
+    #
+    # # Determine the base path of the current Python file
+    base_path = determine_script_path()
+
+    # os.environ['PATH'] = base_path + os.pathsep + os.environ['PATH']
+    #
+    # print("Updated $PATH:", os.environ['PATH'])
+
+    # Create the application
     app = QApplication(sys.argv)
 
     # Ensure that the event loop is interrupted by SIGINT
@@ -1865,7 +1907,9 @@ if __name__ == "__main__":
     timer.start(500)  # Every 500ms, the event loop will be interrupted
     timer.timeout.connect(lambda: None)
 
-    QFontDatabase.addApplicationFont('fonts/segoeui.ttf')
-    QFontDatabase.addApplicationFont('fonts/segoeuib.ttf')
+    QFontDatabase.addApplicationFont(os.path.join(
+        base_path, 'fonts', 'segoeui.ttf'))
+    QFontDatabase.addApplicationFont(
+        os.path.join(base_path, 'fonts', 'segoeuib.ttf'))
     window = MainWindow()
     app.exec()
