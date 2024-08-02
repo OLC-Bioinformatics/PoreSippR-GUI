@@ -12,3 +12,9 @@ test_files/images/
 test_files/output/
 test_files/fast5/
 test_files/poresippr_out/
+
+# Desktop file
+PoreSippr.desktop
+
+# System-specific shell script
+run_poresippr.sh
