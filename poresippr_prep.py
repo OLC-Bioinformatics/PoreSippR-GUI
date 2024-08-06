@@ -95,13 +95,22 @@ def create_run_script(script_dir, conda_env_path):
         script_dir (str): The directory of the script.
         conda_env_path (str): Path to the conda environment.
     """
-    run_script_content = f"""#!/bin/bash
+    # Check if conda_env_path is "test"
+    if conda_env_path == "test":
+        conda_env_path = "$HOME/miniconda/envs/poresippr_gui"
 
-# Path to the conda environment
-CONDA_ENV_PATH="{conda_env_path}"
+    # Create the run_poresippr.sh script
+    run_script_content = f"""#!/bin/bash
 
 # Log file path
 LOG_FILE="{os.path.join(script_dir, 'run_poresippr.log')}"
+"""
+
+    # Add conda environment activation if provided
+    if conda_env_path:
+        run_script_content += f"""
+# Path to the conda environment
+CONDA_ENV_PATH="{conda_env_path}"
 
 # Initialize conda
 {{
@@ -111,16 +120,26 @@ LOG_FILE="{os.path.join(script_dir, 'run_poresippr.log')}"
     # Activate the environment
     echo "Activating environment..."
     conda activate "$CONDA_ENV_PATH"
+}}
+"""
 
-    # Run the application using the full path to the python executable
-    echo "Running application..."
-    python "{os.path.join(script_dir, 'main.py')}"
+    run_script_content += f"""
+# Run the application using the full path to the python executable
+echo "Running application..."
+python "{os.path.join(script_dir, 'main.py')}"
+"""
 
-    # Deactivate the environment
-    echo "Deactivating environment..."
-    conda deactivate
+    if conda_env_path:
+        run_script_content += """
+# Deactivate the environment
+echo "Deactivating environment..."
+conda deactivate
+"""
+
+    run_script_content += f"""
 }} &> "$LOG_FILE"
 """
+
     run_script_file = os.path.join(script_dir, 'run_poresippr.sh')
     with open(run_script_file, 'w') as file:
         file.write(run_script_content)
@@ -140,9 +159,8 @@ def parse_arguments():
     parser.add_argument(
         'conda_env_path',
         nargs='?',
-        default="$HOME/miniconda/envs/poresippr_gui",
-        help="Path to the conda environment (default: "
-             "$HOME/miniconda/envs/poresippr_gui)"
+        default=None,
+        help="Path to the conda environment (default: None)"
     )
     return parser.parse_args()
 
