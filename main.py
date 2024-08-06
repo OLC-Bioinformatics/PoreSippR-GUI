@@ -421,10 +421,10 @@ class MainWindow(QMainWindow):
             self.configure_run
         )
 
-        # Connect the 'open_dialog' method to the 'clicked' signal of the
+        # Connect the 'run_info' method to the 'clicked' signal of the
         # 'sequence_info_button'.
         self.user_interface.sequence_info_button.clicked.connect(
-            self.open_dialog
+            self.run_info
         )
 
         # Disable the sequence info button until a run is configured
@@ -751,7 +751,8 @@ class MainWindow(QMainWindow):
 
     def validate_and_close(
             self, window_dialog, run_name_input, barcode_kit_input,
-            barcode_list_widget, lab_name_dropdown):
+            barcode_list_widget, lab_name_dropdown
+    ):
         """
         Validates the user inputs and closes the dialog if successful.
 
@@ -765,9 +766,11 @@ class MainWindow(QMainWindow):
         self.lab_name = lab_name_dropdown.currentText().rstrip()
         self.run_name = run_name_input.text().rstrip()
         self.barcode_kit = barcode_kit_input.text().rstrip()
-        self.selected_barcodes = sorted([
-            item.text() for item in barcode_list_widget.selectedItems()
-        ])
+        self.selected_barcodes = sorted(
+            [
+                item.text() for item in barcode_list_widget.selectedItems()
+            ]
+        )
 
         # Initialize a list to store messages for invalid inputs
         invalid_messages = []
@@ -796,7 +799,8 @@ class MainWindow(QMainWindow):
             run_name_pattern = re.compile(r"MIN-\d{8}")
             if not run_name_pattern.match(self.run_name):
                 invalid_messages.append(
-                    "Run Name must be in the format MIN-YYYYMMDD.")
+                    "Run Name must be in the format MIN-YYYYMMDD."
+                )
 
         # Validate Barcode Kit
         if not self.barcode_kit:
@@ -856,6 +860,26 @@ class MainWindow(QMainWindow):
             # Enable the sequence info button
             self.user_interface.sequence_info_button.setEnabled(True)
 
+            # Update the configuration_button styling to indicate finalization
+            self.user_interface.configuration_button.setStyleSheet(
+                """
+                QPushButton {
+                    background-color: #5cb85c;
+                    color: white;
+                    font-weight: bold;
+                }
+                QPushButton:disabled {
+                    background-color: #5cb85c;
+                    color: white;
+                    font-weight: bold;
+                }
+            """
+                )
+            self.user_interface.configuration_button.setText(
+                "PoreSippr Run Configured"
+                )
+            self.user_interface.configuration_button.setEnabled(False)
+
             # Close the dialog
             window_dialog.accept()
 
@@ -901,7 +925,7 @@ class MainWindow(QMainWindow):
             writer.writerow(header)
             writer.writerow(row)
 
-    def open_dialog(self):
+    def run_info(self):
         """
         Opens a dialog window with a QTableWidget for user data entry.
 
@@ -945,7 +969,7 @@ class MainWindow(QMainWindow):
         for i, barcode in enumerate(self.selected_barcodes):
             table.setItem(i, 0, QTableWidgetItem(barcode))
 
-            #  SEQID column as empty
+            # SEQID column as empty
             table.setItem(i, 1, QTableWidgetItem(""))
 
             # OLNID column as empty
@@ -957,11 +981,10 @@ class MainWindow(QMainWindow):
 
         # After setting up the table and populating it with items
         for i in range(table.rowCount()):
-            table.setRowHeight(
-                i, 30
-            )
+            table.setRowHeight(i, 30)
 
-        table.setStyleSheet("""
+        table.setStyleSheet(
+            """
             QTableWidget {
                 border: 1px solid #ddd;
                 font-family: Arial, sans-serif;
@@ -987,11 +1010,11 @@ class MainWindow(QMainWindow):
             QTableWidget::item:hover {
                 background-color: #f9f9f9;
             }
-        """)
+        """
+            )
 
         # Set the size policy of the table to Expanding
         table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         # Add the table to the dialog's layout
@@ -1010,7 +1033,8 @@ class MainWindow(QMainWindow):
                 # Show a success message
                 msg_box = CustomMessageBox(dialog)
                 msg_box.setText(
-                    "Validation Successful\nAll entries are valid.")
+                    "Validation Successful\nAll entries are valid."
+                    )
                 msg_box.exec()
                 # Write the metadata to the CSV file
                 self.write_metadata_table()
@@ -1018,6 +1042,26 @@ class MainWindow(QMainWindow):
                 # Enable the run button and make it checkable
                 self.user_interface.run_button.setEnabled(True)
                 self.user_interface.run_button.setCheckable(True)
+
+                # Update the sequence_info_button styling to indicate
+                # finalization
+                self.user_interface.sequence_info_button.setStyleSheet(
+                    """
+                    QPushButton {
+                        background-color: #5cb85c;
+                        color: white;
+                        font-weight: bold;
+                    }
+                    QPushButton:disabled {
+                        background-color: #5cb85c;
+                        color: white;
+                    }
+                """
+                    )
+                self.user_interface.sequence_info_button.setText(
+                    "Sequence Information Entered"
+                    )
+                self.user_interface.sequence_info_button.setEnabled(False)
 
                 # Close the dialog
                 dialog.accept()
@@ -1556,15 +1600,6 @@ class MainWindow(QMainWindow):
             self.user_interface.run_label_error.setText(
                 "Your PoreSippr run has been successfully terminated")
 
-            # Apply the CSS to the button
-            self.user_interface.run_button.setStyleSheet(
-                "QPushButton { border: 1px solid #007bff; "
-                "border-radius: 4px; background-color: #007bff; "
-                "color: white; padding: 5px 10px; }"
-                "QPushButton:hover { background-color: #0056b3; }"
-                "QPushButton:pressed { background-color: #003f7f; }"
-            )
-
             # Show the message
             self.user_interface.run_label_error.show()
 
@@ -1579,6 +1614,12 @@ class MainWindow(QMainWindow):
 
             # Enable the configuration_button
             self.user_interface.configuration_button.setEnabled(True)
+
+            # Enable the sequence_info_button
+            self.user_interface.sequence_info_button.setEnabled(True)
+
+            # Allow the sequence_info_button to be clicked
+            self.user_interface.sequence_info_button.setCheckable(True)
 
             # Terminate the worker thread
             self.worker.terminate()
