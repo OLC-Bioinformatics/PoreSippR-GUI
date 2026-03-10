@@ -1348,7 +1348,21 @@ class MainWindow(QMainWindow):
         if path is None:
             return None
 
-        return sorted(glob(os.path.join(path, '*.html')))
+        def extract_iteration(filename):
+            """
+            Extracts the iteration number from the filename.
+            :param filename: The name of the file from which to extract the
+            iteration number.
+            :return: The iteration number as an integer, or infinity if the
+            pattern is not found.
+            """
+            match = re.search(
+                r'iteration_(\d+)\.html', os.path.basename(filename)
+            )
+            return int(match.group(1)) if match else float('inf')
+
+        images = glob(os.path.join(path, '*.html'))
+        return sorted(images, key=extract_iteration)
 
     def add_html_to_gui(self, html_path):
         """

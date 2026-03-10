@@ -10,7 +10,7 @@ import base64
 from collections import defaultdict
 import csv
 from datetime import datetime
-import glob
+from glob import glob
 import multiprocessing
 import os
 import re
@@ -279,7 +279,14 @@ def get_csv_files_by_iteration(folder_path):
         lists of CSV file paths.
     """
     # Get all CSV files in the folder
-    csv_files = glob.glob(os.path.join(folder_path, '*.csv'))
+    csv_files = glob(os.path.join(folder_path, '*.csv'))
+
+    # Remove any files with the word "barcode" in the name
+    csv_files = [
+        csv_file for csv_file in csv_files if 'barcode'not in os.path.basename(
+            csv_file
+        )
+    ]
 
     # Initialize a dictionary to store the CSV files grouped by iteration
     csv_files_by_iteration = defaultdict(list)
@@ -782,7 +789,7 @@ def main(
             break
 
         # Get all CSV files in the csv_path
-        all_csv_files = glob.glob(os.path.join(csv_path, '*.csv'))
+        all_csv_files = glob(os.path.join(csv_path, '*.csv'))
 
         # Group the CSV files by iteration
         csv_files_by_iteration = defaultdict(list)
