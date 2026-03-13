@@ -6,12 +6,14 @@ PoreSippr, allowing users to start a run and view the summary as it is
 processed in real-time. The GUI is created using PySide6 and Qt Designer.
 """
 # Standard library imports
+import atexit
 import csv
 from glob import glob
 import multiprocessing
 import os
 import re
 import signal
+import subprocess
 import sys
 import time
 
@@ -68,6 +70,27 @@ from methods import (
 )
 from ui_main import Ui_MainWindow
 from version import __version__
+
+
+def cleanup_scheduler_processes(pid_store):
+    # Kill tracked PIDs
+    for pid in pid_store:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except Exception:
+            pass
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except Exception:
+            pass
+    # Fallback: kill all by name
+    try:
+        subprocess.run(
+            ["pkill", "-f", "poresippr_basecall_scheduler.py"],
+            check=False
+        )
+    except Exception:
+        pass
 
 
 class Worker(QThread):
@@ -529,11 +552,14 @@ class MainWindow(QMainWindow):
                 self.complete = True
                 # Terminate the worker and any external processes
                 self.worker.terminate()
+                self.worker.wait()
                 for pid in self.pid_store:
                     try:
                         os.kill(pid, signal.SIGTERM)
                     except ProcessLookupError:
                         pass
+                # Clean up any remaining scheduler processes
+                cleanup_scheduler_processes(self.pid_store)
                 sys.exit(0)  # Exit the application
             else:
                 pass  # Do nothing, continue running
@@ -1318,6 +1344,7 @@ class MainWindow(QMainWindow):
             self.user_interface.run_label_error.show()
 
         self.worker.terminate()
+        self.worker.wait()
 
     def update_page_label(self):
         """
@@ -1348,7 +1375,21 @@ class MainWindow(QMainWindow):
         if path is None:
             return None
 
-        return sorted(glob(os.path.join(path, '*.html')))
+        def extract_iteration(filename):
+            """
+            Extracts the iteration number from the filename.
+            :param filename: The name of the file from which to extract the
+            iteration number.
+            :return: The iteration number as an integer, or infinity if the
+            pattern is not found.
+            """
+            match = re.search(
+                r'iteration_(\d+)\.html', os.path.basename(filename)
+            )
+            return int(match.group(1)) if match else float('inf')
+
+        images = glob(os.path.join(path, '*.html'))
+        return sorted(images, key=extract_iteration)
 
     def add_html_to_gui(self, html_path):
         """
@@ -1623,6 +1664,7 @@ class MainWindow(QMainWindow):
 
             # Terminate the worker thread
             self.worker.terminate()
+            self.worker.wait()
 
             # Terminate any external processes
             for pid in self.pid_store:
@@ -1697,12 +1739,14 @@ class MainWindow(QMainWindow):
             if response == QMessageBox.Yes:
                 self.complete = True
                 self.worker.terminate()
+                self.worker.wait()
                 # Additionally, terminate any external processes
                 for pid in self.pid_store:
                     try:
                         os.kill(pid, signal.SIGTERM)
                     except ProcessLookupError:
                         pass  # Process might have already terminated
+                cleanup_scheduler_processes(self.pid_store)
                 event.accept()
             # If the user clicked 'Cancel', ignore the close event
             else:
@@ -1953,4 +1997,5 @@ if __name__ == "__main__":
     QFontDatabase.addApplicationFont(
         os.path.join(base_path, 'fonts', 'segoeuib.ttf'))
     window = MainWindow()
+    atexit.register(cleanup_scheduler_processes, window.pid_store)
     app.exec()
