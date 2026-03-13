@@ -648,12 +648,32 @@ def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
 
     # Convert HTML to PDF using a system call to weasyprint
     output_pdf_path = os.path.join(report_folder, f'{run_name}_report.pdf')
+
+    # Locate the weasyprint binary; if it's missing, provide a clear error.
+    weasyprint_path = shutil.which('weasyprint') or \
+        '/home/olcbio/miniconda3/envs/poresippr/bin/weasyprint'
+
+    if not os.path.exists(weasyprint_path):
+        raise FileNotFoundError(
+            "Could not find the 'weasyprint' executable. "
+            "Ensure weasyprint is installed and available on PATH."
+        )
+
     try:
         subprocess.run(
-            ['weasyprint', temp_html_path, output_pdf_path], check=True
+            [weasyprint_path, temp_html_path, output_pdf_path], check=True
+        )
+    except FileNotFoundError as exc:
+        # Raised if the executable is missing / cannot be executed
+        print(
+            f"Error running weasyprint: {exc}. "
+            f"Check that it is installed and on PATH."
         )
     except subprocess.CalledProcessError as exc:
-        print(f"Error creating PDF: {exc}")
+        # Raised when the executable runs but exits with a non-zero status
+        print(
+            f"Error creating PDF (weasyprint exited {exc.returncode}): {exc}"
+        )
     finally:
         # Clean up the temporary HTML file
         os.remove(temp_html_path)
