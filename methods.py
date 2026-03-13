@@ -10,7 +10,7 @@ import base64
 from collections import defaultdict
 import csv
 from datetime import datetime
-import glob
+from glob import glob
 import multiprocessing
 import os
 import re
@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 from time import sleep
 
 # Third-party imports
@@ -121,8 +122,7 @@ def validate_headers(data_dict):
     if missing_headers:
         if len(missing_headers) == 1:
             return f"Missing necessary header: {', '.join(missing_headers)}"
-        else:
-            return f"Missing necessary headers: {', '.join(missing_headers)}"
+        return f"Missing necessary headers: {', '.join(missing_headers)}"
 
     return None
 
@@ -130,8 +130,9 @@ def validate_headers(data_dict):
 def is_valid_fasta(file_path):
     """
     This function checks if a file is a valid FASTA file.
-    :param file_path:
-    :return:
+
+    Parameters:
+        file_path (str): The path to the file to check.
     """
     try:
         # Attempt to parse the file as FASTA
@@ -139,8 +140,7 @@ def is_valid_fasta(file_path):
         # Check if there is at least one record
         if len(records) > 0:
             return True
-        else:
-            return False
+        return False
     except Exception as e:
         # If parsing fails, the file is not a valid FASTA file
         print(f"Error parsing file: {e}")
@@ -279,7 +279,14 @@ def get_csv_files_by_iteration(folder_path):
         lists of CSV file paths.
     """
     # Get all CSV files in the folder
-    csv_files = glob.glob(os.path.join(folder_path, '*.csv'))
+    csv_files = glob(os.path.join(folder_path, '*.csv'))
+
+    # Remove any files with the word "barcode" in the name
+    csv_files = [
+        csv_file for csv_file in csv_files if 'barcode'not in os.path.basename(
+            csv_file
+        )
+    ]
 
     # Initialize a dictionary to store the CSV files grouped by iteration
     csv_files_by_iteration = defaultdict(list)
@@ -329,7 +336,7 @@ def create_data_dict(df, csv_file, metadata_dict):
         df['number_of_reads_mapped'].str.replace('X', ''),
         errors='coerce'
     )
-    
+
     # Serotype
     o_type = df[df['gene_name'].str.contains('O/')]
 
@@ -396,7 +403,7 @@ def create_data_dict(df, csv_file, metadata_dict):
 
     # GDCS genes
     gdcs_genes = df[~df['gene_name'].str.contains(
-        'O/|H/|Stx|eae|ehxA|aggR|aaiC|#', case=False
+        'O/|H/|Stx|eae|ehxA|aggR|aaiC|#|genome_coverage', case=False
     )]
 
     # Filter GDCS genes to only include those with at least two reads
@@ -408,7 +415,7 @@ def create_data_dict(df, csv_file, metadata_dict):
 
     # Find the genome coverage
     coverage = df[df['gene_name'].str.contains('genome_coverage')]
-    
+
     # Extract the coverage value
     coverage_value = coverage['number_of_reads_mapped'].values[
         0] if not coverage.empty else 0
@@ -547,7 +554,7 @@ def remove_index_from_html(html_file_path):
     :param html_file_path: The path to the HTML file.
     """
     # Read the HTML file
-    with open(html_file_path, 'r') as f:
+    with open(html_file_path, 'r', encoding='utf-8') as f:
         html = f.read()
 
     # Parse the HTML
@@ -564,7 +571,7 @@ def remove_index_from_html(html_file_path):
         th.decompose()
 
     # Write the modified HTML back to the file
-    with open(html_file_path, 'w') as f:
+    with open(html_file_path, 'w', encoding='utf-8') as f:
         f.write(str(soup))
 
 
@@ -610,7 +617,7 @@ def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
     lab_details = lab_info.get(lab_name, ('', ''))[0]
 
     # Load the HTML table from the file
-    with open(html_file_path, 'r') as file:
+    with open(html_file_path, 'r', encoding='utf-8') as file:
         table_html = file.read()
 
     # Get the script path
@@ -636,7 +643,7 @@ def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
 
     # Save the rendered HTML to a temporary file
     temp_html_path = os.path.join(report_folder, f'{run_name}_temp.html')
-    with open(temp_html_path, 'w') as temp_html_file:
+    with open(temp_html_path, 'w', encoding='utf-8') as temp_html_file:
         temp_html_file.write(html_content)
 
     # Convert HTML to PDF using a system call to weasyprint
@@ -661,6 +668,31 @@ def handle_output(stream, capture_list):
         line = line.rstrip()
         print(line)
         capture_list.append(line)
+
+
+def wait_for_stable_file(file_path, checks=3, interval=0.2, timeout=10):
+    """
+    Wait until the file size is stable, indicating writing is complete.
+    Returns True if stable, False if timeout.
+    """
+
+    last_size = -1
+    stable_count = 0
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            size = os.path.getsize(file_path)
+        except OSError:
+            size = -1
+        if size == last_size and size > 0:
+            stable_count += 1
+            if stable_count >= checks:
+                return True
+        else:
+            stable_count = 0
+        last_size = size
+        sleep(interval)
+    return False
 
 
 def main(
@@ -689,7 +721,7 @@ def main(
     sleep_time (int): The time to sleep between iterations. Default is 20.
     """
     # Read the config file and extract the barcode_values
-    with open(config_file, 'r') as f:
+    with open(config_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
             barcode_values = row['barcode_values'].split(',')
@@ -698,7 +730,7 @@ def main(
     link_dict = {}
 
     # Read the metadata file, and extract the links for seqid:olnid:barcode
-    with open(metadata_file, 'r') as f:
+    with open(metadata_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
             # Populate link_dict with seqid as the key and a nested dictionary
@@ -725,7 +757,7 @@ def main(
     # Run PoreSippr using subprocess.Popen. Capture stdout and stderr
     if test:
         command = [
-            'python',
+            '/home/olcbio/miniconda3/envs/poresippr/bin/python',
             '-u',
             os.path.join(script_path, 'poresippr_placeholder.py'),
             config_file,
@@ -734,7 +766,7 @@ def main(
         ]
     else:
         command = [
-            'python',
+            '/home/olcbio/miniconda3/envs/poresippr/bin/python',
             '-u',
             os.path.join(script_path, 'poresippr_basecall_scheduler.py'),
             config_file,
@@ -782,7 +814,7 @@ def main(
             break
 
         # Get all CSV files in the csv_path
-        all_csv_files = glob.glob(os.path.join(csv_path, '*.csv'))
+        all_csv_files = glob(os.path.join(csv_path, '*.csv'))
 
         # Group the CSV files by iteration
         csv_files_by_iteration = defaultdict(list)
@@ -842,7 +874,13 @@ def main(
                             processed_folder,
                             os.path.basename(csv_file))):
                     continue
-                
+
+                # Wait for the CSV file to be fully written
+                if wait_for_stable_file(csv_file):
+                    df = parse_csv_file(csv_file)
+                else:
+                    print(f"File {csv_file} not stable for reading.")
+
                 # Process the CSV file
                 df = parse_csv_file(csv_file)
                 data_dict = create_data_dict(
@@ -864,7 +902,11 @@ def main(
                 )
 
                 # Move the processed CSV file to a different folder
-                shutil.move(csv_file, processed_folder)
+                try:
+                    shutil.move(csv_file, processed_folder)
+                except Exception:
+                    sleep(3)
+                    shutil.move(csv_file, processed_folder)
 
             # Create the PDF report
             create_pdf_report(
