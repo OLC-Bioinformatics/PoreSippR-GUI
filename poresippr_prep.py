@@ -50,6 +50,7 @@ Icon={os.path.join(script_dir, 'cfia.jpg')}
 Terminal=false
 Type=Application
 Categories=Utility;
+StartupWMClass=main.py
 """
 
 
@@ -97,13 +98,10 @@ def create_run_script(script_dir, conda_env_path):
     """
     # Check if conda_env_path is "test"
     if conda_env_path == "test":
-        conda_env_path = "$HOME/miniconda/envs/poresippr_gui"
+        conda_env_path = "$HOME/miniconda3/envs/poresippr_gui"
 
     # Create the run_poresippr.sh script
     run_script_content = f"""#!/bin/bash
-
-# Log file path
-LOG_FILE="{os.path.join(script_dir, 'run_poresippr.log')}"
 """
 
     # Add conda environment activation if provided
@@ -115,7 +113,7 @@ CONDA_ENV_PATH="{conda_env_path}"
 # Initialize conda
 {{
     echo "Initializing conda..."
-    source "$HOME/miniconda/etc/profile.d/conda.sh"
+    source "$HOME/miniconda3/etc/profile.d/conda.sh"
 
     # Activate the environment
     echo "Activating environment..."
@@ -124,7 +122,7 @@ CONDA_ENV_PATH="{conda_env_path}"
 """
 
     run_script_content += f"""
-# Run the application using the full path to the python executable
+# Run the application
 echo "Running application..."
 python "{os.path.join(script_dir, 'main.py')}"
 """
@@ -132,12 +130,10 @@ python "{os.path.join(script_dir, 'main.py')}"
     if conda_env_path:
         run_script_content += """
 # Deactivate the environment
+{
 echo "Deactivating environment..."
 conda deactivate
-"""
-
-    run_script_content += f"""
-}} &> "$LOG_FILE"
+}
 """
 
     run_script_file = os.path.join(script_dir, 'run_poresippr.sh')

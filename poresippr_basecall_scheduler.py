@@ -67,6 +67,7 @@ with open(metadata_csv_path, 'r') as metafile:
 
 def main_loop(complete, iteration):
     while not terminate:  # Loop to keep running Guppy and downstream analysis
+        print('\n\nIteration:', iteration.value, '\n\n')
         with open(csv_file_path, 'r') as csvfile:
             csv_reader = csv.DictReader(csvfile)
             for row in csv_reader:
@@ -85,7 +86,7 @@ def main_loop(complete, iteration):
                     print(f"Error message: {e}")
 
                 # Running guppy fast basecalling
-                guppy_command = f"guppy_basecaller --input_path {fast5_dir} --save_path {output_dir} --config {config} --barcode_kits {barcode}  -x auto -r"
+                guppy_command = f"/home/olcbio/Downloads/ont-guppy/bin/guppy_basecaller --input_path {fast5_dir} --save_path {output_dir} --config {config} --barcode_kits {barcode}  -x auto -r"
                 print(f"Running guppy command: {guppy_command}")
                 run_command(guppy_command)
 
@@ -138,12 +139,13 @@ def main_loop(complete, iteration):
             break
         print("Waiting for 30 minutes before running Guppy again...")
         time.sleep(1800)
-        complete.value = True
+        #complete.value = True
 
 if __name__ == "__main__":
     terminate = False
     complete = Value('b', False)
     iteration = Value('i', 1)
+    
     p = Process(target=main_loop, args=(complete, iteration))
 
     # Register the signal handler for SIGINT (Ctrl+C) and SIGTERM

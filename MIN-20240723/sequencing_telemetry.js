@@ -1,7 +1,7 @@
 [
     {
         "aggregation": "segment", 
-        "analysis_id": "1b35859f-4157-4fff-bc64-359df0c55d42", 
+        "analysis_id": "c1d3e646-ebf7-47e1-8622-8b8121ef4b7c", 
         "basecall_1d": {
             "exit_status_dist": {
                 "fail:qscore_filter": 1375, 
@@ -103,8 +103,8 @@
             ], 
             "qscore_sum_temp": {
                 "count": 4000, 
-                "mean": 8.503915786743164, 
-                "sum": 34015.6640625
+                "mean": 8.50390338897705, 
+                "sum": 34015.61328125
             }, 
             "read_len_events_sum_temp": 25459645, 
             "seq_len_bases_dist_temp": [
@@ -424,13 +424,13 @@
             ], 
             "strand_median_pa": {
                 "count": 4000, 
-                "mean": 99.09083557128906, 
-                "sum": 396363.34375
+                "mean": 99.09080505371094, 
+                "sum": 396363.21875
             }, 
             "strand_sd_pa": {
                 "count": 4000, 
-                "mean": 18.26476287841797, 
-                "sum": 73059.0546875
+                "mean": 18.26479148864746, 
+                "sum": 73059.1640625
             }
         }, 
         "channel_count": 333, 
@@ -1846,7 +1846,7 @@
             "hostname": "olcbio-Precision-7560", 
             "installation_type": "nc", 
             "is_simulated": "0", 
-            "msg_id": "5647505f-53fd-4038-b1ee-3c6aa06a1f97", 
+            "msg_id": "1a97ec59-e4db-44c8-9ba6-b3729586897e", 
             "operating_system": "ubuntu 22.04", 
             "protocol_group_id": "MIN-20240125", 
             "protocol_run_id": "ae08158b-cc2b-4195-a65d-a27563128731", 
@@ -1854,14 +1854,14 @@
             "protocols_version": "7.8.2", 
             "run_id": "9d280106366cd76af384d9726407c419531e7c16", 
             "sample_id": "no_sample", 
-            "time_stamp": "2025-08-12T18:00:47Z", 
+            "time_stamp": "2025-08-13T13:06:27Z", 
             "usb_config": "fx3_1.2.7#fpga_1.2.1#bulk#USB300", 
             "version": "5.8.3"
         }
     }, 
     {
         "aggregation": "cumulative", 
-        "analysis_id": "1b35859f-4157-4fff-bc64-359df0c55d42", 
+        "analysis_id": "c1d3e646-ebf7-47e1-8622-8b8121ef4b7c", 
         "basecall_1d": {
             "exit_status_dist": {
                 "fail:qscore_filter": 1375, 
@@ -1963,8 +1963,8 @@
             ], 
             "qscore_sum_temp": {
                 "count": 4000, 
-                "mean": 8.503915786743164, 
-                "sum": 34015.6640625
+                "mean": 8.50390338897705, 
+                "sum": 34015.61328125
             }, 
             "read_len_events_sum_temp": 25459645, 
             "seq_len_bases_dist_temp": [
@@ -2284,13 +2284,13 @@
             ], 
             "strand_median_pa": {
                 "count": 4000, 
-                "mean": 99.09083557128906, 
-                "sum": 396363.34375
+                "mean": 99.09080505371094, 
+                "sum": 396363.21875
             }, 
             "strand_sd_pa": {
                 "count": 4000, 
-                "mean": 18.26476287841797, 
-                "sum": 73059.0546875
+                "mean": 18.26479148864746, 
+                "sum": 73059.1640625
             }
         }, 
         "channel_count": 333, 
@@ -3706,7 +3706,7 @@
             "hostname": "olcbio-Precision-7560", 
             "installation_type": "nc", 
             "is_simulated": "0", 
-            "msg_id": "952c4236-7c08-4878-ba4b-a8f23de1fe64", 
+            "msg_id": "f0331672-3201-4daa-b2cf-185a468bb795", 
             "operating_system": "ubuntu 22.04", 
             "protocol_group_id": "MIN-20240125", 
             "protocol_run_id": "ae08158b-cc2b-4195-a65d-a27563128731", 
@@ -3714,7 +3714,7 @@
             "protocols_version": "7.8.2", 
             "run_id": "9d280106366cd76af384d9726407c419531e7c16", 
             "sample_id": "no_sample", 
-            "time_stamp": "2025-08-12T18:00:47Z", 
+            "time_stamp": "2025-08-13T13:06:27Z", 
             "usb_config": "fx3_1.2.7#fpga_1.2.1#bulk#USB300", 
             "version": "5.8.3"
         }

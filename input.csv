@@ -1,2 +1,2 @@
 reference,fast5_dir,output_dir,config,barcode,barcode_values
-/home/olcbio/Downloads/PoreSippRDB_240509.fasta,/home/olcbio/Downloads/240125_MC26299/test,/home/olcbio/Downloads/240125_MC26299/test_out,/usr/data/dna_r10.4.1_e8.2_260bps_fast.cfg,SQK-RBK114-24,"06,07,08,09,10"
+/home/olcbio/PoreSippR-GUI/PoreSippR_DB_251110.fasta,/var/lib/minknow/data/MIN-20260313/no_sample/20260313_1237_MN26299_FBF64510_dc6eb81e/fast5,/home/olcbio/PoreSippR-GUI/MIN-20260313,dna_r10.4.1_e8.2_260bps_fast.cfg,SQK-RBK114-24,"""01,02"""
