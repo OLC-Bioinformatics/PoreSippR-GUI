@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import gzip
 import importlib.util
+import io
 import json
 import os
 import subprocess
@@ -946,3 +947,178 @@ def test_parse_arguments_supports_test_argv() -> None:
     assert arguments.poll_seconds == 5
     assert arguments.stable_polls == 3
     assert arguments.once is True
+
+
+def test_run_mapping_pipeline_uses_valid_samtools_index_command(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Use supported Samtools arguments and replace a stale BAM index.
+
+    Args:
+        monkeypatch: Pytest monkeypatch fixture.
+        tmp_path: Pytest temporary directory.
+    """
+    reference = tmp_path / "reference.fasta"
+    reference.write_text(
+        ">target\nACGT\n",
+        encoding="utf-8",
+    )
+
+    fastq = tmp_path / "reads.fastq"
+    fastq.write_text(
+        "@read\nACGT\n+\n!!!!\n",
+        encoding="utf-8",
+    )
+
+    output_bam = tmp_path / "mapped.sorted.bam"
+    temporary_bam = output_bam.with_suffix(".tmp.bam")
+    output_index = Path(f"{output_bam}.bai")
+
+    output_index.write_bytes(b"stale-index")
+
+    popen_commands: list[list[str]] = []
+    run_commands: list[list[str]] = []
+
+    class FakeProcess:
+        """Minimal successful subprocess used by the pipeline test."""
+
+        def __init__(
+            self,
+            *,
+            stdout: io.BytesIO | None = None,
+        ) -> None:
+            """Create a completed fake process.
+
+            Args:
+                stdout: Optional standard-output stream.
+            """
+            self.stdout = stdout
+            self.pid = 12345
+            self.return_code: int | None = None
+
+        def wait(self) -> int:
+            """Return a successful child-process status."""
+            self.return_code = 0
+            return 0
+
+        def poll(self) -> int | None:
+            """Return the current child-process status."""
+            return self.return_code
+
+        def terminate(self) -> None:
+            """Mark the fake process as terminated."""
+            self.return_code = -15
+
+    def fake_popen(
+        arguments: list[str],
+        *,
+        stdout: object = None,
+        stdin: object = None,
+        **_kwargs: object,
+    ) -> FakeProcess:
+        """Simulate successful Minimap2 and Samtools sort processes.
+
+        Args:
+            arguments: Child-process command.
+            stdout: Requested standard-output destination.
+            stdin: Requested standard-input source.
+            **_kwargs: Additional unused Popen arguments.
+
+        Returns:
+            Successful fake process.
+        """
+        del stdin
+
+        command = [str(value) for value in arguments]
+        popen_commands.append(command)
+
+        if command[0] == "minimap2":
+            assert stdout == subprocess.PIPE
+            return FakeProcess(stdout=io.BytesIO(b"sam-output"))
+
+        if command[:2] == ["samtools", "sort"]:
+            temporary_bam.write_bytes(b"sorted-bam")
+            return FakeProcess()
+
+        raise AssertionError(f"Unexpected Popen command: {command}")
+
+    def fake_run_command(
+        *,
+        runtime: Any,
+        arguments: list[str | Path],
+        stdout_path: Path | None = None,
+        cwd: Path | None = None,
+    ) -> None:
+        """Record and simulate the Samtools indexing command.
+
+        Args:
+            runtime: Scheduler process tracker.
+            arguments: Command and arguments.
+            stdout_path: Optional standard-output path.
+            cwd: Optional working directory.
+        """
+        del runtime, stdout_path, cwd
+
+        command = [str(value) for value in arguments]
+        run_commands.append(command)
+
+        if command[:2] == ["samtools", "index"]:
+            output_index.write_bytes(b"new-index")
+
+    monkeypatch.setattr(
+        scheduler.subprocess,
+        "Popen",
+        fake_popen,
+    )
+    monkeypatch.setattr(
+        scheduler,
+        "run_command",
+        fake_run_command,
+    )
+
+    runtime = scheduler.SchedulerRuntime()
+
+    scheduler.run_mapping_pipeline(
+        runtime=runtime,
+        minimap2="minimap2",
+        samtools="samtools",
+        reference=reference,
+        fastq_files=[fastq],
+        output_bam=output_bam,
+        threads=5,
+    )
+
+    assert popen_commands[0] == [
+        "minimap2",
+        "-ax",
+        "map-ont",
+        str(reference),
+        str(fastq),
+    ]
+
+    assert popen_commands[1] == [
+        "samtools",
+        "sort",
+        "-@",
+        "5",
+        "-o",
+        str(temporary_bam),
+        "-",
+    ]
+
+    assert run_commands == [
+        [
+            "samtools",
+            "index",
+            "-@",
+            "5",
+            str(output_bam),
+        ]
+    ]
+
+    assert all("-f" not in command for command in run_commands)
+    assert output_bam.read_bytes() == b"sorted-bam"
+    assert output_index.read_bytes() == b"new-index"
+    assert not temporary_bam.exists()
+    assert runtime.active_processes == []

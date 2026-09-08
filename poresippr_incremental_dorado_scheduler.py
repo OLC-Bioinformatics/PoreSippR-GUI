@@ -405,9 +405,19 @@ def run_mapping_pipeline(
         )
 
     os.replace(temporary_bam, output_bam)
+
+    output_index = Path(f"{output_bam}.bai")
+    output_index.unlink(missing_ok=True)
+
     run_command(
         runtime=runtime,
-        arguments=[samtools, "index", "-f", output_bam],
+        arguments=[
+            samtools,
+            "index",
+            "-@",
+            str(threads),
+            output_bam,
+        ],
     )
 
 
