@@ -84,9 +84,7 @@ class AzureBlobStore:
         source = Path(source)
         digest = sha256_file(source)
         try:
-            blob = self.client.get_blob_client(
-                container=container, blob=blob_name
-            )
+            blob = self._blob_client(container, blob_name, writing=True)
             with open(source, "rb") as handle:
                 blob.upload_blob(
                     handle, overwrite=False, metadata={"sha256": digest}
@@ -258,7 +256,9 @@ def write_scheduler_inputs(manifest, manifest_path, input_directory, output_dire
                 "OLNID": barcode["olnid"],
             })
 
-    shutil.copyfile(manifest_path, input_directory / "finalized-manifest.json")
+    manifest_copy = input_directory / "finalized-manifest.json"
+    if Path(manifest_path).resolve() != manifest_copy.resolve():
+        shutil.copyfile(manifest_path, manifest_copy)
     (input_directory / ".upload-complete").touch()
     return run_csv, metadata_csv
 

@@ -55,6 +55,22 @@ def test_manifest_materialization_and_csv_generation(tmp_path):
     assert (input_directory / ".upload-complete").is_file()
 
 
+def test_scheduler_input_generation_accepts_manifest_in_input_directory(tmp_path):
+    reference = tmp_path / "reference.fasta"
+    manifest_path = tmp_path / "task" / "input" / "finalized-manifest.json"
+    manifest_path.parent.mkdir(parents=True)
+    manifest_path.write_text(
+        json.dumps(make_manifest(reference)), encoding="utf-8"
+    )
+
+    wrapper.write_scheduler_inputs(
+        make_manifest(reference), manifest_path, manifest_path.parent,
+        tmp_path / "task" / "output"
+    )
+
+    assert manifest_path.is_file()
+
+
 def test_manifest_rejects_path_traversal(tmp_path):
     manifest = make_manifest(tmp_path / "reference.fasta")
     manifest["files"][0]["relative_path"] = "../outside.pod5"
@@ -97,6 +113,38 @@ def test_publish_immutable_file_rejects_divergent_retry(tmp_path):
     source.write_text("different\n", encoding="utf-8")
     with pytest.raises(ValueError, match="immutable output conflict"):
         wrapper.publish_immutable_file(source, destination)
+
+
+def test_sas_store_uploads_immutable_file_through_output_container(tmp_path):
+    class FakeBlob:
+        def __init__(self):
+            self.metadata = None
+
+        def upload_blob(self, handle, overwrite, metadata):
+            assert overwrite is False
+            assert handle.read() == b"result\n"
+            self.metadata = metadata
+
+    class FakeContainer:
+        def __init__(self, blob):
+            self.blob = blob
+
+        def get_blob_client(self, blob_name):
+            assert blob_name == "runs/example/result.txt"
+            return self.blob
+
+    source = tmp_path / "result.txt"
+    source.write_bytes(b"result\n")
+    blob = FakeBlob()
+    store = wrapper.AzureBlobStore.__new__(wrapper.AzureBlobStore)
+    store.client = None
+    store.input_container = None
+    store.output_container = FakeContainer(blob)
+
+    assert store.upload_immutable_file(
+        "nanopore-results", "runs/example/result.txt", source
+    ) is True
+    assert blob.metadata["sha256"] == wrapper.sha256_file(source)
 
 
 def test_inventory_outputs_is_relative_to_output_directory(tmp_path):
