@@ -66,8 +66,10 @@ class AzureBlobStore:
         destination.parent.mkdir(parents=True, exist_ok=True)
         partial = destination.with_name(destination.name + ".partial")
         blob = self._blob_client(container, blob_name)
+        downloader = blob.download_blob(max_concurrency=4)
         with open(partial, "wb") as handle:
-            handle.write(blob.download_blob().readall())
+            for chunk in downloader.chunks():
+                handle.write(chunk)
         os.replace(partial, destination)
 
     def upload_file(self, container, blob_name, source):
