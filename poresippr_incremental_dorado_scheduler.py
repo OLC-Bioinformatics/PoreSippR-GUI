@@ -1204,17 +1204,29 @@ def process_batch(
     retained_count = sum(len(paths) for paths in retained.values())
 
     if retained_count == 0:
-        raise RuntimeError(
-            "Dorado demux produced no configured-barcode FASTQ files"
+        LOGGER.warning(
+            "Dorado demux produced no configured-barcode FASTQ files for %s",
+            batch_id,
         )
 
-    result_files = process_mapping(
-        runtime=runtime,
-        run=run,
-        metadata=metadata,
-        retained_root=retained_root,
-        iteration=iteration,
-        args=args,
+    cumulative_fastq_count = sum(
+        len(cumulative_fastq_files(
+            retained_root=retained_root,
+            barcode_number=barcode_number,
+        ))
+        for barcode_number in run.barcode_values
+    )
+    result_files = (
+        process_mapping(
+            runtime=runtime,
+            run=run,
+            metadata=metadata,
+            retained_root=retained_root,
+            iteration=iteration,
+            args=args,
+        )
+        if cumulative_fastq_count > 0
+        else []
     )
     finished_at = utc_now()
     batch_record = {

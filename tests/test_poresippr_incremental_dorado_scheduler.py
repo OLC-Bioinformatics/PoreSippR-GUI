@@ -900,6 +900,57 @@ def test_process_batch_does_not_checkpoint_after_mapping_failure(
     assert state["batches"] == []
 
 
+def test_process_batch_checkpoints_batch_without_configured_barcodes(
+    monkeypatch: pytest.MonkeyPatch,
+    run_configuration: Any,
+    scheduler_args: SimpleNamespace,
+) -> None:
+    """Checkpoint a valid batch when demux finds no configured barcodes."""
+    pod5_path = run_configuration.pod5_directory / "unbarcoded.pod5"
+    make_old_file(pod5_path)
+    stat_result = pod5_path.stat()
+    candidate = scheduler.Pod5Candidate(
+        path=pod5_path,
+        key=str(pod5_path.resolve()),
+        fingerprint=f"{stat_result.st_size}:{stat_result.st_mtime_ns}",
+        size_bytes=stat_result.st_size,
+        modified_time_ns=stat_result.st_mtime_ns,
+    )
+    state = scheduler.initial_state(run=run_configuration)
+
+    def fake_run_command(
+        *,
+        runtime: Any,
+        arguments: Sequence[str | Path],
+        stdout_path: Path | None = None,
+        cwd: Path | None = None,
+    ) -> None:
+        del runtime, cwd
+        command = [str(item) for item in arguments]
+        if "basecaller" in command:
+            assert stdout_path is not None
+            stdout_path.write_bytes(b"BAM")
+
+    def fail_mapping(**_kwargs: object) -> list[str]:
+        raise AssertionError("mapping should be skipped without FASTQ files")
+
+    monkeypatch.setattr(scheduler, "run_command", fake_run_command)
+    monkeypatch.setattr(scheduler, "process_mapping", fail_mapping)
+
+    scheduler.process_batch(
+        runtime=scheduler.SchedulerRuntime(),
+        run=run_configuration,
+        state=state,
+        metadata={},
+        batch_files=[candidate],
+        args=scheduler_args,
+    )
+
+    assert candidate.key in state["processed_pod5"]
+    assert state["batches"][0]["retained_fastq_count"] == 0
+    assert state["batches"][0]["result_files"] == []
+
+
 def test_finalise_runs_writes_completed_status(
     run_configuration: Any,
 ) -> None:
