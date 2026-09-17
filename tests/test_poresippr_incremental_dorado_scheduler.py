@@ -900,12 +900,12 @@ def test_process_batch_does_not_checkpoint_after_mapping_failure(
     assert state["batches"] == []
 
 
-def test_process_batch_checkpoints_batch_without_configured_barcodes(
+def test_process_batch_fails_without_configured_barcode_reads(
     monkeypatch: pytest.MonkeyPatch,
     run_configuration: Any,
     scheduler_args: SimpleNamespace,
 ) -> None:
-    """Checkpoint a valid batch when demux finds no configured barcodes."""
+    """Do not checkpoint a batch when demux finds no configured barcodes."""
     pod5_path = run_configuration.pod5_directory / "unbarcoded.pod5"
     make_old_file(pod5_path)
     stat_result = pod5_path.stat()
@@ -937,18 +937,23 @@ def test_process_batch_checkpoints_batch_without_configured_barcodes(
     monkeypatch.setattr(scheduler, "run_command", fake_run_command)
     monkeypatch.setattr(scheduler, "process_mapping", fail_mapping)
 
-    scheduler.process_batch(
-        runtime=scheduler.SchedulerRuntime(),
-        run=run_configuration,
-        state=state,
-        metadata={},
-        batch_files=[candidate],
-        args=scheduler_args,
-    )
+    with pytest.raises(
+        scheduler.NoBarcodeReadsError,
+        match="No reads were classified to configured barcodes",
+    ):
+        scheduler.process_batch(
+            runtime=scheduler.SchedulerRuntime(),
+            run=run_configuration,
+            state=state,
+            metadata={},
+            batch_files=[candidate],
+            args=scheduler_args,
+        )
 
-    assert candidate.key in state["processed_pod5"]
-    assert state["batches"][0]["retained_fastq_count"] == 0
-    assert state["batches"][0]["result_files"] == []
+    assert candidate.key not in state["processed_pod5"]
+    assert state["next_batch_number"] == 1
+    assert state["next_iteration"] == 1
+    assert state["batches"] == []
 
 
 def test_finalise_runs_writes_completed_status(

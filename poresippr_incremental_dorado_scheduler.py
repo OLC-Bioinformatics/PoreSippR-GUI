@@ -44,6 +44,11 @@ from typing import Any, BinaryIO
 
 LOGGER = logging.getLogger("poresippr.scheduler")
 
+
+class NoBarcodeReadsError(RuntimeError):
+    """Raised when a batch produces no configured-barcode FASTQ reads."""
+
+
 DEFAULT_MODEL_DIRECTORY = (
     "/opt/ont/models/"
     "dna_r10.4.1_e8.2_400bps_fast@v5.2.0"
@@ -1204,9 +1209,13 @@ def process_batch(
     retained_count = sum(len(paths) for paths in retained.values())
 
     if retained_count == 0:
-        LOGGER.warning(
-            "Dorado demux produced no configured-barcode FASTQ files for %s",
-            batch_id,
+        configured_barcodes = ", ".join(
+            f"barcode{barcode:02d}" for barcode in run.barcode_values
+        )
+        raise NoBarcodeReadsError(
+            f"No reads were classified to configured barcodes for {batch_id}. "
+            f"Expected one of: {configured_barcodes}. "
+            "Check the barcode kit, barcode metadata, and input read quality."
         )
 
     cumulative_fastq_count = sum(

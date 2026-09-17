@@ -13,6 +13,24 @@ wrapper = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(wrapper)
 
 
+def test_wrapper_parser_accepts_foodport_streaming_options():
+    arguments = wrapper.parse_arguments([
+        "--manifest-blob", "260916-nanopore/input/manifests/input-manifest-v000001.json",
+        "--manifest-prefix", "260916-nanopore/input/manifests/input-manifest-v",
+        "--control-blob", "260916-nanopore/input/control/state.json",
+        "--source-root", "/tmp/source",
+        "--task-root", "/tmp/task",
+        "--scheduler", "/tmp/scheduler.py",
+    ])
+
+    assert arguments.manifest_prefix == (
+        "260916-nanopore/input/manifests/input-manifest-v"
+    )
+    assert arguments.control_blob == (
+        "260916-nanopore/input/control/state.json"
+    )
+
+
 def make_manifest(reference):
     return {
         "schema_version": 1,
@@ -100,6 +118,37 @@ def test_publish_result_manifest_writes_latest_after_state(tmp_path):
     )
     assert publication_state["result_manifest"] == "result-manifest.json"
     assert latest["publication_state"] == "publication-state.json"
+
+
+def test_manifest_generation_accepts_only_immutable_generation_names():
+    assert wrapper.manifest_generation(
+        "1745/input/manifests/input-manifest-v000007.json"
+    ) == 7
+    assert wrapper.manifest_generation("1745/input/manifest.json") is None
+    assert wrapper.manifest_generation(
+        "1745/input/manifests/input-manifest-vlatest.json"
+    ) is None
+
+
+def test_publish_result_manifest_uses_iteration_path(tmp_path):
+    result_path = wrapper.publish_result_manifest(
+        tmp_path,
+        {"run_id": 42, "run_name": "260825-nanopore"},
+        {"status": "completed", "outputs": []},
+        iteration=7,
+    )
+
+    assert result_path == (
+        tmp_path / "output/manifests/iteration-000007.json"
+    )
+    latest = json.loads(
+        (tmp_path / "output/manifests/latest.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert latest["result_manifest"] == (
+        "iterations/iteration-000007/manifests/iteration-000007.json"
+    )
 
 
 def test_publish_immutable_file_rejects_divergent_retry(tmp_path):
