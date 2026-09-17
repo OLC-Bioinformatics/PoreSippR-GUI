@@ -555,7 +555,7 @@ def run_task(args):
             publish_cloud_results(
                 storage, args.output_container,
                 "{}/iterations/iteration-{:06d}".format(
-                    args.output_prefix or "runs/{}/".format(manifest["run_name"]),
+                    args.output_prefix or "runs/{}".format(manifest["run_name"]),
                     generation,
                 ), task_root, manifest, result,
             )

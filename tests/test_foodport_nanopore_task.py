@@ -260,7 +260,7 @@ def test_publish_cloud_results_uploads_latest_last(tmp_path):
     store = FakeBlobStore({})
 
     wrapper.publish_cloud_results(
-        store, "nanopore-results", "runs/example", tmp_path, {}, {}
+        store, "nanopore-results", "runs/example/", tmp_path, {}, {}
     )
 
     assert store.uploads[-1] == (

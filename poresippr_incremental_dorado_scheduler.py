@@ -230,6 +230,7 @@ def run_command(
     runtime: SchedulerRuntime,
     arguments: Sequence[str | Path],
     stdout_path: Path | None = None,
+    stderr_path: Path | None = None,
     cwd: Path | None = None,
 ) -> None:
     """Run a command without a shell.
@@ -238,6 +239,7 @@ def run_command(
         runtime: Scheduler child-process tracker.
         arguments: Command and arguments to execute.
         stdout_path: Optional binary file receiving standard output.
+        stderr_path: Optional binary file receiving standard error.
         cwd: Optional child-process working directory.
 
     Raises:
@@ -249,17 +251,22 @@ def run_command(
     LOGGER.info("Running command: %s", " ".join(command))
 
     output_handle: BinaryIO | None = None
+    error_handle: BinaryIO | None = None
     process: subprocess.Popen[Any] | None = None
 
     try:
         if stdout_path is not None:
             stdout_path.parent.mkdir(parents=True, exist_ok=True)
             output_handle = stdout_path.open("wb")
+        if stderr_path is not None:
+            stderr_path.parent.mkdir(parents=True, exist_ok=True)
+            error_handle = stderr_path.open("wb")
 
         process = subprocess.Popen(
             command,
             cwd=str(cwd) if cwd else None,
             stdout=output_handle,
+            stderr=error_handle,
         )
         runtime.register_process(process)
         return_code = process.wait()
@@ -277,6 +284,8 @@ def run_command(
             runtime.unregister_process(process)
         if output_handle is not None:
             output_handle.close()
+        if error_handle is not None:
+            error_handle.close()
 
 
 def run_mapping_pipeline(
@@ -1136,6 +1145,7 @@ def process_batch(
         batch_directory=working_directory,
     )
     batch_bam = working_directory / "basecalls.bam"
+    dorado_stderr = working_directory / "dorado.stderr"
     demux_directory = working_directory / "demux"
     demux_directory.mkdir()
     started_at = utc_now()
@@ -1180,6 +1190,7 @@ def process_batch(
         runtime=runtime,
         arguments=basecaller_command,
         stdout_path=batch_bam,
+        stderr_path=dorado_stderr,
     )
 
     if not batch_bam.is_file() or batch_bam.stat().st_size == 0:

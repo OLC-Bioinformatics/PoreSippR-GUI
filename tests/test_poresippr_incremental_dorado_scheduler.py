@@ -703,6 +703,25 @@ def test_run_command_writes_binary_stdout(tmp_path: Path) -> None:
     assert runtime.active_processes == []
 
 
+def test_run_command_writes_binary_stderr(tmp_path: Path) -> None:
+    """Write child-process standard error to a binary file."""
+    runtime = scheduler.SchedulerRuntime()
+    error = tmp_path / "dorado.stderr"
+
+    scheduler.run_command(
+        runtime=runtime,
+        arguments=[
+            sys.executable,
+            "-c",
+            "import sys; sys.stderr.buffer.write(b'CUDA failure')",
+        ],
+        stderr_path=error,
+    )
+
+    assert error.read_bytes() == b"CUDA failure"
+    assert runtime.active_processes == []
+
+
 def test_run_command_raises_for_nonzero_exit() -> None:
     """Raise CalledProcessError for a failed child process."""
     runtime = scheduler.SchedulerRuntime()
@@ -795,9 +814,10 @@ def test_process_batch_checkpoints_only_after_success(
         runtime: Any,
         arguments: Sequence[str | Path],
         stdout_path: Path | None = None,
+        stderr_path: Path | None = None,
         cwd: Path | None = None,
     ) -> None:
-        del runtime, cwd
+        del runtime, stderr_path, cwd
         command = [str(item) for item in arguments]
         if "basecaller" in command:
             assert stdout_path is not None
@@ -865,9 +885,10 @@ def test_process_batch_does_not_checkpoint_after_mapping_failure(
         runtime: Any,
         arguments: Sequence[str | Path],
         stdout_path: Path | None = None,
+        stderr_path: Path | None = None,
         cwd: Path | None = None,
     ) -> None:
-        del runtime, cwd
+        del runtime, stderr_path, cwd
         command = [str(item) for item in arguments]
         if "basecaller" in command:
             assert stdout_path is not None
@@ -923,9 +944,10 @@ def test_process_batch_fails_without_configured_barcode_reads(
         runtime: Any,
         arguments: Sequence[str | Path],
         stdout_path: Path | None = None,
+        stderr_path: Path | None = None,
         cwd: Path | None = None,
     ) -> None:
-        del runtime, cwd
+        del runtime, stderr_path, cwd
         command = [str(item) for item in arguments]
         if "basecaller" in command:
             assert stdout_path is not None
@@ -1104,6 +1126,7 @@ def test_run_mapping_pipeline_uses_valid_samtools_index_command(
         runtime: Any,
         arguments: list[str | Path],
         stdout_path: Path | None = None,
+        stderr_path: Path | None = None,
         cwd: Path | None = None,
     ) -> None:
         """Record and simulate the Samtools indexing command.
@@ -1114,7 +1137,7 @@ def test_run_mapping_pipeline_uses_valid_samtools_index_command(
             stdout_path: Optional standard-output path.
             cwd: Optional working directory.
         """
-        del runtime, stdout_path, cwd
+        del runtime, stdout_path, stderr_path, cwd
 
         command = [str(value) for value in arguments]
         run_commands.append(command)
