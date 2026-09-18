@@ -424,6 +424,23 @@ def manifest_generation(blob_name):
         return None
 
 
+def resolve_model_path(model, models_directory="/opt/ont/models"):
+    """Prefer the immutable model installed in the runtime image."""
+    model_path = Path(model)
+    if model_path.is_dir():
+        return str(model_path)
+
+    installed_model = Path(models_directory) / model
+    if installed_model.is_dir():
+        return str(installed_model)
+
+    raise FileNotFoundError(
+        "Dorado model is not installed: {} (checked {})".format(
+            model, installed_model
+        )
+    )
+
+
 def control_state(storage, container, control_blob):
     if not storage.blob_exists(container, control_blob):
         return "running"
@@ -521,7 +538,8 @@ def run_task(args):
         )
         command = [
             args.python, args.scheduler, str(run_csv), str(metadata_csv),
-            "--model", manifest["dorado"]["model"], "--device", args.device,
+            "--model", resolve_model_path(manifest["dorado"]["model"]),
+            "--device", args.device,
             "--once", "--keep-mapping-bam",
             "--completion-marker", str(input_directory / ".upload-complete"),
         ]

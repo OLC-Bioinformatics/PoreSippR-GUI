@@ -130,6 +130,27 @@ def test_manifest_generation_accepts_only_immutable_generation_names():
     ) is None
 
 
+def test_resolve_model_path_prefers_installed_model_directory(tmp_path):
+    model = tmp_path / "dna_r10.4.1_e8.2_400bps_fast@v5.2.0"
+    model.mkdir()
+
+    assert wrapper.resolve_model_path(
+        model.name, str(tmp_path)
+    ) == str(model)
+
+
+def test_resolve_model_path_accepts_explicit_directory(tmp_path):
+    model = tmp_path / "model"
+    model.mkdir()
+
+    assert wrapper.resolve_model_path(str(model), str(tmp_path)) == str(model)
+
+
+def test_resolve_model_path_rejects_missing_model(tmp_path):
+    with pytest.raises(FileNotFoundError, match="Dorado model is not installed"):
+        wrapper.resolve_model_path("missing-model", str(tmp_path))
+
+
 def test_publish_result_manifest_uses_iteration_path(tmp_path):
     result_path = wrapper.publish_result_manifest(
         tmp_path,
