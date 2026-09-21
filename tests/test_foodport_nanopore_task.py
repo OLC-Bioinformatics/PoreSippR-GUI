@@ -3,6 +3,8 @@
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
+from unittest import mock
 
 import pytest
 
@@ -246,6 +248,95 @@ class FakeBlobStore:
         self.uploads.append((container, blob_name))
         return True
 
+    def upload_mutable_file(self, container, blob_name, source):
+        self.uploads.append((container, blob_name))
+        return True
+
+
+def test_streaming_wrapper_processes_generations_in_one_workspace(tmp_path):
+    reference = tmp_path / "reference.fasta"
+    reference.write_text(">target\nACGT\n", encoding="utf-8")
+    first_manifest = make_manifest(reference)
+    second_manifest = make_manifest(reference)
+    second_manifest["files"][0]["relative_path"] = "pass/sample-002.pod5"
+    second_manifest["files"][0]["blob_name"] = (
+        "runs/260825-nanopore/input/pod5/pass/sample-002.pod5"
+    )
+    first_manifest["files"][0]["size_bytes"] = 6
+    second_manifest["files"][0]["size_bytes"] = 6
+    manifest_blobs = {
+        "runs/260825-nanopore/input/manifests/input-manifest-v000001.json":
+            json.dumps(first_manifest).encode("utf-8"),
+        "runs/260825-nanopore/input/manifests/input-manifest-v000002.json":
+            json.dumps(second_manifest).encode("utf-8"),
+        first_manifest["files"][0]["blob_name"]: b"pod5-1",
+        second_manifest["files"][0]["blob_name"]: b"pod5-2",
+        "runs/260825-nanopore/input/control/state.json": (
+            b'{"state": "stopping"}'
+        ),
+    }
+
+    class StreamingStore(FakeBlobStore):
+        def list_blob_names(self, container, prefix):
+            return [
+                name for name in self.files
+                if name.startswith(prefix)
+            ]
+
+        def blob_exists(self, container, blob_name):
+            return True
+
+    store = StreamingStore(manifest_blobs)
+    arguments = SimpleNamespace(
+        manifest=None,
+        manifest_blob=(
+            "runs/260825-nanopore/input/manifests/"
+            "input-manifest-v000001.json"
+        ),
+        manifest_prefix=(
+            "runs/260825-nanopore/input/manifests/input-manifest-v"
+        ),
+        control_blob="runs/260825-nanopore/input/control/state.json",
+        poll_seconds=0,
+        source_root=tmp_path / "source",
+        task_root=tmp_path / "task",
+        input_container="nanopore-runs",
+        output_container="nanopore-results",
+        output_prefix="runs/260825-nanopore",
+        input_sas_url="input-sas",
+        output_sas_url="output-sas",
+        storage_account=None,
+        storage_key=None,
+        scheduler=tmp_path / "scheduler.py",
+        python="python",
+        device="cuda:0",
+    )
+
+    def run_scheduler(command, stdout, stderr, check):
+        output = arguments.task_root / "output" / "scheduler" / "reads.fastq"
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with output.open("a", encoding="utf-8") as handle:
+            handle.write("generation\n")
+        return SimpleNamespace(returncode=0)
+
+    with mock.patch.object(wrapper, "AzureBlobStore", return_value=store), \
+            mock.patch.object(wrapper, "resolve_model_path", return_value="model"), \
+            mock.patch.object(wrapper.subprocess, "run", side_effect=run_scheduler):
+        assert wrapper.run_task(arguments) == 0
+
+    scheduler_calls = [
+        upload for upload in store.uploads
+        if upload[1].endswith("/scheduler/reads.fastq")
+    ]
+    assert len(scheduler_calls) == 2
+    assert (
+        arguments.task_root / "output" / "scheduler" / "reads.fastq"
+    ).read_text(encoding="utf-8") == "generation\ngeneration\n"
+    assert json.loads(
+        (arguments.task_root / "input" / ".processed-generations.json")
+        .read_text(encoding="utf-8")
+    ) == [1, 2]
+
 
 def test_download_manifest_inputs_uses_blob_names_and_local_paths(tmp_path):
     reference = tmp_path / "reference.fasta"
@@ -282,6 +373,22 @@ def test_publish_cloud_results_uploads_latest_last(tmp_path):
 
     wrapper.publish_cloud_results(
         store, "nanopore-results", "runs/example/", tmp_path, {}, {}
+    )
+
+    assert store.uploads[-1] == (
+        "nanopore-results", "runs/example/manifests/latest.json"
+    )
+
+
+def test_publish_cloud_results_updates_latest_pointer(tmp_path):
+    output = tmp_path / "task/output"
+    (output / "manifests").mkdir(parents=True)
+    (output / "manifests/latest.json").write_text("{}\n", encoding="utf-8")
+    store = FakeBlobStore({})
+
+    wrapper.publish_cloud_results(
+        store, "nanopore-results", "runs/example/iterations/iteration-000002",
+        tmp_path, {}, {}
     )
 
     assert store.uploads[-1] == (

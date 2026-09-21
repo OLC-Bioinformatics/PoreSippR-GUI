@@ -128,6 +128,12 @@ class AzureBlobStore:
             return False
         raise ValueError("immutable cloud output conflict: {}".format(blob_name))
 
+    def upload_mutable_file(self, container, blob_name, source):
+        source = Path(source)
+        blob = self._blob_client(container, blob_name, writing=True)
+        with open(source, "rb") as handle:
+            blob.upload_blob(handle, overwrite=True)
+
 
 def utc_now():
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
@@ -343,10 +349,13 @@ def publish_result_manifest(task_root, manifest, result, iteration=None):
     """Commit the result manifest and latest pointer in publication order."""
     task_root = Path(task_root)
     publication_directory = task_root / "output" / "manifests"
+    latest_path = publication_directory / "latest.json"
+    publication_state_path = publication_directory / "publication-state.json"
     if iteration is None:
         result_path = publication_directory / "result-manifest.json"
         result_manifest_name = result_path.name
         latest_result_manifest_name = result_manifest_name
+        publication_state_name = publication_state_path.name
     else:
         result_path = publication_directory / (
             "iteration-{0:06d}.json".format(iteration)
@@ -355,9 +364,9 @@ def publish_result_manifest(task_root, manifest, result, iteration=None):
         latest_result_manifest_name = (
             "iterations/iteration-{0:06d}/{1}"
         ).format(iteration, result_manifest_name)
-    latest_path = publication_directory / "latest.json"
-    publication_state_path = publication_directory / "publication-state.json"
-
+        publication_state_name = (
+            "iterations/iteration-{0:06d}/manifests/{1}"
+        ).format(iteration, publication_state_path.name)
     for output in result.get("outputs", []):
         source = task_root / "output" / output["path"]
         publish_immutable_file(source, task_root / "output" / output["path"])
@@ -377,7 +386,7 @@ def publish_result_manifest(task_root, manifest, result, iteration=None):
         "run_id": manifest["run_id"],
         "run_name": manifest["run_name"],
         "result_manifest": latest_result_manifest_name,
-        "publication_state": publication_state_path.name,
+        "publication_state": publication_state_name,
         "published_at": publication_state["published_at"],
     })
     return result_path
@@ -410,7 +419,7 @@ def publish_cloud_results(store, container, prefix, task_root, manifest, result)
         store.upload_immutable_file(container, blob_name, path)
     root_prefix = prefix.strip("/").split("/iterations/", 1)[0]
     blob_name = "{}/manifests/latest.json".format(root_prefix)
-    store.upload_immutable_file(container, blob_name, latest)
+    store.upload_mutable_file(container, blob_name, latest)
 
 
 def manifest_generation(blob_name):
