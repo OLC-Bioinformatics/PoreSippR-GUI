@@ -238,19 +238,69 @@ class FakeBlobStore:
         self.files = files
         self.downloads = []
         self.uploads = []
+        self.mutable_uploads = []
+        self.immutable_uploads = []
 
-    def download_file(self, container, blob_name, destination):
+    def download_file(
+        self,
+        container,
+        blob_name,
+        destination,
+    ):
         self.downloads.append((container, blob_name))
-        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
         destination.write_bytes(self.files[blob_name])
 
-    def upload_immutable_file(self, container, blob_name, source):
-        self.uploads.append((container, blob_name))
+    def upload_immutable_file(
+        self,
+        container,
+        blob_name,
+        source,
+    ):
+        upload = (
+            container,
+            blob_name,
+        )
+        self.uploads.append(upload)
+        self.immutable_uploads.append(upload)
         return True
 
-    def upload_mutable_file(self, container, blob_name, source):
-        self.uploads.append((container, blob_name))
+    def upload_mutable_file(
+        self,
+        container,
+        blob_name,
+        source,
+    ):
+        upload = (
+            container,
+            blob_name,
+        )
+        self.uploads.append(upload)
+        self.mutable_uploads.append(upload)
         return True
+
+    def publish_file(
+        self,
+        container,
+        blob_name,
+        source,
+    ):
+        if wrapper.is_mutable_cloud_output(blob_name):
+            self.upload_mutable_file(
+                container,
+                blob_name,
+                source,
+            )
+            return True
+
+        return self.upload_immutable_file(
+            container,
+            blob_name,
+            source,
+        )
 
 
 def test_streaming_wrapper_processes_generations_in_one_workspace(tmp_path):
@@ -360,37 +410,234 @@ def test_download_manifest_inputs_uses_blob_names_and_local_paths(tmp_path):
     ]
 
 
-def test_publish_cloud_results_uploads_latest_last(tmp_path):
-    output = tmp_path / "task/output"
+def test_publish_cloud_results_uploads_latest_last(
+    tmp_path,
+):
+    task_root = tmp_path / "task"
+    output = task_root / "output"
+
     (output / "results").mkdir(parents=True)
     (output / "manifests").mkdir(parents=True)
-    (output / "results/sample.csv").write_text("result\n", encoding="utf-8")
+
+    (output / "results/sample.csv").write_text(
+        "result\n",
+        encoding="utf-8",
+    )
+
     (output / "manifests/publication-state.json").write_text(
-        "{}\n", encoding="utf-8"
+        "{}\n",
+        encoding="utf-8",
     )
-    (output / "manifests/latest.json").write_text("{}\n", encoding="utf-8")
+
+    (output / "manifests/latest.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+
     store = FakeBlobStore({})
 
     wrapper.publish_cloud_results(
-        store, "nanopore-results", "runs/example/", tmp_path, {}, {}
+        store,
+        "nanopore-results",
+        "runs/example/",
+        task_root,
+        {},
+        {},
     )
 
-    assert store.uploads[-1] == (
-        "nanopore-results", "runs/example/manifests/latest.json"
+    latest_upload = (
+        "nanopore-results",
+        "runs/example/manifests/latest.json",
     )
 
+    publication_state_upload = (
+        "nanopore-results",
+        "runs/example/manifests/publication-state.json",
+    )
 
-def test_publish_cloud_results_updates_latest_pointer(tmp_path):
-    output = tmp_path / "task/output"
+    result_upload = (
+        "nanopore-results",
+        "runs/example/results/sample.csv",
+    )
+
+    assert store.uploads[-1] == latest_upload
+
+    assert latest_upload in store.mutable_uploads
+    assert latest_upload not in store.immutable_uploads
+
+    assert publication_state_upload in store.mutable_uploads
+    assert publication_state_upload not in store.immutable_uploads
+
+    assert result_upload in store.immutable_uploads
+    assert result_upload not in store.mutable_uploads
+
+def test_publish_cloud_results_updates_latest_pointer(
+    tmp_path,
+):
+    task_root = tmp_path / "task"
+    output = task_root / "output"
+
     (output / "manifests").mkdir(parents=True)
-    (output / "manifests/latest.json").write_text("{}\n", encoding="utf-8")
+
+    (output / "manifests/latest.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+
     store = FakeBlobStore({})
 
     wrapper.publish_cloud_results(
-        store, "nanopore-results", "runs/example/iterations/iteration-000002",
-        tmp_path, {}, {}
+        store,
+        "nanopore-results",
+        ("runs/example/iterations/iteration-000002"),
+        task_root,
+        {},
+        {},
     )
 
     assert store.uploads[-1] == (
-        "nanopore-results", "runs/example/manifests/latest.json"
+        "nanopore-results",
+        "runs/example/manifests/latest.json",
     )
+
+
+def test_mutable_cloud_output_matches_run_prefixed_latest():
+    assert wrapper.is_mutable_cloud_output("runs/260921-nanopore/manifests/latest.json")
+
+
+def test_mutable_cloud_output_matches_iteration_publication_state():
+    assert wrapper.is_mutable_cloud_output(
+        "runs/260921-nanopore/iterations/iteration-000002/"
+        "manifests/publication-state.json"
+    )
+
+
+def test_scheduler_state_is_mutable():
+    assert wrapper.is_mutable_cloud_output(
+        "runs/260921-nanopore/iterations/iteration-000002/scheduler/state.json"
+    )
+
+
+def test_iteration_result_manifest_remains_immutable():
+    assert not wrapper.is_mutable_cloud_output(
+        "runs/260921-nanopore/iterations/iteration-000002/"
+        "manifests/iteration-000002.json"
+    )
+
+
+def test_fastq_remains_immutable():
+    assert not wrapper.is_mutable_cloud_output(
+        "runs/260921-nanopore/iterations/iteration-000002/"
+        "fastq/barcode01/batch-000001/0001-reads.fastq.gz"
+    )
+
+
+class RecordingStore(object):
+    def __init__(self):
+        self.mutable = []
+        self.immutable = []
+
+    def upload_mutable_file(self, container, blob_name, source):
+        self.mutable.append((container, blob_name, Path(source)))
+
+    def upload_immutable_file(self, container, blob_name, source):
+        self.immutable.append((container, blob_name, Path(source)))
+        return True
+
+    def publish_file(
+        self,
+        container,
+        blob_name,
+        source,
+    ):
+        if wrapper.is_mutable_cloud_output(blob_name):
+            print(
+                "TEST publishing mutable cloud output: {}".format(
+                    blob_name
+                )
+            )
+
+            self.upload_mutable_file(
+                container,
+                blob_name,
+                source,
+            )
+
+            return True
+
+        print(
+            "TEST publishing immutable cloud output: {}".format(
+                blob_name
+            )
+        )
+
+        return self.upload_immutable_file(
+            container,
+            blob_name,
+            source,
+        )
+
+
+def test_publish_cloud_results_commits_root_latest_as_mutable(tmp_path):
+    output = tmp_path / "output"
+    manifests = output / "manifests"
+    results = output / "results"
+    manifests.mkdir(parents=True)
+    results.mkdir(parents=True)
+
+    (manifests / "latest.json").write_text(
+        '{"latest_iteration": 2}\n', encoding="utf-8"
+    )
+    (manifests / "iteration-000002.json").write_text(
+        '{"iteration": 2}\n', encoding="utf-8"
+    )
+    (results / "sample_iteration2.csv").write_text(
+        "gene_name,number_of_reads_mapped\n", encoding="utf-8"
+    )
+
+    store = RecordingStore()
+
+    wrapper.publish_cloud_results(
+        store=store,
+        container="nanopore-results",
+        prefix=("runs/260921-nanopore/iterations/iteration-000002"),
+        task_root=tmp_path,
+        manifest={"run_id": 1, "run_name": "260921-nanopore"},
+        result={"status": "completed"},
+    )
+
+    mutable_names = [item[1] for item in store.mutable]
+    immutable_names = [item[1] for item in store.immutable]
+
+    assert mutable_names == ["runs/260921-nanopore/manifests/latest.json"]
+    assert "runs/260921-nanopore/manifests/latest.json" not in immutable_names
+    assert any(name.endswith("iteration-000002.json") for name in immutable_names)
+    assert any(name.endswith("sample_iteration2.csv") for name in immutable_names)
+
+
+def test_immutable_upload_redirects_known_mutable_path(tmp_path):
+    source = tmp_path / "latest.json"
+    source.write_text('{"iteration": 2}\n', encoding="utf-8")
+
+    store = object.__new__(wrapper.AzureBlobStore)
+    calls = []
+
+    def mutable(container, blob_name, source_path):
+        calls.append((container, blob_name, Path(source_path)))
+
+    store.upload_mutable_file = mutable
+
+    result = store.upload_immutable_file(
+        "nanopore-results",
+        "runs/260921-nanopore/manifests/latest.json",
+        source,
+    )
+
+    assert result is True
+    assert calls == [
+        (
+            "nanopore-results",
+            "runs/260921-nanopore/manifests/latest.json",
+            source,
+        )
+    ]

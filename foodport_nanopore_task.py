@@ -14,6 +14,24 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
+WRAPPER_VERSION = "0.0.15"
+
+MUTABLE_CLOUD_OUTPUT_SUFFIXES = (
+    "/manifests/latest.json",
+    "/manifests/publication-state.json",
+    "/control/state.json",
+    "/control/status.json",
+    "/scheduler/state.json",
+    "/scheduler/status.json",
+)
+
+
+def is_mutable_cloud_output(blob_name):
+    """Return whether a cloud object is intentionally mutable."""
+    normalized = str(blob_name).replace("\\", "/")
+    return normalized.endswith(MUTABLE_CLOUD_OUTPUT_SUFFIXES)
+
+
 class ManifestError(ValueError):
     """Raised when a finalized FoodPort manifest is invalid."""
 
@@ -109,7 +127,22 @@ class AzureBlobStore:
             ).list_blobs(name_starts_with=prefix)
         )
 
+    def publish_file(self, container, blob_name, source):
+        """Publish an object according to its cloud path policy."""
+        if is_mutable_cloud_output(blob_name):
+            print("Publishing mutable cloud output: {}".format(blob_name))
+            self.upload_mutable_file(container, blob_name, source)
+            return True
+
+        print("Publishing immutable cloud output: {}".format(blob_name))
+        return self.upload_immutable_file(container, blob_name, source)
+
     def upload_immutable_file(self, container, blob_name, source):
+        if is_mutable_cloud_output(blob_name):
+            print("Redirecting mutable cloud output: {}".format(blob_name))
+            self.upload_mutable_file(container, blob_name, source)
+            return True
+
         source = Path(source)
         digest = sha256_file(source)
         try:
@@ -416,10 +449,21 @@ def publish_cloud_results(store, container, prefix, task_root, manifest, result)
         blob_name = "{}/{}".format(prefix.strip("/"), path.relative_to(
             output_directory
         ).as_posix())
-        store.upload_immutable_file(container, blob_name, path)
+        store.publish_file(container, blob_name, path)
     root_prefix = prefix.strip("/").split("/iterations/", 1)[0]
     blob_name = "{}/manifests/latest.json".format(root_prefix)
+    print("Publishing latest pointer as mutable: {}".format(blob_name))
     store.upload_mutable_file(container, blob_name, latest)
+
+
+def wrapper_identity():
+    """Return the installed wrapper version and source-file digest."""
+    wrapper_path = Path(__file__).resolve()
+    return {
+        "version": WRAPPER_VERSION,
+        "path": str(wrapper_path),
+        "sha256": sha256_file(wrapper_path),
+    }
 
 
 def manifest_generation(blob_name):
@@ -487,6 +531,14 @@ def run_task(args):
     logs_directory = task_root / "logs"
     output_directory.mkdir(parents=True, exist_ok=True)
     logs_directory.mkdir(parents=True, exist_ok=True)
+
+    identity = wrapper_identity()
+    print(
+        "FoodPort Nanopore wrapper {} ({})".format(
+            identity["version"], identity["sha256"]
+        ),
+        file=sys.stderr,
+    )
 
     if args.manifest_blob:
         if storage is None or not args.input_container:
@@ -561,6 +613,7 @@ def run_task(args):
             )
         result = {
             "schema_version": 1,
+            "wrapper": identity,
             "run_id": manifest["run_id"],
             "run_name": manifest["run_name"],
             "generation": generation,
