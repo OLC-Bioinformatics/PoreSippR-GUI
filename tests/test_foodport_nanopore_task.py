@@ -641,3 +641,235 @@ def test_immutable_upload_redirects_known_mutable_path(tmp_path):
             source,
         )
     ]
+
+
+def test_cloud_publication_includes_scheduler_logs(
+    tmp_path,
+):
+    task_root = tmp_path / "task"
+    output = task_root / "output"
+
+    (output / "logs").mkdir(parents=True)
+
+    (output / "manifests").mkdir(parents=True)
+
+    (output / "logs/scheduler-stderr.log").write_text(
+        "scheduler diagnostic\n",
+        encoding="utf-8",
+    )
+
+    (output / "manifests/latest.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+
+    store = FakeBlobStore({})
+
+    wrapper.publish_cloud_results(
+        store,
+        "nanopore-results",
+        ("runs/example/iterations/iteration-000001"),
+        task_root,
+        {},
+        {},
+    )
+
+    log_upload = (
+        "nanopore-results",
+        ("runs/example/iterations/iteration-000001/logs/scheduler-stderr.log"),
+    )
+
+    assert log_upload in store.mutable_uploads
+
+
+def test_wrapper_version_option_reports_installed_version(capsys):
+    with pytest.raises(SystemExit) as error:
+        wrapper.parse_arguments(["--version"])
+
+    assert error.value.code == 0
+    assert capsys.readouterr().out.strip() == (
+        "{} {}".format(
+            wrapper.PROGRAM_NAME,
+            wrapper.WRAPPER_VERSION,
+        )
+    )
+
+
+def test_local_manifest_mode_processes_once(tmp_path):
+    reference = tmp_path / "reference.fasta"
+    reference.write_text(">target\nACGT\n", encoding="utf-8")
+    manifest = make_manifest(reference)
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    source = tmp_path / "source" / "pass" / "sample-001.pod5"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"pod5")
+
+    arguments = SimpleNamespace(
+        manifest=manifest_path,
+        manifest_blob=None,
+        manifest_prefix=None,
+        control_blob=None,
+        poll_seconds=0,
+        source_root=tmp_path / "source",
+        task_root=tmp_path / "task",
+        input_container=None,
+        output_container=None,
+        output_prefix=None,
+        input_sas_url=None,
+        output_sas_url=None,
+        storage_account=None,
+        storage_key=None,
+        scheduler=tmp_path / "scheduler.py",
+        python="python",
+        device="cuda:0",
+    )
+
+    def run_scheduler(command, stdout, stderr, check):
+        return SimpleNamespace(returncode=0)
+
+    with mock.patch.object(
+        wrapper, "resolve_model_path", return_value="model"
+    ), mock.patch.object(
+        wrapper.subprocess, "run", side_effect=run_scheduler
+    ):
+        assert wrapper.run_task(arguments) == 0
+
+    processed = json.loads(
+        (arguments.task_root / "input" / ".processed-generations.json")
+        .read_text(encoding="utf-8")
+    )
+    assert processed == [1]
+    assert (
+        arguments.task_root / "output" / "logs" / "exit-code.txt"
+    ).read_text(encoding="utf-8") == "0\n"
+
+
+def test_first_streaming_generation_downloads_inputs_once(tmp_path):
+    reference = tmp_path / "reference.fasta"
+    reference.write_text(">target\nACGT\n", encoding="utf-8")
+    manifest = make_manifest(reference)
+    manifest_blob = (
+        "runs/260825-nanopore/input/manifests/"
+        "input-manifest-v000001.json"
+    )
+    control_blob = "runs/260825-nanopore/input/control/state.json"
+
+    class OneGenerationStore(FakeBlobStore):
+        def list_blob_names(self, container, prefix):
+            return [manifest_blob]
+
+        def blob_exists(self, container, blob_name):
+            return blob_name == control_blob
+
+    store = OneGenerationStore({
+        manifest_blob: json.dumps(manifest).encode("utf-8"),
+        manifest["files"][0]["blob_name"]: b"pod5",
+        control_blob: b'{"state": "stopping"}',
+    })
+    arguments = SimpleNamespace(
+        manifest=None,
+        manifest_blob=manifest_blob,
+        manifest_prefix=(
+            "runs/260825-nanopore/input/manifests/input-manifest-v"
+        ),
+        control_blob=control_blob,
+        poll_seconds=0,
+        source_root=tmp_path / "source",
+        task_root=tmp_path / "task",
+        input_container="nanopore-runs",
+        output_container="nanopore-results",
+        output_prefix="runs/260825-nanopore",
+        input_sas_url="input-sas",
+        output_sas_url="output-sas",
+        storage_account=None,
+        storage_key=None,
+        scheduler=tmp_path / "scheduler.py",
+        python="python",
+        device="cuda:0",
+    )
+
+    with mock.patch.object(
+        wrapper, "AzureBlobStore", return_value=store
+    ), mock.patch.object(
+        wrapper, "resolve_model_path", return_value="model"
+    ), mock.patch.object(
+        wrapper.subprocess,
+        "run",
+        return_value=SimpleNamespace(returncode=0),
+    ):
+        assert wrapper.run_task(arguments) == 0
+
+    assert store.downloads.count(("nanopore-runs", manifest_blob)) == 1
+    assert store.downloads.count((
+        "nanopore-runs",
+        manifest["files"][0]["blob_name"],
+    )) == 1
+
+
+def test_failed_generation_is_not_recorded_as_processed(tmp_path):
+    reference = tmp_path / "reference.fasta"
+    reference.write_text(">target\nACGT\n", encoding="utf-8")
+    manifest = make_manifest(reference)
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    source = tmp_path / "source" / "pass" / "sample-001.pod5"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"pod5")
+
+    arguments = SimpleNamespace(
+        manifest=manifest_path,
+        manifest_blob=None,
+        manifest_prefix=None,
+        control_blob=None,
+        poll_seconds=0,
+        source_root=tmp_path / "source",
+        task_root=tmp_path / "task",
+        input_container=None,
+        output_container=None,
+        output_prefix=None,
+        input_sas_url=None,
+        output_sas_url=None,
+        storage_account=None,
+        storage_key=None,
+        scheduler=tmp_path / "scheduler.py",
+        python="python",
+        device="cuda:0",
+    )
+
+    def failed_scheduler(command, stdout, stderr, check):
+        stderr.write("scheduler failed\n")
+        stderr.flush()
+        return SimpleNamespace(returncode=7)
+
+    with mock.patch.object(
+        wrapper, "resolve_model_path", return_value="model"
+    ), mock.patch.object(
+        wrapper.subprocess, "run", side_effect=failed_scheduler
+    ):
+        assert wrapper.run_task(arguments) == 7
+
+    assert not (
+        arguments.task_root / "input" / ".processed-generations.json"
+    ).exists()
+    assert (
+        arguments.task_root / "output" / "logs" / "exit-code.txt"
+    ).read_text(encoding="utf-8") == "7\n"
+
+
+def test_exit_code_log_is_included_in_result_inventory(tmp_path):
+    output = tmp_path / "output"
+    log = output / "logs" / "exit-code.txt"
+    log.parent.mkdir(parents=True)
+    log.write_text("0\n", encoding="utf-8")
+
+    outputs = wrapper.inventory_outputs(output)
+
+    assert any(
+        item["path"] == "logs/exit-code.txt"
+        and item["size_bytes"] == 2
+        for item in outputs
+    )
+

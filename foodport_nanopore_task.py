@@ -14,7 +14,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-WRAPPER_VERSION = "0.0.15"
+PROGRAM_NAME = "foodport-nanopore-task"
+WRAPPER_VERSION = "0.0.16"
 
 MUTABLE_CLOUD_OUTPUT_SUFFIXES = (
     "/manifests/latest.json",
@@ -28,7 +29,14 @@ MUTABLE_CLOUD_OUTPUT_SUFFIXES = (
 
 def is_mutable_cloud_output(blob_name):
     """Return whether a cloud object is intentionally mutable."""
-    normalized = str(blob_name).replace("\\", "/")
+    normalized = str(blob_name).replace(
+        "\\",
+        "/",
+    )
+
+    if "/logs/" in normalized:
+        return True
+
     return normalized.endswith(MUTABLE_CLOUD_OUTPUT_SUFFIXES)
 
 
@@ -525,19 +533,28 @@ def run_task(args):
     manifest_path = Path(args.manifest).resolve() if args.manifest else (
         task_root / "input" / "finalized-manifest.json"
     )
+    local_manifest_path = manifest_path
     source_root = Path(args.source_root).resolve()
     input_directory = task_root / "input"
     output_directory = task_root / "output"
-    logs_directory = task_root / "logs"
-    output_directory.mkdir(parents=True, exist_ok=True)
-    logs_directory.mkdir(parents=True, exist_ok=True)
+    logs_directory = output_directory / "logs"
 
+    output_directory.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    logs_directory.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
     identity = wrapper_identity()
     print(
         "FoodPort Nanopore wrapper {} ({})".format(
             identity["version"], identity["sha256"]
         ),
         file=sys.stderr,
+        flush=True,
     )
 
     if args.manifest_blob:
@@ -549,10 +566,7 @@ def run_task(args):
             raise ValueError(
                 "cloud streaming mode requires manifest prefix and control blob"
             )
-        manifest = download_manifest_inputs(
-            storage, args.input_container, args.manifest_blob,
-            manifest_path, source_root
-        )
+        manifest = None
     else:
         manifest = load_manifest(manifest_path)
     stdout_path = logs_directory / "scheduler-stdout.log"
@@ -562,9 +576,9 @@ def run_task(args):
         processed = set(json.loads(processed_path.read_text(encoding="utf-8")))
     else:
         processed = set()
-    next_manifest_blob = args.manifest_blob
-    final_return_code = 0
     streaming = bool(args.manifest_blob)
+    next_manifest_blob = args.manifest_blob or "__local_manifest__"
+    final_return_code = 0
     while True:
         if next_manifest_blob is None:
             generations = available_manifest_generations(
@@ -583,15 +597,16 @@ def run_task(args):
         else:
             generation = manifest_generation(next_manifest_blob) or 1
 
-        manifest_path = task_root / "input" / (
-            "input-manifest-v{:06d}.json".format(generation)
-        )
-        if args.manifest_blob:
+        if streaming:
+            manifest_path = task_root / "input" / (
+                "input-manifest-v{:06d}.json".format(generation)
+            )
             manifest = download_manifest_inputs(
                 storage, args.input_container, next_manifest_blob,
                 manifest_path, source_root
             )
         else:
+            manifest_path = local_manifest_path
             manifest = load_manifest(manifest_path)
         materialize_inputs(manifest, source_root, input_directory)
         run_csv, metadata_csv = write_scheduler_inputs(
@@ -611,6 +626,17 @@ def run_task(args):
             completed = subprocess.run(
                 command, stdout=stdout, stderr=stderr, check=False
             )
+        print(
+            "Scheduler generation {0} exited with code {1}".format(
+                generation,
+                completed.returncode,
+            ),
+            file=sys.stderr,
+            flush=True,
+        )
+        (logs_directory / "exit-code.txt").write_text(
+            "{}\n".format(completed.returncode), encoding="utf-8"
+        )
         result = {
             "schema_version": 1,
             "wrapper": identity,
@@ -639,21 +665,42 @@ def run_task(args):
                     generation,
                 ), task_root, manifest, result,
             )
+        final_return_code = completed.returncode
+        if completed.returncode != 0:
+            try:
+                scheduler_stderr = stderr_path.read_text(
+                    encoding="utf-8",
+                    errors="replace",
+                )
+            except OSError:
+                scheduler_stderr = ""
+            if scheduler_stderr:
+                print(
+                    "Scheduler stderr tail:\n{}".format(
+                        scheduler_stderr[-8000:]
+                    ),
+                    file=sys.stderr,
+                    flush=True,
+                )
+            return completed.returncode
+
         processed.add(generation)
         atomic_write_json(processed_path, sorted(processed))
-        (logs_directory / "exit-code.txt").write_text(
-            "{}\n".format(completed.returncode), encoding="utf-8"
-        )
         next_manifest_blob = None
-        final_return_code = completed.returncode
         if not streaming:
             return final_return_code
-        if completed.returncode != 0:
-            return completed.returncode
 
 
 def parse_arguments(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        prog=PROGRAM_NAME,
+        description=__doc__,
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s {}".format(WRAPPER_VERSION),
+    )
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--manifest-blob")
     parser.add_argument("--manifest-prefix")
@@ -677,7 +724,13 @@ def parse_arguments(argv=None):
 def main(argv=None):
     try:
         return run_task(parse_arguments(argv))
-    except (ManifestError, FileNotFoundError, OSError, ValueError) as exc:
+    except (
+        ManifestError,
+        FileNotFoundError,
+        OSError,
+        RuntimeError,
+        ValueError,
+    ) as exc:
         print("Nanopore task failed: {}".format(exc), file=sys.stderr)
         return 2
 
