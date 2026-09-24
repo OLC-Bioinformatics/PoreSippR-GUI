@@ -92,6 +92,7 @@ def scheduler_args(tmp_path: Path) -> SimpleNamespace:
         benchmark_file=str(benchmark),
         device="cuda:0",
         dorado="dorado",
+        fail_on_no_barcode_reads=False,
         genome_size=100,
         keep_batch_work=False,
         keep_mapping_bam=False,
@@ -938,6 +939,7 @@ def test_process_batch_fails_without_configured_barcode_reads(
         modified_time_ns=stat_result.st_mtime_ns,
     )
     state = scheduler.initial_state(run=run_configuration)
+    scheduler_args.fail_on_no_barcode_reads = True
 
     def fake_run_command(
         *,

@@ -65,14 +65,20 @@ def test_manifest_materialization_and_csv_generation(tmp_path):
     manifest = wrapper.load_manifest(manifest_path)
     input_directory = tmp_path / "task" / "input"
     wrapper.materialize_inputs(manifest, tmp_path / "source", input_directory)
-    run_csv, metadata_csv = wrapper.write_scheduler_inputs(
-        manifest, manifest_path, input_directory, tmp_path / "task" / "output"
+    run_csv, metadata_csv, completion_marker = (
+        wrapper.write_scheduler_inputs(
+            manifest,
+            manifest_path,
+            input_directory,
+            tmp_path / "task" / "output",
+        )
     )
 
     assert (input_directory / "pod5/pass/sample-001.pod5").read_bytes() == b"pod5"
     assert "42" in run_csv.read_text(encoding="utf-8")
     assert "sample-12" in metadata_csv.read_text(encoding="utf-8")
-    assert (input_directory / ".upload-complete").is_file()
+    assert completion_marker.is_file()
+    assert completion_marker.parent == input_directory / "control"
 
 
 def test_scheduler_input_generation_accepts_manifest_in_input_directory(tmp_path):
@@ -107,9 +113,13 @@ def test_publish_result_manifest_writes_latest_after_state(tmp_path):
         "outputs": [],
     }
 
-    result_path = wrapper.publish_result_manifest(tmp_path, manifest, result)
+    result_path, state_path, latest_path = (
+        wrapper.publish_result_manifest(tmp_path, manifest, result)
+    )
 
     assert result_path == tmp_path / "output/manifests/result-manifest.json"
+    assert state_path == tmp_path / "output/manifests/publication-state.json"
+    assert latest_path == tmp_path / "output/manifests/latest.json"
     publication_state = json.loads(
         (tmp_path / "output/manifests/publication-state.json").read_text(
             encoding="utf-8"
@@ -118,8 +128,12 @@ def test_publish_result_manifest_writes_latest_after_state(tmp_path):
     latest = json.loads(
         (tmp_path / "output/manifests/latest.json").read_text(encoding="utf-8")
     )
-    assert publication_state["result_manifest"] == "result-manifest.json"
-    assert latest["publication_state"] == "publication-state.json"
+    assert publication_state["result_manifest"] == (
+        "manifests/result-manifest.json"
+    )
+    assert latest["publication_state"] == (
+        "manifests/publication-state.json"
+    )
 
 
 def test_manifest_generation_accepts_only_immutable_generation_names():
@@ -154,21 +168,23 @@ def test_resolve_model_path_rejects_missing_model(tmp_path):
 
 
 def test_publish_result_manifest_uses_iteration_path(tmp_path):
-    result_path = wrapper.publish_result_manifest(
-        tmp_path,
-        {"run_id": 42, "run_name": "260825-nanopore"},
-        {"status": "completed", "outputs": []},
-        iteration=7,
+    result_path, state_path, latest_path = (
+        wrapper.publish_result_manifest(
+            tmp_path,
+            {"run_id": 42, "run_name": "260825-nanopore"},
+            {"status": "completed", "outputs": []},
+            iteration=7,
+        )
     )
 
     assert result_path == (
         tmp_path / "output/manifests/iteration-000007.json"
     )
-    latest = json.loads(
-        (tmp_path / "output/manifests/latest.json").read_text(
-            encoding="utf-8"
-        )
+    assert state_path == (
+        tmp_path / "output/manifests/publication-state.json"
     )
+    assert latest_path == tmp_path / "output/manifests/latest.json"
+    latest = json.loads(latest_path.read_text(encoding="utf-8"))
     assert latest["result_manifest"] == (
         "iterations/iteration-000007/manifests/iteration-000007.json"
     )
@@ -219,18 +235,18 @@ def test_sas_store_uploads_immutable_file_through_output_container(tmp_path):
     assert blob.metadata["sha256"] == wrapper.sha256_file(source)
 
 
-def test_inventory_outputs_is_relative_to_output_directory(tmp_path):
+def test_output_snapshot_is_relative_to_output_directory(tmp_path):
     output_directory = tmp_path / "task" / "output"
     output_file = output_directory / "results" / "sample.csv"
     output_file.parent.mkdir(parents=True)
     output_file.write_text("result\n", encoding="utf-8")
-    (tmp_path / "task" / "input.txt").write_text("input\n", encoding="utf-8")
+    (tmp_path / "task" / "input.txt").write_text(
+        "input\n", encoding="utf-8"
+    )
 
-    assert wrapper.inventory_outputs(output_directory) == [{
-        "path": "results/sample.csv",
-        "size_bytes": 7,
-        "sha256": wrapper.sha256_file(output_file),
-    }]
+    snapshot = wrapper.output_snapshot(output_directory)
+
+    assert set(snapshot) == {"results/sample.csv"}
 
 
 class FakeBlobStore:
@@ -382,9 +398,12 @@ def test_streaming_wrapper_processes_generations_in_one_workspace(tmp_path):
     assert (
         arguments.task_root / "output" / "scheduler" / "reads.fastq"
     ).read_text(encoding="utf-8") == "generation\ngeneration\n"
+    generation_ledgers = list(
+        arguments.task_root.rglob("*processed-generations.json")
+    )
+    assert len(generation_ledgers) == 1
     assert json.loads(
-        (arguments.task_root / "input" / ".processed-generations.json")
-        .read_text(encoding="utf-8")
+        generation_ledgers[0].read_text(encoding="utf-8")
     ) == [1, 2]
 
 
@@ -410,89 +429,67 @@ def test_download_manifest_inputs_uses_blob_names_and_local_paths(tmp_path):
     ]
 
 
-def test_publish_cloud_results_uploads_latest_last(
-    tmp_path,
-):
+def test_publish_cloud_results_uploads_latest_last(tmp_path):
     task_root = tmp_path / "task"
     output = task_root / "output"
-
-    (output / "results").mkdir(parents=True)
-    (output / "manifests").mkdir(parents=True)
-
-    (output / "results/sample.csv").write_text(
-        "result\n",
-        encoding="utf-8",
-    )
-
-    (output / "manifests/publication-state.json").write_text(
-        "{}\n",
-        encoding="utf-8",
-    )
-
-    (output / "manifests/latest.json").write_text(
-        "{}\n",
-        encoding="utf-8",
-    )
-
+    result_file = output / "results" / "sample.csv"
+    result_file.parent.mkdir(parents=True)
+    result_file.write_text("result\n", encoding="utf-8")
+    manifests = output / "manifests"
+    manifests.mkdir(parents=True)
+    result_path = manifests / "iteration-000001.json"
+    state_path = manifests / "publication-state.json"
+    latest_path = manifests / "latest.json"
+    result_path.write_text("{}\n", encoding="utf-8")
+    state_path.write_text("{}\n", encoding="utf-8")
+    latest_path.write_text("{}\n", encoding="utf-8")
     store = FakeBlobStore({})
 
     wrapper.publish_cloud_results(
         store,
         "nanopore-results",
-        "runs/example/",
+        "runs/example/iterations/iteration-000001",
         task_root,
-        {},
-        {},
+        {
+            "generation": 1,
+            "outputs": [{"path": "results/sample.csv"}],
+        },
+        result_path,
+        state_path,
+        latest_path,
     )
 
-    latest_upload = (
+    assert store.uploads[-1] == (
         "nanopore-results",
         "runs/example/manifests/latest.json",
     )
-
-    publication_state_upload = (
+    assert store.uploads[-1] in store.mutable_uploads
+    assert (
         "nanopore-results",
-        "runs/example/manifests/publication-state.json",
-    )
+        "runs/example/iterations/iteration-000001/results/sample.csv",
+    ) in store.immutable_uploads
 
-    result_upload = (
-        "nanopore-results",
-        "runs/example/results/sample.csv",
-    )
 
-    assert store.uploads[-1] == latest_upload
-
-    assert latest_upload in store.mutable_uploads
-    assert latest_upload not in store.immutable_uploads
-
-    assert publication_state_upload in store.mutable_uploads
-    assert publication_state_upload not in store.immutable_uploads
-
-    assert result_upload in store.immutable_uploads
-    assert result_upload not in store.mutable_uploads
-
-def test_publish_cloud_results_updates_latest_pointer(
-    tmp_path,
-):
+def test_publish_cloud_results_updates_latest_pointer(tmp_path):
     task_root = tmp_path / "task"
-    output = task_root / "output"
-
-    (output / "manifests").mkdir(parents=True)
-
-    (output / "manifests/latest.json").write_text(
-        "{}\n",
-        encoding="utf-8",
-    )
-
+    manifests = task_root / "output" / "manifests"
+    manifests.mkdir(parents=True)
+    result_path = manifests / "iteration-000002.json"
+    state_path = manifests / "publication-state.json"
+    latest_path = manifests / "latest.json"
+    for path in (result_path, state_path, latest_path):
+        path.write_text("{}\n", encoding="utf-8")
     store = FakeBlobStore({})
 
     wrapper.publish_cloud_results(
         store,
         "nanopore-results",
-        ("runs/example/iterations/iteration-000002"),
+        "runs/example/iterations/iteration-000002",
         task_root,
-        {},
-        {},
+        {"generation": 2, "outputs": []},
+        result_path,
+        state_path,
+        latest_path,
     )
 
     assert store.uploads[-1] == (
@@ -584,33 +581,40 @@ def test_publish_cloud_results_commits_root_latest_as_mutable(tmp_path):
     results = output / "results"
     manifests.mkdir(parents=True)
     results.mkdir(parents=True)
-
-    (manifests / "latest.json").write_text(
-        '{"latest_iteration": 2}\n', encoding="utf-8"
-    )
-    (manifests / "iteration-000002.json").write_text(
-        '{"iteration": 2}\n', encoding="utf-8"
-    )
-    (results / "sample_iteration2.csv").write_text(
+    latest_path = manifests / "latest.json"
+    state_path = manifests / "publication-state.json"
+    result_path = manifests / "iteration-000002.json"
+    latest_path.write_text('{"latest_iteration": 2}\n', encoding="utf-8")
+    state_path.write_text('{"iteration": 2}\n', encoding="utf-8")
+    result_path.write_text('{"iteration": 2}\n', encoding="utf-8")
+    result_file = results / "sample_iteration2.csv"
+    result_file.write_text(
         "gene_name,number_of_reads_mapped\n", encoding="utf-8"
     )
-
     store = RecordingStore()
 
     wrapper.publish_cloud_results(
-        store=store,
-        container="nanopore-results",
-        prefix=("runs/260921-nanopore/iterations/iteration-000002"),
-        task_root=tmp_path,
-        manifest={"run_id": 1, "run_name": "260921-nanopore"},
-        result={"status": "completed"},
+        store,
+        "nanopore-results",
+        "runs/260921-nanopore/iterations/iteration-000002",
+        tmp_path,
+        {
+            "generation": 2,
+            "outputs": [{
+                "path": "results/sample_iteration2.csv"
+            }],
+        },
+        result_path,
+        state_path,
+        latest_path,
     )
 
     mutable_names = [item[1] for item in store.mutable]
     immutable_names = [item[1] for item in store.immutable]
-
-    assert mutable_names == ["runs/260921-nanopore/manifests/latest.json"]
-    assert "runs/260921-nanopore/manifests/latest.json" not in immutable_names
+    assert mutable_names[-1] == (
+        "runs/260921-nanopore/manifests/latest.json"
+    )
+    assert mutable_names[-1] not in immutable_names
     assert any(name.endswith("iteration-000002.json") for name in immutable_names)
     assert any(name.endswith("sample_iteration2.csv") for name in immutable_names)
 
@@ -643,43 +647,44 @@ def test_immutable_upload_redirects_known_mutable_path(tmp_path):
     ]
 
 
-def test_cloud_publication_includes_scheduler_logs(
-    tmp_path,
-):
+def test_cloud_publication_includes_scheduler_logs(tmp_path):
     task_root = tmp_path / "task"
     output = task_root / "output"
-
-    (output / "logs").mkdir(parents=True)
-
-    (output / "manifests").mkdir(parents=True)
-
-    (output / "logs/scheduler-stderr.log").write_text(
-        "scheduler diagnostic\n",
-        encoding="utf-8",
-    )
-
-    (output / "manifests/latest.json").write_text(
-        "{}\n",
-        encoding="utf-8",
-    )
-
+    log = output / "logs" / "scheduler-generation-000001-stderr.log"
+    log.parent.mkdir(parents=True)
+    log.write_text("scheduler diagnostic\n", encoding="utf-8")
+    manifests = output / "manifests"
+    manifests.mkdir(parents=True)
+    result_path = manifests / "iteration-000001.json"
+    state_path = manifests / "publication-state.json"
+    latest_path = manifests / "latest.json"
+    for path in (result_path, state_path, latest_path):
+        path.write_text("{}\n", encoding="utf-8")
     store = FakeBlobStore({})
 
     wrapper.publish_cloud_results(
         store,
         "nanopore-results",
-        ("runs/example/iterations/iteration-000001"),
+        "runs/example/iterations/iteration-000001",
         task_root,
-        {},
-        {},
+        {
+            "generation": 1,
+            "outputs": [{
+                "path": (
+                    "logs/scheduler-generation-000001-stderr.log"
+                )
+            }],
+        },
+        result_path,
+        state_path,
+        latest_path,
     )
 
-    log_upload = (
+    assert (
         "nanopore-results",
-        ("runs/example/iterations/iteration-000001/logs/scheduler-stderr.log"),
-    )
-
-    assert log_upload in store.mutable_uploads
+        "runs/example/iterations/iteration-000001/"
+        "logs/scheduler-generation-000001-stderr.log",
+    ) in store.immutable_uploads
 
 
 def test_wrapper_version_option_reports_installed_version(capsys):
@@ -736,13 +741,17 @@ def test_local_manifest_mode_processes_once(tmp_path):
     ):
         assert wrapper.run_task(arguments) == 0
 
+    generation_ledgers = list(
+        arguments.task_root.rglob("*processed-generations.json")
+    )
+    assert len(generation_ledgers) == 1
     processed = json.loads(
-        (arguments.task_root / "input" / ".processed-generations.json")
-        .read_text(encoding="utf-8")
+        generation_ledgers[0].read_text(encoding="utf-8")
     )
     assert processed == [1]
     assert (
-        arguments.task_root / "output" / "logs" / "exit-code.txt"
+        arguments.task_root / "output" / "logs"
+        / "scheduler-generation-000001-exit-code.txt"
     ).read_text(encoding="utf-8") == "0\n"
 
 
@@ -852,24 +861,21 @@ def test_failed_generation_is_not_recorded_as_processed(tmp_path):
         assert wrapper.run_task(arguments) == 7
 
     assert not (
-        arguments.task_root / "input" / ".processed-generations.json"
+        arguments.task_root / "state" / "processed-generations.json"
     ).exists()
     assert (
-        arguments.task_root / "output" / "logs" / "exit-code.txt"
+        arguments.task_root / "output" / "logs"
+        / "scheduler-generation-000001-exit-code.txt"
     ).read_text(encoding="utf-8") == "7\n"
 
 
-def test_exit_code_log_is_included_in_result_inventory(tmp_path):
+def test_exit_code_log_is_included_in_output_snapshot(tmp_path):
     output = tmp_path / "output"
-    log = output / "logs" / "exit-code.txt"
+    log = output / "logs" / "scheduler-generation-000001-exit-code.txt"
     log.parent.mkdir(parents=True)
     log.write_text("0\n", encoding="utf-8")
 
-    outputs = wrapper.inventory_outputs(output)
+    snapshot = wrapper.output_snapshot(output)
 
-    assert any(
-        item["path"] == "logs/exit-code.txt"
-        and item["size_bytes"] == 2
-        for item in outputs
-    )
+    assert "logs/scheduler-generation-000001-exit-code.txt" in snapshot
 

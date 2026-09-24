@@ -4,7 +4,9 @@
 The scheduler watches one or more POD5 input directories described by an input
 CSV. Stable POD5 files are processed exactly once in bounded batches. Per-batch
 FASTQ files are retained so each mapping iteration includes all reads produced
-for the run so far.
+for the run so far. When ``--once`` is used with a completion marker, the
+input directory is treated as one immutable manifest generation: files are
+eligible immediately and are processed together as one scheduler iteration.
 
 Required input CSV columns:
     reference,pod5_dir,output_dir,barcode,barcode_values
@@ -636,6 +638,7 @@ def discover_pod5_files(
     observations: dict[str, FileObservation],
     stable_seconds: int,
     stable_polls: int,
+    immutable_snapshot: bool = False,
 ) -> tuple[list[Pod5Candidate], int]:
     """Discover stable and pending unprocessed POD5 files.
 
@@ -645,6 +648,10 @@ def discover_pod5_files(
         observations: In-memory file stability observations.
         stable_seconds: Required age since the last modification.
         stable_polls: Required consecutive unchanged polls.
+        immutable_snapshot: Whether the input directory is a completed,
+            immutable manifest generation. Such files are eligible
+            immediately and use a modification-time-independent fingerprint
+            so retries do not process the same bytes again.
 
     Returns:
         A tuple containing stable candidates and the total number of pending
@@ -672,9 +679,12 @@ def discover_pod5_files(
 
         key = str(path.resolve())
         seen.add(key)
-        fingerprint = (
-            f"{stat_result.st_size}:{stat_result.st_mtime_ns}"
-        )
+        if immutable_snapshot:
+            fingerprint = f"size:{stat_result.st_size}"
+        else:
+            fingerprint = (
+                f"{stat_result.st_size}:{stat_result.st_mtime_ns}"
+            )
         processed = processed_files.get(key)
 
         if (
@@ -696,10 +706,12 @@ def discover_pod5_files(
             observations[key] = observation
 
         age_seconds = time.time() - stat_result.st_mtime
-        is_stable = (
-            observation.poll_count >= stable_polls
-            and age_seconds >= stable_seconds
-            and stat_result.st_size > 0
+        is_stable = stat_result.st_size > 0 and (
+            immutable_snapshot
+            or (
+                observation.poll_count >= stable_polls
+                and age_seconds >= stable_seconds
+            )
         )
 
         if is_stable:
@@ -1223,11 +1235,15 @@ def process_batch(
         configured_barcodes = ", ".join(
             f"barcode{barcode:02d}" for barcode in run.barcode_values
         )
-        raise NoBarcodeReadsError(
-            f"No reads were classified to configured barcodes for {batch_id}. "
-            f"Expected one of: {configured_barcodes}. "
-            "Check the barcode kit, barcode metadata, and input read quality."
+        message = (
+            "No reads were classified to configured barcodes for "
+            f"{batch_id}. Expected one of: {configured_barcodes}. "
+            "The POD5 files will still be checkpointed so a sparse "
+            "streaming iteration is not retried indefinitely."
         )
+        if args.fail_on_no_barcode_reads:
+            raise NoBarcodeReadsError(message)
+        LOGGER.warning(message)
 
     cumulative_fastq_count = sum(
         len(cumulative_fastq_files(
@@ -1257,6 +1273,7 @@ def process_batch(
         "pod5_count": len(batch_files),
         "pod5_bytes": sum(item.size_bytes for item in batch_files),
         "retained_fastq_count": retained_count,
+        "configured_barcode_reads_found": retained_count > 0,
         "result_files": result_files,
     }
 
@@ -1586,6 +1603,14 @@ def parse_arguments(
         help="Retain temporary Dorado BAM and demultiplexing outputs",
     )
     parser.add_argument(
+        "--fail-on-no-barcode-reads",
+        action="store_true",
+        help=(
+            "Fail when a batch has no reads for configured barcodes. "
+            "By default sparse batches are checkpointed with a warning."
+        ),
+    )
+    parser.add_argument(
         "--once",
         action="store_true",
         help=(
@@ -1712,6 +1737,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
             for run in runs:
                 state = states[run.run_id]
+                snapshot_complete = completion_requested(
+                    run=run,
+                    global_marker=args.completion_marker,
+                )
+                immutable_snapshot = args.once and snapshot_complete
 
                 stable_files, run_pending = discover_pod5_files(
                     run=run,
@@ -1719,13 +1749,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                     observations=observations[run.run_id],
                     stable_seconds=args.stable_seconds,
                     stable_polls=args.stable_polls,
+                    immutable_snapshot=immutable_snapshot,
                 )
 
                 pending_files += run_pending
                 processed_file_count = 0
 
                 if stable_files:
-                    batch_files = stable_files[: args.max_batch_files]
+                    if immutable_snapshot:
+                        batch_files = stable_files
+                    else:
+                        batch_files = stable_files[: args.max_batch_files]
 
                     process_batch(
                         runtime=runtime,
@@ -1743,13 +1777,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 pending_after = run_pending - processed_file_count
                 pending_files -= processed_file_count
 
-                if (
-                    not completion_requested(
-                        run=run,
-                        global_marker=args.completion_marker,
-                    )
-                    or pending_after > 0
-                ):
+                if not snapshot_complete or pending_after > 0:
                     all_complete = False
 
             if processed_any:

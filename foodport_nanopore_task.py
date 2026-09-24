@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 PROGRAM_NAME = "foodport-nanopore-task"
-WRAPPER_VERSION = "0.0.16"
+WRAPPER_VERSION = "0.0.17"
 
 MUTABLE_CLOUD_OUTPUT_SUFFIXES = (
     "/manifests/latest.json",
@@ -273,57 +273,96 @@ def resolve_source(source_root, entry):
     raise FileNotFoundError("POD5 input is missing: {}".format(relative))
 
 
+
 def materialize_inputs(manifest, source_root, input_directory):
+    """Copy one manifest generation into an isolated input directory."""
+    input_directory = Path(input_directory)
+    if input_directory.exists():
+        shutil.rmtree(str(input_directory))
+
     pod5_directory = input_directory / "pod5"
-    pod5_directory.mkdir(parents=True, exist_ok=True)
+    pod5_directory.mkdir(parents=True, exist_ok=False)
     materialized = []
+
     for entry in manifest["files"]:
         source = resolve_source(source_root, entry)
         expected_size = entry["size_bytes"]
         if source.stat().st_size != expected_size:
-            raise ValueError("POD5 size mismatch: {}".format(entry["relative_path"]))
+            raise ValueError(
+                "POD5 size mismatch: {}".format(entry["relative_path"])
+            )
+
         expected_sha256 = entry.get("sha256")
         if expected_sha256 and sha256_file(source) != expected_sha256:
-            raise ValueError("POD5 SHA-256 mismatch: {}".format(entry["relative_path"]))
+            raise ValueError(
+                "POD5 SHA-256 mismatch: {}".format(
+                    entry["relative_path"]
+                )
+            )
+
         destination = pod5_directory / relative_path(
-            entry["relative_path"], "relative_path"
+            entry["relative_path"],
+            "relative_path",
         )
         destination.parent.mkdir(parents=True, exist_ok=True)
         partial = destination.with_name(destination.name + ".partial")
-        shutil.copyfile(source, partial)
-        os.replace(partial, destination)
+        shutil.copyfile(str(source), str(partial))
+        os.replace(str(partial), str(destination))
         materialized.append(destination)
+
     return materialized
 
 
-def write_scheduler_inputs(manifest, manifest_path, input_directory, output_directory):
-    scheduler_directory = output_directory / "scheduler"
+def write_scheduler_inputs(
+        manifest, manifest_path, input_directory, output_directory):
+    """Write scheduler CSV inputs for one isolated manifest generation."""
+    scheduler_directory = Path(output_directory) / "scheduler"
     scheduler_directory.mkdir(parents=True, exist_ok=True)
-    run_csv = scheduler_directory / "scheduler-run.csv"
-    metadata_csv = scheduler_directory / "scheduler-metadata.csv"
+
+    generation = int(manifest.get("generation") or 1)
+    generation_name = "generation-{0:06d}".format(generation)
+    control_directory = Path(input_directory) / "control"
+    control_directory.mkdir(parents=True, exist_ok=True)
+
+    run_csv = control_directory / (
+        "scheduler-run-{0}.csv".format(generation_name)
+    )
+    metadata_csv = control_directory / (
+        "scheduler-metadata-{0}.csv".format(generation_name)
+    )
     reference = manifest["reference"]["path"]
-    barcode_values = [str(item["barcode"]) for item in manifest["barcodes"]]
+    barcode_values = [
+        str(item["barcode"])
+        for item in manifest["barcodes"]
+    ]
 
     with open(run_csv, "w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(
             handle,
             fieldnames=[
-                "run_id", "reference", "pod5_dir", "output_dir",
-                "barcode", "barcode_values",
+                "run_id",
+                "reference",
+                "pod5_dir",
+                "output_dir",
+                "barcode",
+                "barcode_values",
             ],
         )
         writer.writeheader()
         writer.writerow({
             "run_id": str(manifest["run_id"]),
             "reference": reference,
-            "pod5_dir": str(input_directory / "pod5"),
+            "pod5_dir": str(Path(input_directory) / "pod5"),
             "output_dir": str(scheduler_directory),
             "barcode": manifest["dorado"]["barcode_kit"],
             "barcode_values": ",".join(barcode_values),
         })
 
     with open(metadata_csv, "w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["Barcode", "SEQID", "OLNID"])
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=["Barcode", "SEQID", "OLNID"],
+        )
         writer.writeheader()
         for barcode in manifest["barcodes"]:
             writer.writerow({
@@ -332,25 +371,54 @@ def write_scheduler_inputs(manifest, manifest_path, input_directory, output_dire
                 "OLNID": barcode["olnid"],
             })
 
-    manifest_copy = input_directory / "finalized-manifest.json"
+    manifest_copy = control_directory / "finalized-manifest.json"
     if Path(manifest_path).resolve() != manifest_copy.resolve():
-        shutil.copyfile(manifest_path, manifest_copy)
-    (input_directory / ".upload-complete").touch()
-    return run_csv, metadata_csv
+        shutil.copyfile(str(manifest_path), str(manifest_copy))
+
+    completion_marker = control_directory / ".upload-complete"
+    completion_marker.touch()
+    return run_csv, metadata_csv, completion_marker
 
 
-def inventory_outputs(output_directory):
-    outputs = []
+def output_snapshot(output_directory):
+    """Return hashes and sizes for publishable shared output files."""
+    output_directory = Path(output_directory)
+    snapshot = {}
+
+    if not output_directory.is_dir():
+        return snapshot
+
     for path in sorted(output_directory.rglob("*")):
-        if not path.is_file() or path.name in ("result-manifest.json",):
+        if not path.is_file():
             continue
-        outputs.append({
-            "path": path.relative_to(output_directory).as_posix(),
+
+        relative = path.relative_to(output_directory).as_posix()
+        if relative.startswith("manifests/"):
+            continue
+        if path.name == "result-manifest.json":
+            continue
+
+        snapshot[relative] = {
+            "path": relative,
             "size_bytes": path.stat().st_size,
             "sha256": sha256_file(path),
-        })
-    return outputs
+        }
 
+    return snapshot
+
+
+def inventory_changed_outputs(output_directory, before):
+    """Describe files created or changed during the current generation."""
+    after = output_snapshot(output_directory)
+    changed = []
+
+    for relative in sorted(after):
+        current = after[relative]
+        previous = before.get(relative)
+        if previous != current:
+            changed.append(current)
+
+    return changed
 
 def atomic_write_json(path, value):
     """Write a JSON document without exposing a partially written file."""
@@ -386,52 +454,53 @@ def publish_immutable_file(source, destination):
     return True
 
 
+
 def publish_result_manifest(task_root, manifest, result, iteration=None):
-    """Commit the result manifest and latest pointer in publication order."""
+    """Commit an immutable result manifest and mutable latest pointers."""
     task_root = Path(task_root)
     publication_directory = task_root / "output" / "manifests"
     latest_path = publication_directory / "latest.json"
-    publication_state_path = publication_directory / "publication-state.json"
+    state_path = publication_directory / "publication-state.json"
+
     if iteration is None:
         result_path = publication_directory / "result-manifest.json"
-        result_manifest_name = result_path.name
-        latest_result_manifest_name = result_manifest_name
-        publication_state_name = publication_state_path.name
+        result_manifest_name = "manifests/result-manifest.json"
+        publication_state_name = "manifests/publication-state.json"
     else:
         result_path = publication_directory / (
             "iteration-{0:06d}.json".format(iteration)
         )
-        result_manifest_name = "manifests/{}".format(result_path.name)
-        latest_result_manifest_name = (
-            "iterations/iteration-{0:06d}/{1}"
-        ).format(iteration, result_manifest_name)
+        result_manifest_name = (
+            "iterations/iteration-{0:06d}/manifests/"
+            "iteration-{0:06d}.json"
+        ).format(iteration)
         publication_state_name = (
-            "iterations/iteration-{0:06d}/manifests/{1}"
-        ).format(iteration, publication_state_path.name)
-    for output in result.get("outputs", []):
-        source = task_root / "output" / output["path"]
-        publish_immutable_file(source, task_root / "output" / output["path"])
+            "iterations/iteration-{0:06d}/manifests/"
+            "publication-state.json"
+        ).format(iteration)
 
     atomic_write_json(result_path, result)
+    published_at = utc_now()
     publication_state = {
         "schema_version": 1,
         "run_id": manifest["run_id"],
         "run_name": manifest["run_name"],
+        "generation": iteration,
         "status": result["status"],
-        "result_manifest": latest_result_manifest_name,
-        "published_at": utc_now(),
+        "result_manifest": result_manifest_name,
+        "published_at": published_at,
     }
-    atomic_write_json(publication_state_path, publication_state)
+    atomic_write_json(state_path, publication_state)
     atomic_write_json(latest_path, {
         "schema_version": 1,
         "run_id": manifest["run_id"],
         "run_name": manifest["run_name"],
-        "result_manifest": latest_result_manifest_name,
+        "generation": iteration,
+        "result_manifest": result_manifest_name,
         "publication_state": publication_state_name,
-        "published_at": publication_state["published_at"],
+        "published_at": published_at,
     })
-    return result_path
-
+    return result_path, state_path, latest_path
 
 def download_manifest_inputs(store, container, manifest_blob, manifest_path,
                              source_root):
@@ -446,23 +515,34 @@ def download_manifest_inputs(store, container, manifest_blob, manifest_path,
     return manifest
 
 
-def publish_cloud_results(store, container, prefix, task_root, manifest, result):
-    """Publish outputs first and commit the result pointers last."""
-    output_directory = Path(task_root) / "output"
-    files = sorted(path for path in output_directory.rglob("*") if path.is_file())
-    latest = output_directory / "manifests" / "latest.json"
-    for path in files:
-        if path == latest:
-            continue
-        blob_name = "{}/{}".format(prefix.strip("/"), path.relative_to(
-            output_directory
-        ).as_posix())
-        store.publish_file(container, blob_name, path)
-    root_prefix = prefix.strip("/").split("/iterations/", 1)[0]
-    blob_name = "{}/manifests/latest.json".format(root_prefix)
-    print("Publishing latest pointer as mutable: {}".format(blob_name))
-    store.upload_mutable_file(container, blob_name, latest)
 
+def publish_cloud_results(
+        store, container, prefix, task_root, result, result_path,
+        state_path, latest_path):
+    """Publish one generation snapshot, then commit its pointers."""
+    task_root = Path(task_root)
+    output_directory = task_root / "output"
+    prefix = prefix.strip("/")
+
+    for output in result.get("outputs", []):
+        relative = relative_path(output["path"], "output path")
+        source = output_directory / relative
+        if not source.is_file():
+            raise FileNotFoundError(str(source))
+        blob_name = "{0}/{1}".format(prefix, relative.as_posix())
+        store.upload_immutable_file(container, blob_name, source)
+
+    generation = int(result["generation"])
+    manifest_blob = (
+        "{0}/manifests/iteration-{1:06d}.json"
+    ).format(prefix, generation)
+    state_blob = "{}/manifests/publication-state.json".format(prefix)
+    store.upload_immutable_file(container, manifest_blob, result_path)
+    store.upload_mutable_file(container, state_blob, state_path)
+
+    root_prefix = prefix.split("/iterations/", 1)[0]
+    latest_blob = "{}/manifests/latest.json".format(root_prefix)
+    store.upload_mutable_file(container, latest_blob, latest_path)
 
 def wrapper_identity():
     """Return the installed wrapper version and source-file digest."""
@@ -520,112 +600,173 @@ def available_manifest_generations(storage, container, manifest_prefix):
     return sorted(generations)
 
 
+
 def run_task(args):
+    """Process local or cloud manifests until the run is drained."""
     task_root = Path(args.task_root).resolve()
     storage = None
+
     if args.input_sas_url or args.output_sas_url:
         storage = AzureBlobStore(
             input_sas_url=args.input_sas_url,
             output_sas_url=args.output_sas_url,
         )
     elif args.storage_account or args.storage_key:
-        storage = AzureBlobStore(args.storage_account, args.storage_key)
-    manifest_path = Path(args.manifest).resolve() if args.manifest else (
-        task_root / "input" / "finalized-manifest.json"
+        storage = AzureBlobStore(
+            args.storage_account,
+            args.storage_key,
+        )
+
+    local_manifest_path = (
+        Path(args.manifest).resolve()
+        if args.manifest
+        else task_root / "input" / "finalized-manifest.json"
     )
-    local_manifest_path = manifest_path
     source_root = Path(args.source_root).resolve()
-    input_directory = task_root / "input"
     output_directory = task_root / "output"
     logs_directory = output_directory / "logs"
+    iterations_directory = task_root / "iterations"
+    state_directory = task_root / "state"
 
-    output_directory.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    for directory in (
+            output_directory, logs_directory, iterations_directory,
+            state_directory):
+        directory.mkdir(parents=True, exist_ok=True)
 
-    logs_directory.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
     identity = wrapper_identity()
     print(
         "FoodPort Nanopore wrapper {} ({})".format(
-            identity["version"], identity["sha256"]
+            identity["version"],
+            identity["sha256"],
         ),
         file=sys.stderr,
         flush=True,
     )
 
-    if args.manifest_blob:
+    streaming = bool(args.manifest_blob)
+    if streaming:
         if storage is None or not args.input_container:
             raise ValueError(
-                "cloud manifest mode requires storage credentials and input container"
+                "cloud manifest mode requires input storage credentials"
+            )
+        if not args.output_container:
+            raise ValueError(
+                "cloud manifest mode requires an output container"
             )
         if not args.manifest_prefix or not args.control_blob:
             raise ValueError(
-                "cloud streaming mode requires manifest prefix and control blob"
+                "cloud streaming mode requires a manifest prefix and "
+                "control blob"
             )
-        manifest = None
     else:
-        manifest = load_manifest(manifest_path)
-    stdout_path = logs_directory / "scheduler-stdout.log"
-    stderr_path = logs_directory / "scheduler-stderr.log"
-    processed_path = task_root / "input" / ".processed-generations.json"
+        load_manifest(local_manifest_path)
+
+    processed_path = state_directory / ".processed-generations.json"
     if processed_path.exists():
-        processed = set(json.loads(processed_path.read_text(encoding="utf-8")))
+        processed_values = json.loads(
+            processed_path.read_text(encoding="utf-8")
+        )
+        if not isinstance(processed_values, list):
+            raise ValueError("processed generation state must be a list")
+        processed = set(int(value) for value in processed_values)
     else:
         processed = set()
-    streaming = bool(args.manifest_blob)
+
     next_manifest_blob = args.manifest_blob or "__local_manifest__"
     final_return_code = 0
+
     while True:
         if next_manifest_blob is None:
             generations = available_manifest_generations(
-                storage, args.input_container, args.manifest_prefix
+                storage,
+                args.input_container,
+                args.manifest_prefix,
             )
-            next_items = [item for item in generations if item[0] not in processed]
+            next_items = [
+                item
+                for item in generations
+                if item[0] not in processed
+            ]
             if not next_items:
                 state = control_state(
-                    storage, args.input_container, args.control_blob
+                    storage,
+                    args.input_container,
+                    args.control_blob,
                 )
                 if state in ("stopping", "error"):
-                    return 1 if state == "error" else final_return_code
+                    if state == "error":
+                        return 1
+                    return final_return_code
                 time.sleep(args.poll_seconds)
                 continue
             generation, next_manifest_blob = next_items[0]
         else:
             generation = manifest_generation(next_manifest_blob) or 1
 
+        generation_root = iterations_directory / (
+            "iteration-{0:06d}".format(generation)
+        )
+        input_directory = generation_root / "input"
+        generation_root.mkdir(parents=True, exist_ok=True)
+
         if streaming:
-            manifest_path = task_root / "input" / (
-                "input-manifest-v{:06d}.json".format(generation)
+            manifest_path = generation_root / (
+                "input-manifest-v{0:06d}.json".format(generation)
             )
             manifest = download_manifest_inputs(
-                storage, args.input_container, next_manifest_blob,
-                manifest_path, source_root
+                storage,
+                args.input_container,
+                next_manifest_blob,
+                manifest_path,
+                source_root,
             )
         else:
             manifest_path = local_manifest_path
             manifest = load_manifest(manifest_path)
+
+        manifest["generation"] = generation
         materialize_inputs(manifest, source_root, input_directory)
-        run_csv, metadata_csv = write_scheduler_inputs(
-            manifest, manifest_path, input_directory, output_directory
+        run_csv, metadata_csv, completion_marker = (
+            write_scheduler_inputs(
+                manifest,
+                manifest_path,
+                input_directory,
+                output_directory,
+            )
+        )
+
+        before_outputs = output_snapshot(output_directory)
+        stdout_path = logs_directory / (
+            "scheduler-generation-{0:06d}-stdout.log".format(generation)
+        )
+        stderr_path = logs_directory / (
+            "scheduler-generation-{0:06d}-stderr.log".format(generation)
         )
         command = [
-            args.python, args.scheduler, str(run_csv), str(metadata_csv),
-            "--model", resolve_model_path(manifest["dorado"]["model"]),
-            "--device", args.device,
-            "--once", "--keep-mapping-bam",
-            "--completion-marker", str(input_directory / ".upload-complete"),
+            args.python,
+            str(args.scheduler),
+            str(run_csv),
+            str(metadata_csv),
+            "--model",
+            resolve_model_path(manifest["dorado"]["model"]),
+            "--device",
+            args.device,
+            "--once",
+            "--keep-mapping-bam",
+            "--completion-marker",
+            str(completion_marker),
         ]
+
         started_at = utc_now()
-        with open(stdout_path, "a", encoding="utf-8") as stdout, open(
-            stderr_path, "a", encoding="utf-8"
-        ) as stderr:
+        with open(stdout_path, "w", encoding="utf-8") as stdout, open(
+                stderr_path, "w", encoding="utf-8") as stderr:
             completed = subprocess.run(
-                command, stdout=stdout, stderr=stderr, check=False
+                command,
+                stdout=stdout,
+                stderr=stderr,
+                check=False,
             )
+
         print(
             "Scheduler generation {0} exited with code {1}".format(
                 generation,
@@ -634,9 +775,16 @@ def run_task(args):
             file=sys.stderr,
             flush=True,
         )
-        (logs_directory / "exit-code.txt").write_text(
-            "{}\n".format(completed.returncode), encoding="utf-8"
+        exit_code_path = logs_directory / (
+            "scheduler-generation-{0:06d}-exit-code.txt".format(
+                generation
+            )
         )
+        exit_code_path.write_text(
+            "{}\n".format(completed.returncode),
+            encoding="utf-8",
+        )
+
         result = {
             "schema_version": 1,
             "wrapper": identity,
@@ -644,7 +792,11 @@ def run_task(args):
             "run_name": manifest["run_name"],
             "generation": generation,
             "iteration": generation,
-            "status": "completed" if completed.returncode == 0 else "failed",
+            "status": (
+                "completed"
+                if completed.returncode == 0
+                else "failed"
+            ),
             "started_at": started_at,
             "finished_at": utc_now(),
             "scheduler_exit_code": completed.returncode,
@@ -654,17 +806,37 @@ def run_task(args):
             },
             "scheduler_run_csv_sha256": sha256_file(run_csv),
             "scheduler_metadata_csv_sha256": sha256_file(metadata_csv),
-            "outputs": inventory_outputs(output_directory),
+            "outputs": inventory_changed_outputs(
+                output_directory,
+                before_outputs,
+            ),
         }
-        publish_result_manifest(task_root, manifest, result, generation)
-        if storage is not None and args.output_container:
-            publish_cloud_results(
-                storage, args.output_container,
-                "{}/iterations/iteration-{:06d}".format(
-                    args.output_prefix or "runs/{}".format(manifest["run_name"]),
-                    generation,
-                ), task_root, manifest, result,
+        result_path, state_path, latest_path = publish_result_manifest(
+            task_root,
+            manifest,
+            result,
+            generation,
+        )
+
+        if storage is not None:
+            output_prefix = (
+                args.output_prefix
+                or "runs/{}".format(manifest["run_name"])
             )
+            generation_prefix = (
+                "{0}/iterations/iteration-{1:06d}"
+            ).format(output_prefix, generation)
+            publish_cloud_results(
+                storage,
+                args.output_container,
+                generation_prefix,
+                task_root,
+                result,
+                result_path,
+                state_path,
+                latest_path,
+            )
+
         final_return_code = completed.returncode
         if completed.returncode != 0:
             try:
@@ -692,6 +864,7 @@ def run_task(args):
 
 
 def parse_arguments(argv=None):
+    """Parse wrapper command-line arguments."""
     parser = argparse.ArgumentParser(
         prog=PROGRAM_NAME,
         description=__doc__,
@@ -713,13 +886,21 @@ def parse_arguments(argv=None):
     parser.add_argument("--output-prefix")
     parser.add_argument("--storage-account")
     parser.add_argument("--storage-key")
-    parser.add_argument("--input-sas-url")
-    parser.add_argument("--output-sas-url")
+    parser.add_argument(
+        "--input-sas-url",
+        default=os.environ.get("FOODPORT_INPUT_SAS_URL"),
+    )
+    parser.add_argument(
+        "--output-sas-url",
+        default=os.environ.get("FOODPORT_OUTPUT_SAS_URL"),
+    )
     parser.add_argument("--scheduler", required=True, type=Path)
     parser.add_argument("--python", default=sys.executable)
-    parser.add_argument("--device", default=os.environ.get("DORADO_DEVICE", "cuda:all"))
+    parser.add_argument(
+        "--device",
+        default=os.environ.get("DORADO_DEVICE", "cuda:all"),
+    )
     return parser.parse_args(argv)
-
 
 def main(argv=None):
     try:
