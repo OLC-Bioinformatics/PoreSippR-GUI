@@ -1,0 +1,24 @@
+# make setup installs these packages in the .env folder.
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  # Python 3.12 supports the GUI packages in requirements.txt.
+  - python=3.12
+  - pip
+  # Tools for mapping reads and handling alignments.
+  - minimap2
+  - samtools
+  # Libraries for PDF reports and the GUI.
+  - pango
+  - fontconfig
+  - libxkbcommon
+  - xcb-util-cursor
+  - libegl
+  - libgl
+  # Tools for downloading and unpacking Dorado.
+  - curl
+  - tar
+  - pip:
+      - -r requirements.txt
