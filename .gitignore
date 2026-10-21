@@ -21,3 +21,32 @@ run_poresippr.sh
 
 # Log files
 *.log
+
+# Local environment, downloaded tools, and models.
+/.env/
+/.tools/
+
+# Local settings and generated run output.
+/config/*
+!/config/README.md
+/runs/*
+!/runs/README.md
+/results/
+/output/
+/reports/
+/images/
+/MIN-*/
+/site/
+/.cache/
+/.gui-settings.ini
+
+# Python caches and editor temporary files.
+__pycache__/
+.pytest_cache/
+*.swp
+
+# Temporary files created alongside the relocated test data.
+/tests/fixtures/test_files/images/
+/tests/fixtures/test_files/output/
+/tests/fixtures/test_files/fast5/
+/tests/fixtures/test_files/poresippr_out/
