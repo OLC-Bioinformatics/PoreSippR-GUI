@@ -513,8 +513,8 @@ class MainWindow(QMainWindow):
         # Initialise the selected barcodes
         self.selected_barcodes = []
 
-        # Initialise the fast5 directory
-        self.fast5_dir = None
+        # Initialise the pod5 directory
+        self.pod5_dir = None
 
         # Initialise the CSV path
         self.csv_path = None
@@ -836,30 +836,30 @@ class MainWindow(QMainWindow):
         if not self.selected_barcodes:
             invalid_messages.append("At least one barcode must be selected.")
 
-        # Validate if fast5 directory exists
-        fast5_dir = os.path.join(
-            '/var/lib/minknow/data/', self.run_name, 'no_sample'
+        # Validate if pod5 directory exists
+        pod5_dir = os.path.join(
+            '/var/lib/minknow/data/', self.run_name, 'no_sample_id'
         )
 
-        if not os.path.exists(fast5_dir):
+        if not os.path.exists(pod5_dir):
             invalid_messages.append(
-                f"Run directory {fast5_dir} does not exist. Please ensure "
+                f"Run directory {pod5_dir} does not exist. Please ensure "
                 f"that you supplied the correct run name, and that the run "
                 f"has started"
             )
         else:
             # Check if the run-specific output folder exists
-            fast5_dirs = glob(os.path.join(fast5_dir, '*/'))
-            if not fast5_dirs:
+            pod5_dirs = glob(os.path.join(pod5_dir, '*/'))
+            if not pod5_dirs:
                 invalid_messages.append(
-                    "No fast5 files found in the directory. Please wait for "
+                    "No pod5 files found in the directory. Please wait for "
                     "files to be produced. This can take up to 45 minutes "
                     "after starting a run"
                 )
 
-            # Add 'fast5' to self.fast5_dir
-            self.fast5_dir = os.path.join(
-                fast5_dirs[0], 'fast5'
+            # Add 'pod5' to self.pod5_dir
+            self.pod5_dir = os.path.join(
+                pod5_dirs[0], 'pod5'
             )
 
         # Display warning message if there are invalid inputs
@@ -914,7 +914,7 @@ class MainWindow(QMainWindow):
         Creates an input CSV file with the user inputs.
         """
         # Define the header and rows
-        header = ['reference', 'fast5_dir', 'output_dir', 'config', 'barcode',
+        header = ['reference', 'pod5_dir', 'output_dir', 'config', 'barcode',
                   'barcode_values']
         # Step 1: Sort the list of selected barcodes
         sorted_barcodes = sorted(self.selected_barcodes)
@@ -931,7 +931,7 @@ class MainWindow(QMainWindow):
         # Step 4: Create the row for the CSV file
         row = [
             self.reference_file,
-            self.fast5_dir,
+            self.pod5_dir,
             self.csv_path,
             'dna_r10.4.1_e8.2_260bps_fast.cfg',
             self.barcode_kit,
