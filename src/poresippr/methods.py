@@ -41,9 +41,9 @@ def determine_script_path():
     # Attempt to determine the script path using __file__
     # Look for cfia.jpg in the images folder after reorganizing the files.
     script_path = os.path.join(
-    	os.path.dirname(os.path.abspath(__file__)), 'resources', 'images'
+    	os.path.dirname(os.path.abspath(__file__)), 'resources'
     )
-    image_path = os.path.join(script_path, 'cfia.jpg')
+    image_path = os.path.join(script_path,  'images', 'cfia.jpg')
 
     if not os.path.exists(image_path):
         # If the image file does not exist, attempt to determine the script

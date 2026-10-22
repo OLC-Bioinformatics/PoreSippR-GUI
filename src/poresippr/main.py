@@ -381,7 +381,7 @@ class MainWindow(QMainWindow):
         script_path = determine_script_path()
 
         # Set the application icon for the system taskbar
-        image_path = os.path.join(script_path, 'cfia.jpg')
+        image_path = os.path.join(script_path,  'images',  'cfia.jpg')
         if os.path.exists(image_path):
             if QImageReader(image_path).canRead():
                 app_icon = QIcon(image_path)
