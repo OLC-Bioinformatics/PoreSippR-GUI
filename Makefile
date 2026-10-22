@@ -16,6 +16,9 @@ setup:
 # Start the GUI using the environment created by make setup.
 # --prefix selects .env, even if another environment is active in your terminal.
 run:
-	"$(CONDA)" run --prefix "$(ENV_PREFIX)" python src/poresippr/main.py > "$(LOG_FILE)" 
+	"$(CONDA)" run --prefix "$(ENV_PREFIX)" python src/poresippr/main.py > "$(LOG_FILE)" 2>&1 || { \
+		echo "See $(LOG_FILE) for errors."; \
+		exit 1; \
+	}
 clean:
 	echo "cleaning"
