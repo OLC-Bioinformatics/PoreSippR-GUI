@@ -49,7 +49,8 @@ def determine_script_path():
         image_path = os.path.join(script_path, 'cfia.jpg')
 
         if not os.path.exists(image_path):
-            raise SystemExit('Cannot determine path')
+            # changed from SystemExit to RuntimeError to allow tracing back the error origin easily
+            raise RuntimeError('Cannot determine path')
 
     return script_path
 
