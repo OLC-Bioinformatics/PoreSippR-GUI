@@ -7,7 +7,7 @@ ENV_PREFIX ?= $(CURDIR)/.env
 # Save the program's messages and errors here. Each run starts a new log.
 LOG_FILE ?= $(CURDIR)/run_poresippr.log
 
-.PHONY: setup run
+.PHONY: setup run clean
 
 # Install dependencies, prepare Dorado and its model, then check the setup.
 setup:
@@ -16,4 +16,6 @@ setup:
 # Start the GUI using the environment created by make setup.
 # --prefix selects .env, even if another environment is active in your terminal.
 run:
-	"$(CONDA)" run --prefix "$(ENV_PREFIX)" python main.py > "$(LOG_FILE)"
+	"$(CONDA)" run --prefix "$(ENV_PREFIX)" python src/poresippr/main.py > "$(LOG_FILE)" 
+clean:
+	echo "cleaning"
