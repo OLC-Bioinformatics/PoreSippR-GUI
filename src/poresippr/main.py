@@ -1726,8 +1726,8 @@ class MainWindow(QMainWindow):
                 "A run is in progress. Are you sure you want to "
                 "close the application?"
             )
-            message.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-
+            #message.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+            message.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             # Move the message box to the desired position
             self.move_message(message=message)
 
@@ -1751,9 +1751,23 @@ class MainWindow(QMainWindow):
             # If the user clicked 'Cancel', ignore the close event
             else:
                 event.ignore()
-        # If no run is in progress, accept the close event
+        # show a message box if the user clicked on close botton if the run is not active
         else:
-            event.accept()
+            response = CustomMessageBox.question(
+                self,
+                "Close PoreSippR",
+                "Are you sure you want to close PoreSippR?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No,
+            )
+
+            if response == QMessageBox.Yes:
+                cleanup_scheduler_processes(self.pid_store)
+                os._exit(0)
+                event.accept()
+            else:
+                event.ignore()
+
 
     def move_message(self, message):
         """
