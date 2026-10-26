@@ -646,6 +646,16 @@ class MainWindow(QMainWindow):
         # Reference file selection section
         layout.addWidget(QLabel("Reference File"))
         reference_button = QPushButton("Select Reference File", dialog)
+        # added by Amin
+        # if not selected, use the default DB below
+        if not self.reference_file:
+            self.reference_file = os.path.abspath(os.path.join(
+            os.path.dirname(__file__),
+            "..", "..", "references", "PoreSippR_DB_251110.fasta"
+        ))
+
+        reference_button.setText(os.path.basename(self.reference_file))
+
         reference_button.setStyleSheet(
             """
             QPushButton {
@@ -721,6 +731,11 @@ class MainWindow(QMainWindow):
             barcode_list_widget.addItem(f"{i:02}")
 
         layout.addWidget(barcode_list_widget)
+        # Default values # added by Amin
+        lab_name_dropdown.setCurrentText("OLC")
+        barcode_kit_input.setText("SQK-RBK114-24")
+        #run_name_input.setText(time.strftime("MIN-%Y%m%d"))
+        run_name_input.setText(time.strftime("MIN-20260421"))
 
         # Validate button section
         validate_button = QPushButton("Validate", dialog)
@@ -757,12 +772,21 @@ class MainWindow(QMainWindow):
         :param button: The button to update with the selected file's name
         and style.
         """
-        self.reference_file, _ = QFileDialog.getOpenFileName(
+        # added by Amin
+        # defalt DB is selected
+        selected_file, _ = QFileDialog.getOpenFileName(
             window_dialog,
             caption="Select Reference File",
-            dir="",
+            dir=self.reference_file or "",
             filter="All Files (*)"
         )
+
+        # keep the existing reference if the user cancels.
+        if not selected_file:
+            return
+
+        self.reference_file = selected_file
+
         if self.reference_file:
             # Extract the file name from the path
             file_name = os.path.basename(self.reference_file)
