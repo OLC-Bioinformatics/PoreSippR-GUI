@@ -688,14 +688,53 @@ class MainWindow(QMainWindow):
         layout.addWidget(run_name_input)
 
         # Barcode kit selection section
-        layout.addWidget(QLabel("Barcode Kit"))
-        barcode_kit_input = QLineEdit(dialog)
+        #layout.addWidget(QLabel("Barcode Kit"))
+        #barcode_kit_input = QLineEdit(dialog)
 
         # Set the placeholder text
-        barcode_kit_input.setPlaceholderText(
-            "Enter barcode kit e.g. SQK-RBK114-24")
+        #barcode_kit_input.setPlaceholderText(
+        #    "Enter barcode kit e.g. SQK-RBK114-24")
 
-        layout.addWidget(barcode_kit_input)
+        #layout.addWidget(barcode_kit_input)
+
+        # added by Amin
+        # Barcode kit selection section
+        layout.addWidget(QLabel("Barcode Kit"))
+        barcode_kit_input_dropdown = QComboBox(dialog)
+        # MinKNOW barcoding kits and expansions supported by Dorado 2.1.2.
+        barcode_kit_input_dropdown.addItems([
+            "EXP-PBC001",
+            "EXP-PBC096",
+            "SQK-16S114-24",
+            "SQK-DRB004-24",
+            "SQK-MAB114-24",
+            "SQK-MLK114-96-XL",
+            "SQK-NBD114-24",
+            "SQK-NBD114-96",
+            "SQK-PCB114-24",
+            "SQK-RBK114-24",
+            "SQK-RBK114-96",
+            "SQK-RPB114-24",
+        ])
+        barcode_kit_input_dropdown.setStyleSheet(
+            "QComboBox { border: 1px solid #007bff; border-radius: 4px; "
+            "padding: 5px; }"
+            "QComboBox::drop-down { border: 0px; width: 25px; "
+            "background-color: #333333; }"
+            "QComboBox::down-arrow { image: "
+            "url(:/20x20/icons/20x20/cil-chevron-bottom.png); }"
+            "QComboBox::down-arrow { width: 14px; height: 14px; }"
+            "QComboBox::down-arrow { subcontrol-origin: padding; "
+            "subcontrol-position: center right; right: 5px; }"
+            "QComboBox QAbstractItemView::item { height: 25px; }"
+            "QComboBox QAbstractItemView::item:selected { background-color: "
+            "#007bff; color: white; }"
+            "QComboBox QAbstractItemView::item:hover { background-color: "
+            "#007bff; color: white; }"
+            "QComboBox QAbstractItemView { selection-background-color: "
+            "#007bff; selection-color: white; }"
+        )
+        layout.addWidget(barcode_kit_input_dropdown)
 
         # Enhanced barcode selection section with custom styling and tooltips
         # Create the QLabel for "Barcodes" and set its tooltip
@@ -733,7 +772,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(barcode_list_widget)
         # Default values # added by Amin
         lab_name_dropdown.setCurrentText("OLC")
-        barcode_kit_input.setText("SQK-RBK114-24")
+        barcode_kit_input_dropdown.setCurrentText("SQK-RBK114-24")
         #run_name_input.setText(time.strftime("MIN-%Y%m%d"))
         run_name_input.setText(time.strftime("MIN-20260421"))
 
@@ -750,7 +789,7 @@ class MainWindow(QMainWindow):
             lambda: self.validate_and_close(
                 window_dialog=dialog,
                 run_name_input=run_name_input,
-                barcode_kit_input=barcode_kit_input,
+                barcode_kit_input=barcode_kit_input_dropdown,
                 barcode_list_widget=barcode_list_widget,
                 lab_name_dropdown=lab_name_dropdown
             )
@@ -820,14 +859,14 @@ class MainWindow(QMainWindow):
 
         :param window_dialog: The dialog window to close.
         :param run_name_input: The QLineEdit for the run name.
-        :param barcode_kit_input: The QLineEdit for the barcode kit.
+        :param barcode_kit_input: The QComboBox for the barcode kit.
         :param barcode_list_widget: The QListWidget for the selected barcodes.
         :param lab_name_dropdown: The QComboBox for the lab name.
         """
         # Capture inputs
         self.lab_name = lab_name_dropdown.currentText().rstrip()
         self.run_name = run_name_input.text().rstrip()
-        self.barcode_kit = barcode_kit_input.text().rstrip()
+        self.barcode_kit = barcode_kit_input.currentText().rstrip()
         self.selected_barcodes = sorted(
             [
                 item.text() for item in barcode_list_widget.selectedItems()
@@ -912,7 +951,7 @@ class MainWindow(QMainWindow):
             msg_box.exec()
 
             # added by Amin
-            # Create a separate folder for this new analysis.
+            # create a separate folder for this new analysis.
             self.analysis_id = time.strftime("analysis_%Y%m%d_%H%M%S")
             self.working_dir = os.path.abspath(os.path.join(
                 os.path.dirname(__file__),
