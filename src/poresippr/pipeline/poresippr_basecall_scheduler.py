@@ -144,7 +144,7 @@ def build_basecaller_command(pod5_dir, barcode_kit, dorado_bam):
         f"dorado basecaller "
         f"--device {DEVICE} "
         f"{MODEL} "
-        f"--batchsize-benchmarks-file {BENCH_FILE} "
+        #f"--batchsize-benchmarks-file {BENCH_FILE} "
         f"--batchsize 640 "
         f"{bench_refresh_flag}"
         f"{pod5_dir} "
