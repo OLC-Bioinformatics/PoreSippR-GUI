@@ -957,13 +957,27 @@ class MainWindow(QMainWindow):
             msg_box.exec()
 
             # added by Amin
-            # create a separate folder for this new analysis.
-            self.analysis_id = time.strftime("analysis_%Y%m%d_%H%M%S")
-            self.working_dir = os.path.abspath(os.path.join(
-                os.path.dirname(__file__),
-                "..", "..", "runs", self.run_name, self.analysis_id
-            ))
-            os.makedirs(self.working_dir, exist_ok=False)
+            # find the analysis folder from the input.csv path.
+            # before the first validation, this path is empty.
+            draft_dir = os.path.dirname(self.configuration_file or "")
+
+            # keep the same folder when correcting settings before starting.
+            # only reuse it if it exists and belongs to the same run name.
+            if (
+                self.worker is None
+                and os.path.isdir(draft_dir)
+                and os.path.basename(os.path.dirname(draft_dir)) == self.run_name
+            ):
+                self.working_dir = draft_dir
+            else:
+                # make a new folder for the first configuration,
+                # a different run name, or an analysis that has already started.
+                self.analysis_id = time.strftime("analysis_%Y%m%d_%H%M%S")
+                self.working_dir = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__),
+                    "..", "..", "runs", self.run_name, self.analysis_id
+                ))
+                os.makedirs(self.working_dir, exist_ok=False)
             
             # Write the run configuration information to a CSV file
             self.create_input_csv()
