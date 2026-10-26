@@ -623,9 +623,13 @@ class MainWindow(QMainWindow):
         lab_name_dropdown.setStyleSheet(
             "QComboBox { border: 1px solid #007bff; border-radius: 4px; "
             "padding: 5px; }"
-            "QComboBox::drop-down { border: 0px; }"
+            # added by Amin
+            # to make the down-arrow more visible 
+            "QComboBox::drop-down { border: 0px; width: 25px; "
+            "background-color: #333333; }"
             "QComboBox::down-arrow { image: "
-            "url(icons/20x20/cil-chevron-bottom.png); }"
+            #"url(icons/20x20/cil-chevron-bottom.png); }"
+            "url(:/20x20/icons/20x20/cil-chevron-bottom.png); }"
             "QComboBox::down-arrow { width: 14px; height: 14px; }"
             "QComboBox::down-arrow { subcontrol-origin: padding; "
             "subcontrol-position: center right; right: 5px; }"
