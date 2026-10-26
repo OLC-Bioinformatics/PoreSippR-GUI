@@ -596,6 +596,12 @@ class MainWindow(QMainWindow):
         a validation button that, when clicked, checks the inputs and closes
         the dialog if everything is valid.
         """
+
+        # added by Amin
+        # require configuration and sequence validation again before starting.
+        self.user_interface.run_button.setEnabled(False)
+        self.user_interface.sequence_info_button.setEnabled(False)
+
         # Initialize the dialog
         dialog = QDialog(self)
         dialog.setWindowTitle("Enter PoreSippr Run Data")
@@ -988,7 +994,8 @@ class MainWindow(QMainWindow):
             self.user_interface.configuration_button.setText(
                 "PoreSippr Run Configured"
                 )
-            self.user_interface.configuration_button.setEnabled(False)
+            # changed by Amin, to allow modification before starting the run
+            self.user_interface.configuration_button.setEnabled(True)
 
             # Close the dialog
             window_dialog.accept()
@@ -1198,7 +1205,8 @@ class MainWindow(QMainWindow):
                 self.user_interface.sequence_info_button.setText(
                     "Sequence Information Entered"
                     )
-                self.user_interface.sequence_info_button.setEnabled(False)
+                # changed by Amin, to allow modification before starting the run
+                self.user_interface.sequence_info_button.setEnabled(True)
 
                 # Close the dialog
                 dialog.accept()
