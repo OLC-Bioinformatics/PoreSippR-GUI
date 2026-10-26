@@ -43,7 +43,7 @@ def determine_script_path():
     script_path = os.path.join(
     	os.path.dirname(os.path.abspath(__file__)), 'resources'
     )
-    image_path = os.path.join(script_path,  'images', 'cfia.jpg')
+    image_path = os.path.join(script_path,  'images','cfia.jpg')
 
     if not os.path.exists(image_path):
         # If the image file does not exist, attempt to determine the script
@@ -628,11 +628,14 @@ def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
     script_path = determine_script_path()
 
     # Load the HTML template
-    env = Environment(loader=FileSystemLoader(script_path))
+    #env = Environment(loader=FileSystemLoader(script_path))
+    env = Environment(
+    loader=FileSystemLoader(os.path.join(script_path, 'templates'))
+    )
     template = env.get_template('report_template.html')
 
     # Convert image to Base64
-    image_base64 = image_to_base64(os.path.join(script_path, 'CFIA_logo.png'))
+    image_base64 = image_to_base64(os.path.join(script_path, 'images', 'CFIA_logo.png'))
 
     # Render the HTML content with dynamic data
     html_content = template.render(
@@ -834,11 +837,22 @@ def main(
             break
 
         # Check if the worker process is still running
+        # added std outputs to expose errors when running the GUI
         if worker_process.poll() is not None:
-            break
+            stdout_thread.join()
+            stderr_thread.join()
 
+            if worker_process.returncode != 0:
+                error_message = '\n'.join(stderr_capture)
+                raise RuntimeError(
+                    f"Scheduler failed with exit code "
+                    f"{worker_process.returncode}:\n{error_message}"
+                )
+
+            break
+        # changed by Amin
         # Get all CSV files in the csv_path
-        all_csv_files = glob(os.path.join(csv_path, '*.csv'))
+        all_csv_files = glob(os.path.join(csv_path, 'results', '*.csv'))
 
         # Group the CSV files by iteration
         csv_files_by_iteration = defaultdict(list)
