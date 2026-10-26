@@ -1038,15 +1038,40 @@ class MainWindow(QMainWindow):
         table.setItemDelegateForColumn(1, delegate)
         table.setItemDelegateForColumn(2, delegate)
 
+        # added by Amin
+        # Load the last saved entries, matched by barcode.
+        previous_entries = {}
+        metadata_path = os.path.join(self.working_dir, "metadata.csv")
+
+        if os.path.isfile(metadata_path):
+            with open(metadata_path, newline="", encoding="utf-8-sig") as handle:
+                previous_entries = {
+                    int(row["Barcode"]): row
+                    for row in csv.DictReader(handle)
+                }
+
         # Populate the first column of the table with barcode values
         for i, barcode in enumerate(self.selected_barcodes):
             table.setItem(i, 0, QTableWidgetItem(barcode))
 
             # SEQID column as empty
-            table.setItem(i, 1, QTableWidgetItem(""))
+            #table.setItem(i, 1, QTableWidgetItem(""))
 
             # OLNID column as empty
-            table.setItem(i, 2, QTableWidgetItem(""))
+            #table.setItem(i, 2, QTableWidgetItem(""))
+            # added by Amin
+            previous = previous_entries.get(int(barcode), {})
+
+            # Restore the previous SEQID; leave new barcodes blank.
+            table.setItem(
+                i, 1, QTableWidgetItem(previous.get("SEQID", ""))
+            )
+
+            # Restore the previous OLNID; leave new barcodes blank.
+            table.setItem(
+                i, 2, QTableWidgetItem(previous.get("OLNID", ""))
+            )
+
 
         # Set initial widths for SEQID and OLNID columns
         table.setColumnWidth(1, 150)
