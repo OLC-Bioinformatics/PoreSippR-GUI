@@ -52,7 +52,7 @@ class NoBarcodeReadsError(RuntimeError):
 
 
 DEFAULT_MODEL_DIRECTORY = (
-    "/opt/ont/models/"
+    "/home/olcbio/Desktop/amin_work/github/poreSippR/.tools/models/"
     "dna_r10.4.1_e8.2_400bps_fast@v5.2.0"
 )
 DEFAULT_BENCHMARK_FILE = (
