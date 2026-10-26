@@ -323,6 +323,13 @@ class MainWindow(QMainWindow):
         # Create the user interface
         self.user_interface = Ui_MainWindow()
         self.user_interface.setupUi(self)
+        # added by Amin
+        # added to allow copying the error messages in the GUI
+        self.user_interface.run_label_error.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+            | Qt.TextInteractionFlag.TextSelectableByKeyboard
+        )
+        
         self.user_interface_functions = UIFunctions(self)
 
         # Define class variables
