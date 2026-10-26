@@ -86,7 +86,8 @@ def cleanup_scheduler_processes(pid_store):
     # Fallback: kill all by name
     try:
         subprocess.run(
-            ["pkill", "-f", "poresippr_basecall_scheduler.py"],
+            #["pkill", "-f", "poresippr_basecall_scheduler.py"],
+            ["pkill", "-f", "poresippr_incremental_dorado_scheduler.py"],
             check=False
         )
     except Exception:
@@ -686,7 +687,7 @@ class MainWindow(QMainWindow):
         # Continue with the QListWidget setup
         barcode_list_widget = QListWidget(dialog)
         barcode_list_widget.setSelectionMode(QAbstractItemView.MultiSelection)
-
+        
         barcode_list_widget.setStyleSheet("""
             QListWidget {
                 border: 1px solid #007bff;
@@ -875,6 +876,15 @@ class MainWindow(QMainWindow):
             msg_box.setText("Validation Successful\nAll entries are valid.")
             msg_box.exec()
 
+            # added by Amin
+            # Create a separate folder for this new analysis.
+            self.analysis_id = time.strftime("analysis_%Y%m%d_%H%M%S")
+            self.working_dir = os.path.abspath(os.path.join(
+                os.path.dirname(__file__),
+                "..", "..", "runs", self.run_name, self.analysis_id
+            ))
+            os.makedirs(self.working_dir, exist_ok=False)
+            
             # Write the run configuration information to a CSV file
             self.create_input_csv()
 
@@ -926,7 +936,9 @@ class MainWindow(QMainWindow):
         barcode_values_literal = f'"{barcode_values_str}"'
 
         # Define the csv_path
-        self.csv_path = os.path.join(self.working_dir, self.run_name)
+        # changed bu Amin
+        self.csv_path = self.working_dir
+        #self.csv_path = os.path.join(self.working_dir, self.run_name)
 
         # Step 4: Create the row for the CSV file
         row = [
@@ -1751,6 +1763,7 @@ class MainWindow(QMainWindow):
             # If the user clicked 'Cancel', ignore the close event
             else:
                 event.ignore()
+        # added by Amin
         # show a message box if the user clicked on close botton if the run is not active
         else:
             response = CustomMessageBox.question(
