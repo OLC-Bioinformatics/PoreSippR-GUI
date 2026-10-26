@@ -776,11 +776,20 @@ class MainWindow(QMainWindow):
             barcode_list_widget.addItem(f"{i:02}")
 
         layout.addWidget(barcode_list_widget)
+        
         # Default values # added by Amin
-        lab_name_dropdown.setCurrentText("OLC")
-        barcode_kit_input_dropdown.setCurrentText("SQK-RBK114-24")
-        #run_name_input.setText(time.strftime("MIN-%Y%m%d"))
-        run_name_input.setText(time.strftime("MIN-20260421"))
+        # show the current lab and kit when reopening this window.
+        # use these defaults only when no values have been entered yet.
+        lab_name_dropdown.setCurrentText(self.lab_name or "OLC")
+        barcode_kit_input_dropdown.setCurrentText(
+            self.barcode_kit or "SQK-RBK114-24"
+        )
+
+        # keep the entered run name when reopening the window.
+        # on the first opening, suggest a name using today's date.
+        run_name_input.setText(
+            self.run_name or time.strftime("MIN-%Y%m%d")
+        )
 
         # Validate button section
         validate_button = QPushButton("Validate", dialog)
