@@ -795,7 +795,8 @@ def main(
         command = [
             '/home/olcbio/miniconda3/envs/poresippr/bin/python',
             '-u',
-            os.path.join(script_path, 'poresippr_basecall_scheduler.py'),
+            #os.path.join(script_path, 'pipeline', 'poresippr_basecall_scheduler.py'),
+            os.path.join(script_path, 'pipeline', 'poresippr_incremental_dorado_scheduler.py'),
             config_file,
             metadata_file
         ]
@@ -939,12 +940,14 @@ def main(
                     html_file_path=output_path
                 )
 
+                # changed from move to copy2 by Amin
+                # to avoid pointing to missing file in state.json records.
                 # Move the processed CSV file to a different folder
                 try:
-                    shutil.move(csv_file, processed_folder)
+                    shutil.copy2(csv_file, processed_folder)
                 except Exception:
                     sleep(3)
-                    shutil.move(csv_file, processed_folder)
+                    shutil.copy2(csv_file, processed_folder)
 
             # Create the PDF report
             create_pdf_report(
