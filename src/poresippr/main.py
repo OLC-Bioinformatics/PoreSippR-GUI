@@ -506,6 +506,14 @@ class MainWindow(QMainWindow):
         # Initialise the lab name
         self.lab_name = None
 
+        
+        # Initialise the organism and its genome size
+        # added by Amin
+        # Remember these values when configuration is reopened.
+        self.organism = None
+        self.genome_size = None
+
+
         # Initialise the reference file name/path
         self.reference_file = None
 
@@ -649,12 +657,19 @@ class MainWindow(QMainWindow):
         )
         layout.addWidget(lab_name_dropdown)
 
+        # added by Amin
         # Organism input section
         layout.addWidget(QLabel("Organism"))
-        oraganism_dropdown = QComboBox(dialog)
-        oraganism_dropdown.addItems(
-            ["EColi", "listeria", "Salmonella"])
-        oraganism_dropdown.setStyleSheet(
+        organism_dropdown = QComboBox(dialog)
+        # show the organism name and store its default genome size.
+        organism_dropdown.addItem("E. coli", 5_000_000)
+        organism_dropdown.addItem("Listeria monocytogenes", 3_000_000)
+        organism_dropdown.addItem("Salmonella enterica", 5_000_000)
+
+        # restore the previous choice when reopening configuration
+        organism_dropdown.setCurrentText(self.organism or "E. coli")
+
+        organism_dropdown.setStyleSheet(
             "QComboBox { border: 1px solid #007bff; border-radius: 4px; "
             "padding: 5px; }"
             "QComboBox::drop-down { border: 0px; width: 25px; "
@@ -672,7 +687,8 @@ class MainWindow(QMainWindow):
             "QComboBox QAbstractItemView { selection-background-color: "
             "#007bff; selection-color: white; }"
         )
-        layout.addWidget(oraganism_dropdown)        
+
+        layout.addWidget(organism_dropdown)        
 
         # Reference file selection section
         layout.addWidget(QLabel("Reference File"))
@@ -831,8 +847,8 @@ class MainWindow(QMainWindow):
                 run_name_input=run_name_input,
                 barcode_kit_input=barcode_kit_input_dropdown,
                 barcode_list_widget=barcode_list_widget,
-                lab_name_dropdown=lab_name_dropdown
-            )
+                lab_name_dropdown=lab_name_dropdown,
+                organism_dropdown=organism_dropdown            )
         )
         layout.addWidget(validate_button)
 
@@ -889,10 +905,11 @@ class MainWindow(QMainWindow):
                 }
                 """
             )
-
+    # changed by Amin
     def validate_and_close(
             self, window_dialog, run_name_input, barcode_kit_input,
-            barcode_list_widget, lab_name_dropdown
+            barcode_list_widget, lab_name_dropdown,
+            organism_dropdown
     ):
         """
         Validates the user inputs and closes the dialog if successful.
@@ -907,6 +924,11 @@ class MainWindow(QMainWindow):
         self.lab_name = lab_name_dropdown.currentText().rstrip()
         self.run_name = run_name_input.text().rstrip()
         self.barcode_kit = barcode_kit_input.currentText().rstrip()
+        # added by Amin
+        # Save the organism and get the corresponsing size
+        self.organism = organism_dropdown.currentText()
+        self.genome_size = int(organism_dropdown.currentData())
+        
         self.selected_barcodes = sorted(
             [
                 item.text() for item in barcode_list_widget.selectedItems()
@@ -1055,6 +1077,8 @@ class MainWindow(QMainWindow):
         # Define the header and rows
         header = ['reference', 'pod5_dir', 'output_dir', 'config', 'barcode',
                   'barcode_values']
+        # Add columns for the organism and assumed genome size.
+        header.extend(["organism", "genome_size"])
         # Step 1: Sort the list of selected barcodes
         sorted_barcodes = sorted(self.selected_barcodes)
 
@@ -1078,6 +1102,8 @@ class MainWindow(QMainWindow):
             self.barcode_kit,
             barcode_values_literal
         ]
+        # Write the values in the same order as the added column names.
+        row.extend([self.organism, self.genome_size])
 
         # Set the name and path of the CSV file
         self.configuration_file = os.path.join(
