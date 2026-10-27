@@ -656,19 +656,11 @@ def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
     # Convert HTML to PDF using a system call to weasyprint
     output_pdf_path = os.path.join(report_folder, f'{run_name}_report.pdf')
 
-    # Locate the weasyprint binary; if it's missing, provide a clear error.
-    weasyprint_path = shutil.which('weasyprint') or \
-        '/home/olcbio/miniconda3/envs/poresippr/bin/weasyprint'
-
-    if not os.path.exists(weasyprint_path):
-        raise FileNotFoundError(
-            "Could not find the 'weasyprint' executable. "
-            "Ensure weasyprint is installed and available on PATH."
-        )
-
+    
     try:
         subprocess.run(
-            [weasyprint_path, temp_html_path, output_pdf_path], check=True
+            [sys.executable, "-m", "weasyprint",
+             temp_html_path, output_pdf_path], check=True
         )
     except FileNotFoundError as exc:
         # Raised if the executable is missing / cannot be executed
@@ -784,7 +776,8 @@ def main(
     # Run PoreSippr using subprocess.Popen. Capture stdout and stderr
     if test:
         command = [
-            '/home/olcbio/miniconda3/envs/poresippr/bin/python',
+            #'/home/olcbio/miniconda3/envs/poresippr/bin/python',
+            sys.executable,
             '-u',
             os.path.join(script_path, 'poresippr_placeholder.py'),
             config_file,
@@ -793,7 +786,8 @@ def main(
         ]
     else:
         command = [
-            '/home/olcbio/miniconda3/envs/poresippr/bin/python',
+            #'/home/olcbio/miniconda3/envs/poresippr/bin/python',
+            sys.executable,
             '-u',
             #os.path.join(script_path, 'pipeline', 'poresippr_basecall_scheduler.py'),
             os.path.join(script_path, 'pipeline', 'poresippr_incremental_dorado_scheduler.py'),

@@ -51,13 +51,22 @@ class NoBarcodeReadsError(RuntimeError):
     """Raised when a batch produces no configured-barcode FASTQ reads."""
 
 
-DEFAULT_MODEL_DIRECTORY = (
-    "/home/olcbio/Desktop/amin_work/github/poreSippR/.tools/models/"
-    "dna_r10.4.1_e8.2_400bps_fast@v5.2.0"
+#DEFAULT_MODEL_DIRECTORY = (
+#    "/home/olcbio/Desktop/amin_work/github/poreSippR/.tools/models/"
+#    "dna_r10.4.1_e8.2_400bps_fast@v5.2.0"
+#)
+#DEFAULT_BENCHMARK_FILE = (
+#    "/opt/ont/benchmarks/dorado-batch-size-benchmarks.json"
+#)
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+# Use the model downloaded by make setup in this checkout.
+DEFAULT_MODEL_DIRECTORY = str(
+    PROJECT_ROOT / ".tools" / "models"
+    / "dna_r10.4.1_e8.2_400bps_fast@v5.2.0"
 )
-DEFAULT_BENCHMARK_FILE = (
-    "/opt/ont/benchmarks/dorado-batch-size-benchmarks.json"
-)
+DEFAULT_BENCHMARK_FILE = ""
 FASTQ_SUFFIXES = (".fastq", ".fastq.gz")
 STATE_SCHEMA_VERSION = 1
 
