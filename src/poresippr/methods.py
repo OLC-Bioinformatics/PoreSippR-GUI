@@ -740,11 +740,26 @@ def main(
     sleep_time (int): The time to sleep between iterations. Default is 20.
     """
     # Read the config file and extract the barcode_values
+    # replaced by Amin
+    # The GUI creates one configuration row for each analysis.
     with open(config_file, 'r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            barcode_values = row['barcode_values'].split(',')
+        configuration_rows = list(csv.DictReader(f))
 
+    if len(configuration_rows) != 1:
+        raise ValueError(
+            "The GUI requires exactly one configuration row per analysis."
+        )
+
+    configuration = configuration_rows[0]
+    barcode_values = configuration['barcode_values'].split(',')
+
+    # The organism dropdown already assigns this value.
+    # Older configuration files use the original E. coli default.
+    genome_size = int(configuration.get('genome_size') or 5_000_000)
+
+    if genome_size <= 0:
+        raise ValueError("Genome size must be greater than zero.")
+    
     # Create a dictionary to store the links for seqid:olnid:barcode
     link_dict = {}
 
@@ -793,6 +808,9 @@ def main(
             os.path.join(script_path, 'pipeline', 'poresippr_incremental_dorado_scheduler.py'),
             config_file,
             metadata_file
+            # use the genome size assigned by the organism dropdown.
+            '--genome-size',
+            str(genome_size)
         ]
 
     worker_process = subprocess.Popen(

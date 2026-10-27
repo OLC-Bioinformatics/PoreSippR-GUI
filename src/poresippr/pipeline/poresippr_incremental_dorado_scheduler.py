@@ -59,6 +59,7 @@ class NoBarcodeReadsError(RuntimeError):
 #    "/opt/ont/benchmarks/dorado-batch-size-benchmarks.json"
 #)
 
+# added by Amin
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 # Use the model downloaded by make setup in this checkout.
