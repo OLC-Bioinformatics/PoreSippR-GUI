@@ -807,7 +807,7 @@ def main(
             #os.path.join(script_path, 'pipeline', 'poresippr_basecall_scheduler.py'),
             os.path.join(script_path, 'pipeline', 'poresippr_incremental_dorado_scheduler.py'),
             config_file,
-            metadata_file
+            metadata_file,
             # use the genome size assigned by the organism dropdown.
             '--genome-size',
             str(genome_size)
