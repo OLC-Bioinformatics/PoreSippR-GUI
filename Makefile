@@ -20,5 +20,24 @@ run:
 		echo "See $(LOG_FILE) for errors."; \
 		exit 1; \
 	}
+	
+.PHONY: list-runs clean-analysis clean-runs clean
+
+# Show the available analysis folders.
+list-runs:
+	@ls -d runs/MIN-*/analysis_*
+
+# Delete the analysis supplied on the command line.
+clean-analysis:
+	@test -n "$(ANALYSIS)" || { echo "Specify ANALYSIS=MIN-YYYYMMDD/analysis_YYYYMMDD_HHMMSS"; exit 1; }
+	rm -rf -- "runs/$(ANALYSIS)"
+
+# Delete all analysis folders, keeping runs/README.md.
+clean-runs:
+	rm -rf -- runs/MIN-*/analysis_*
+
+# Delete generated outputs from the old folder layout.
 clean:
-	echo "cleaning"
+	rm -rf -- MIN-20260421 references/MIN-20260421 references/images references/output references/reports output/processed
+	rm -f -- images/iteration_*.html reports/MIN-*_report.pdf
+
