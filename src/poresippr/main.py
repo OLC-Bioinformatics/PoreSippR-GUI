@@ -693,15 +693,32 @@ class MainWindow(QMainWindow):
         # Reference file selection section
         layout.addWidget(QLabel("Reference File"))
         reference_button = QPushButton("Select Reference File", dialog)
-        # added by Amin
-        # if not selected, use the default DB below
-        if not self.reference_file:
-            self.reference_file = os.path.abspath(os.path.join(
-            os.path.dirname(__file__),
-            "..", "..", "references", "PoreSippR_DB_251110.fasta"
-        ))
+        # added by Amin (linked other databases)
+        # Default database for each organism.
+        database_files = {
+            "E. coli": "EColi_DB.fasta",
+            "Listeria monocytogenes": "Listeria_DB.fasta",
+            "Salmonella enterica": "Salmonella_DB.fasta",
+        }
 
-        reference_button.setText(os.path.basename(self.reference_file))
+        def update_reference(organism):
+            # change the default database when the organism changes.
+            # Keep a manually selected file when reopening the same organism.
+            if (
+                not self.reference_file
+                or getattr(self, "reference_organism", None) != organism
+            ):
+                self.reference_file = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__),
+                    "..", "..", "references", database_files[organism]
+                ))
+
+            self.reference_organism = organism
+            reference_button.setText(os.path.basename(self.reference_file))
+
+        organism_dropdown.currentTextChanged.connect(update_reference)
+        update_reference(organism_dropdown.currentText())
+
 
         reference_button.setStyleSheet(
             """
@@ -928,7 +945,7 @@ class MainWindow(QMainWindow):
         # Save the organism and get the corresponsing size
         self.organism = organism_dropdown.currentText()
         self.genome_size = int(organism_dropdown.currentData())
-        
+
         self.selected_barcodes = sorted(
             [
                 item.text() for item in barcode_list_widget.selectedItems()
