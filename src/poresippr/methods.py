@@ -590,7 +590,7 @@ def image_to_base64(image_path):
 
 
 def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
-                      run_name, version):
+                      run_name, version, organism="E. coli"):
     """
     Create a PDF report from provided information and HTML table.
 
@@ -639,6 +639,8 @@ def create_pdf_report(html_file_path, lab_name, num_strains, report_folder,
 
     # Render the HTML content with dynamic data
     html_content = template.render(
+        # added by Amin
+        organism=organism,
         lab_name=lab_name,
         lab_address=lab_details,
         number=num_strains,
@@ -751,6 +753,10 @@ def main(
         )
 
     configuration = configuration_rows[0]
+    # added by Amin
+    # Read the organism saved by the GUI.
+    # Older configuration files default to E. coli.
+    organism = configuration.get('organism') or 'E. coli'
     barcode_values = configuration['barcode_values'].split(',')
 
     # The organism dropdown already assigns this value.
@@ -968,7 +974,9 @@ def main(
                 num_strains=len(barcode_values),
                 report_folder=report_folder,
                 run_name=run_name,
-                version=__version__
+                version=__version__,
+                # added by Amin
+                organism=organism
             )
 
             # Update the current iteration
