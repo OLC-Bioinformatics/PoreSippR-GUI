@@ -947,7 +947,8 @@ def write_coverage_csv(
         text=True,
         capture_output=True,
     )
-    rows: list[tuple[str, int]] = []
+    # added two more values for the coverage and meandepth 
+    rows: list[tuple[str, int, float, float]] = []
     reader = csv.DictReader(
         result.stdout.splitlines(),
         delimiter="\t",
@@ -958,7 +959,22 @@ def write_coverage_csv(
         read_count = int(row.get("numreads", "0"))
 
         if reference_name and read_count > 0:
-            rows.append((reference_name, read_count))
+            # Save the read count, percentage covered, and average depth.
+            # Samtools already reports coverage as a percentage.
+            # For each reference, L is its full length and d_i is the number
+            # of aligned read bases retained by samtools at position i.
+            # Breadth (%) = 100 * count of positions with d_i >= 1 / L.
+            # Mean depth (X) = (d_1 + d_2 + ... + d_L) / L.
+            # Uncovered positions have d_i = 0 and stay in the denominator.
+            # Example: a 1000-base reference with 800 positions each at 5X
+            # and 200 uncovered positions has breadth = 80% and mean depth
+            # = (800 * 5 + 200 * 0) / 1000 = 4X.
+            rows.append((
+                reference_name,
+                read_count,
+                float(row["coverage"]),
+                float(row["meandepth"]),
+            ))
 
     rows.sort(key=lambda item: (-item[1], item[0]))
     temporary = output_path.with_suffix(".tmp.csv")
@@ -970,15 +986,20 @@ def write_coverage_csv(
             newline="",
         ) as handle:
             writer = csv.writer(handle)
-            writer.writerow(
-                ["gene_name", "number_of_reads_mapped"]
-            )
+            writer.writerow([
+                "gene_name",
+                "number_of_reads_mapped",
+                "target_breadth_percent",
+                "target_mean_depth",
+            ])
+
             writer.writerows(rows)
 
             if genome_size > 0:
                 coverage = total_bases / genome_size
+                # sequence-yield
                 writer.writerow(
-                    ["genome_coverage", f"{coverage:.6f}X"]
+                    ["genome_coverage", f"{coverage:.6f}X", "", ""]
                 )
 
         os.replace(temporary, output_path)
