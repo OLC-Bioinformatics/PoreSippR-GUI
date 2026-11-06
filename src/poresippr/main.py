@@ -323,6 +323,8 @@ class MainWindow(QMainWindow):
         # Create the user interface
         self.user_interface = Ui_MainWindow()
         self.user_interface.setupUi(self)
+        # for the report table to shrink and allow the user to scroll through the table
+        self.user_interface.frame_4.setMinimumHeight(0)
         # added by Amin
         # added to allow copying the error messages in the GUI
         self.user_interface.run_label_error.setTextInteractionFlags(
@@ -715,8 +717,8 @@ class MainWindow(QMainWindow):
 
             self.reference_organism = organism
             reference_button.setText(os.path.basename(self.reference_file))
-
-        organism_dropdown.currentTextChanged.connect(update_reference)
+        # signals and slots in PyQt/PySide (a note for Amin)
+        organism_dropdown.currentTextChanged.connect(update_reference) # Qt calls the function with the selected org. but no exec.
         update_reference(organism_dropdown.currentText())
 
 
@@ -1633,8 +1635,13 @@ class MainWindow(QMainWindow):
         # Create a QTextBrowser to display the HTML
         text_browser = QTextBrowser(new_page)
         text_browser.setObjectName(u"textBrowser")
-        text_browser.setAlignment(Qt.AlignCenter)
 
+        # match the font and color of the QTextBrowser to the main window
+        text_browser.setFont(self.font())
+        text_browser.setStyleSheet(
+            "QTextBrowser { background-color: #2c313c; "
+            "color: #e6e6e6; border: 0; }"
+        )
         # Load the HTML file into the QTextBrowser
         with open(html_path, 'r') as f:
             html_content = f.read()
