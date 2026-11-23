@@ -34,6 +34,14 @@ import pandas as pd
 from version import __version__
 
 
+# The GUI assigns these sizes automatically and users only choose the organism.
+ORGANISM_DEFAULTS = {
+    "E. coli": (5_000_000, "EColi_DB.fasta"),
+    "Listeria monocytogenes": (3_000_000, "Listeria_DB.fasta"),
+    "Salmonella enterica": (5_000_000, "Salmonella_DB.fasta"),
+}
+
+
 def determine_script_path():
     """
     Determine the base path of the current Python file or executable.

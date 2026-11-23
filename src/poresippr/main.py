@@ -64,6 +64,7 @@ from PySide6.QtWidgets import (
 
 # Local imports
 from methods import (
+    ORGANISM_DEFAULTS,
     determine_script_path,
     is_valid_fasta,
     main,
@@ -518,6 +519,13 @@ class MainWindow(QMainWindow):
 
         # Initialise the reference file name/path
         self.reference_file = None
+        # Keep one database per organism, including custom files chosen in Mix.
+        self.reference_files = {
+            name: os.path.abspath(os.path.join(
+                os.path.dirname(__file__), "..", "..", "references", filename
+            ))
+            for name, (_, filename) in ORGANISM_DEFAULTS.items()
+        }
 
         # Initialise the parent directory of the reference file
         self.working_dir = None
@@ -664,9 +672,10 @@ class MainWindow(QMainWindow):
         layout.addWidget(QLabel("Organism"))
         organism_dropdown = QComboBox(dialog)
         # show the organism name and store its default genome size.
-        organism_dropdown.addItem("E. coli", 5_000_000)
-        organism_dropdown.addItem("Listeria monocytogenes", 3_000_000)
-        organism_dropdown.addItem("Salmonella enterica", 5_000_000)
+        for name, (size, _) in ORGANISM_DEFAULTS.items():
+            organism_dropdown.addItem(name, size)
+        # Each barcode gets its own organism and genome size in Mix mode.
+        organism_dropdown.addItem("Mix", None)
 
         # restore the previous choice when reopening configuration
         organism_dropdown.setCurrentText(self.organism or "E. coli")
@@ -697,23 +706,34 @@ class MainWindow(QMainWindow):
         reference_button = QPushButton("Select Reference File", dialog)
         # added by Amin (linked other databases)
         # Default database for each organism.
-        database_files = {
-            "E. coli": "EColi_DB.fasta",
-            "Listeria monocytogenes": "Listeria_DB.fasta",
-            "Salmonella enterica": "Salmonella_DB.fasta",
-        }
+        mixed_references = QWidget(dialog)
+        mixed_reference_layout = QVBoxLayout(mixed_references)
+        mixed_reference_layout.setContentsMargins(0, 0, 0, 0)
+        for name in ORGANISM_DEFAULTS:
+            row = QHBoxLayout()
+            row.addWidget(QLabel(name))
+            button = QPushButton(os.path.basename(self.reference_files[name]))
+            button.clicked.connect(
+                lambda checked=False, name=name, button=button:
+                    self.select_reference_file(dialog, button, name)
+            )
+            row.addWidget(button)
+            mixed_reference_layout.addLayout(row)
 
         def update_reference(organism):
+            mixed_references.setVisible(organism == "Mix")
+            reference_button.setEnabled(organism != "Mix")
+            if organism == "Mix":
+                reference_button.setText("Databases for the assigned organisms")
+                self.reference_organism = organism
+                return
             # change the default database when the organism changes.
             # Keep a manually selected file when reopening the same organism.
             if (
                 not self.reference_file
                 or getattr(self, "reference_organism", None) != organism
             ):
-                self.reference_file = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__),
-                    "..", "..", "references", database_files[organism]
-                ))
+                self.reference_file = self.reference_files[organism]
 
             self.reference_organism = organism
             reference_button.setText(os.path.basename(self.reference_file))
@@ -743,6 +763,7 @@ class MainWindow(QMainWindow):
             lambda: self.select_reference_file(dialog, reference_button)
         )
         layout.addWidget(reference_button)
+        layout.addWidget(mixed_references)
 
         # Run name input section
         layout.addWidget(QLabel("Run Name"))
@@ -834,7 +855,11 @@ class MainWindow(QMainWindow):
         # Add items to the list widget
         for i in range(1, 25):
             barcode_list_widget.addItem(f"{i:02}")
-
+            # Highlight any barcode that was selected previously.
+            # The user can still select or deselect it.
+            barcode_list_widget.item(i - 1).setSelected(
+                f"{i:02}" in self.selected_barcodes
+            )
         layout.addWidget(barcode_list_widget)
         
         # Default values # added by Amin
@@ -877,7 +902,7 @@ class MainWindow(QMainWindow):
         # Execute the dialog
         dialog.exec()
 
-    def select_reference_file(self, window_dialog, button):
+    def select_reference_file(self, window_dialog, button, organism=None):
         """
         Opens a file dialog to select a reference file and updates the button
         with the selected file's name and green styling.
@@ -891,7 +916,7 @@ class MainWindow(QMainWindow):
         selected_file, _ = QFileDialog.getOpenFileName(
             window_dialog,
             caption="Select Reference File",
-            dir=self.reference_file or "",
+            dir=self.reference_files.get(organism, self.reference_file) or "",
             filter="All Files (*)"
         )
 
@@ -899,11 +924,14 @@ class MainWindow(QMainWindow):
         if not selected_file:
             return
 
-        self.reference_file = selected_file
+        selected_organism = organism or self.reference_organism
+        self.reference_files[selected_organism] = selected_file
+        if organism is None:
+            self.reference_file = selected_file
 
-        if self.reference_file:
+        if selected_file:
             # Extract the file name from the path
-            file_name = os.path.basename(self.reference_file)
+            file_name = os.path.basename(selected_file)
 
             # Update the button text and style
             button.setText(file_name)
@@ -946,7 +974,7 @@ class MainWindow(QMainWindow):
         # added by Amin
         # Save the organism and get the corresponsing size
         self.organism = organism_dropdown.currentText()
-        self.genome_size = int(organism_dropdown.currentData())
+        self.genome_size = organism_dropdown.currentData()
 
         self.selected_barcodes = sorted(
             [
@@ -962,7 +990,10 @@ class MainWindow(QMainWindow):
             invalid_messages.append("Lab Name cannot be blank.")
 
         # Ensure a reference file is selected
-        if not self.reference_file:
+        if self.organism == "Mix":
+            # Only databases actually assigned to barcodes are validated later.
+            pass
+        elif not self.reference_file:
             invalid_messages.append("Reference file is required.")
         else:
             # Validate the reference file
