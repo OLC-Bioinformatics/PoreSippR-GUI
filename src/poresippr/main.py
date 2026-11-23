@@ -774,6 +774,31 @@ class MainWindow(QMainWindow):
 
         layout.addWidget(run_name_input)
 
+        # Optional folder override. Leave blank for the normal MinKNOW lookup.
+        layout.addWidget(QLabel("POD5 folder"))
+        pod5_folder_layout = QHBoxLayout()
+        pod5_folder_input = QLineEdit(dialog)
+        pod5_folder_input.setPlaceholderText(
+            "Leave blank to locate the MinKNOW run automatically"
+        )
+        # Restore an explicit choice when configuration is reopened.
+        pod5_folder_input.setText(getattr(self, "pod5_folder_override", ""))
+        pod5_browse_button = QPushButton("Browse", dialog)
+
+        def browse_pod5_folder():
+            folder = QFileDialog.getExistingDirectory(
+                dialog, "Select POD5 folder",
+                pod5_folder_input.text().strip() or os.path.expanduser("~"),
+            )
+            # Cancelling keeps the existing path.
+            if folder:
+                pod5_folder_input.setText(folder)
+
+        pod5_browse_button.clicked.connect(browse_pod5_folder)
+        pod5_folder_layout.addWidget(pod5_folder_input)
+        pod5_folder_layout.addWidget(pod5_browse_button)
+        layout.addLayout(pod5_folder_layout)
+
         # Barcode kit selection section
         #layout.addWidget(QLabel("Barcode Kit"))
         #barcode_kit_input = QLineEdit(dialog)
@@ -892,7 +917,9 @@ class MainWindow(QMainWindow):
                 barcode_kit_input=barcode_kit_input_dropdown,
                 barcode_list_widget=barcode_list_widget,
                 lab_name_dropdown=lab_name_dropdown,
-                organism_dropdown=organism_dropdown            )
+                organism_dropdown=organism_dropdown,
+                pod5_folder_input=pod5_folder_input,
+            )
         )
         layout.addWidget(validate_button)
 
@@ -956,7 +983,7 @@ class MainWindow(QMainWindow):
     def validate_and_close(
             self, window_dialog, run_name_input, barcode_kit_input,
             barcode_list_widget, lab_name_dropdown,
-            organism_dropdown
+            organism_dropdown, pod5_folder_input
     ):
         """
         Validates the user inputs and closes the dialog if successful.
@@ -966,6 +993,7 @@ class MainWindow(QMainWindow):
         :param barcode_kit_input: The QComboBox for the barcode kit.
         :param barcode_list_widget: The QListWidget for the selected barcodes.
         :param lab_name_dropdown: The QComboBox for the lab name.
+        :param pod5_folder_input: Optional folder to watch instead of MinKNOW lookup.
         """
         # Capture inputs
         self.lab_name = lab_name_dropdown.currentText().rstrip()
@@ -1023,31 +1051,39 @@ class MainWindow(QMainWindow):
         if not self.selected_barcodes:
             invalid_messages.append("At least one barcode must be selected.")
 
-        # Validate if pod5 directory exists
-        pod5_dir = os.path.join(
-            '/var/lib/minknow/data/', self.run_name, 'no_sample_id'
-        )
-
-        if not os.path.exists(pod5_dir):
-            invalid_messages.append(
-                f"Run directory {pod5_dir} does not exist. Please ensure "
-                f"that you supplied the correct run name, and that the run "
-                f"has started"
+        # Save the override separately so reopening an automatic configuration
+        # does not accidentally turn its old MinKNOW path into a fixed choice.
+        self.pod5_folder_override = pod5_folder_input.text().strip()
+        if self.pod5_folder_override:
+            self.pod5_dir = os.path.abspath(
+                os.path.expanduser(self.pod5_folder_override)
             )
-        else:
-            # Check if the run-specific output folder exists
-            pod5_dirs = glob(os.path.join(pod5_dir, '*/'))
-            if not pod5_dirs:
+            # Existing empty folders are allowed; new POD5 files may arrive later.
+            if not os.path.isdir(self.pod5_dir):
                 invalid_messages.append(
-                    "No pod5 files found in the directory. Please wait for "
-                    "files to be produced. This can take up to 45 minutes "
-                    "after starting a run"
+                    f"POD5 folder does not exist: {self.pod5_dir}"
                 )
-
-            # Add 'pod5' to self.pod5_dir
-            self.pod5_dir = os.path.join(
-                pod5_dirs[0], 'pod5'
+        else:
+            # With no override, keep the existing MinKNOW run lookup.
+            pod5_dir = os.path.join(
+                '/var/lib/minknow/data/', self.run_name, 'no_sample_id'
             )
+            if not os.path.isdir(pod5_dir):
+                invalid_messages.append(
+                    f"Run directory {pod5_dir} does not exist. Please ensure "
+                    f"that you supplied the correct run name, and that the run "
+                    f"has started"
+                )
+            else:
+                pod5_dirs = glob(os.path.join(pod5_dir, '*/'))
+                if not pod5_dirs:
+                    invalid_messages.append(
+                        "No pod5 files found in the directory. Please wait for "
+                        "files to be produced. This can take up to 45 minutes "
+                        "after starting a run"
+                    )
+                else:
+                    self.pod5_dir = os.path.join(pod5_dirs[0], 'pod5')
 
         # Display warning message if there are invalid inputs
         if invalid_messages:
