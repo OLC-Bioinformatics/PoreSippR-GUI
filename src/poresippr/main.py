@@ -1233,10 +1233,13 @@ class MainWindow(QMainWindow):
 
         # Initialize the QTableWidget within the dialog
         table = CustomTableWidget(dialog)
-        table.setColumnCount(3)
+        table.setColumnCount(4 if self.organism == "Mix" else 3)
 
         # Define the headers for the table columns
-        table.setHorizontalHeaderLabels(["Barcode", "SEQID", "OLNID"])
+        headers = ["Barcode", "SEQID", "OLNID"]
+        if self.organism == "Mix":
+            headers.append("Organism")
+        table.setHorizontalHeaderLabels(headers)
         table.setRowCount(len(self.selected_barcodes))
 
         # Apply the custom delegate to the SEQID and OLNID columns
@@ -1258,7 +1261,9 @@ class MainWindow(QMainWindow):
 
         # Populate the first column of the table with barcode values
         for i, barcode in enumerate(self.selected_barcodes):
-            table.setItem(i, 0, QTableWidgetItem(barcode))
+            barcode_item = QTableWidgetItem(barcode)
+            barcode_item.setFlags(barcode_item.flags() & ~Qt.ItemIsEditable)
+            table.setItem(i, 0, barcode_item)
 
             # SEQID column as empty
             #table.setItem(i, 1, QTableWidgetItem(""))
@@ -1277,6 +1282,13 @@ class MainWindow(QMainWindow):
             table.setItem(
                 i, 2, QTableWidgetItem(previous.get("OLNID", ""))
             )
+            if self.organism == "Mix":
+                selector = QComboBox(table)
+                selector.addItem("Select organism")
+                selector.addItems(list(ORGANISM_DEFAULTS))
+                if previous.get("Organism") in ORGANISM_DEFAULTS:
+                    selector.setCurrentText(previous["Organism"])
+                table.setCellWidget(i, 3, selector)
 
 
         # Set initial widths for SEQID and OLNID columns
@@ -1417,6 +1429,8 @@ class MainWindow(QMainWindow):
             int(self.screen_size.width() * 0.3),
             int(self.screen_size.height() * 0.45)
         )
+        if self.organism == "Mix":
+            dialog.setMinimumWidth(max(dialog.minimumWidth(), 780))
 
         # Display the dialog and block input to the main window until closed
         dialog.exec()
@@ -1448,12 +1462,27 @@ class MainWindow(QMainWindow):
 
         # Reset sequence_info to avoid duplicates
         self.sequence_info = []
+        validated_references = set()
 
         for row in range(table.rowCount()):
             # Retrieve SEQID, barcode, and OLNID from the table
-            seqid = table.item(row, 1).text().rstrip()
-            barcode = table.item(row, 0).text().rstrip()
-            olnid = table.item(row, 2).text().rstrip()
+            seqid = table.item(row, 1).text().rstrip() if table.item(row, 1) else ""
+            barcode = table.item(row, 0).text().rstrip() if table.item(row, 0) else ""
+            olnid = table.item(row, 2).text().rstrip() if table.item(row, 2) else ""
+            selector = table.cellWidget(row, 3) if self.organism == "Mix" else None
+            organism = selector.currentText() if selector else self.organism
+            if organism not in ORGANISM_DEFAULTS:
+                invalid_messages.append(f"Choose an organism for barcode '{barcode}'.")
+                continue
+            reference = (
+                self.reference_files[organism]
+                if self.organism == "Mix" else self.reference_file
+            )
+            # Validate each selected database once, even with many barcodes.
+            if reference not in validated_references:
+                if not is_valid_fasta(reference):
+                    invalid_messages.append(f"Invalid database for {organism}: {reference}")
+                validated_references.add(reference)
 
             # Check if SEQID is empty
             if seqid == "":
@@ -1470,7 +1499,12 @@ class MainWindow(QMainWindow):
                 else:
                     seqid_to_barcodes[seqid] = [barcode]
                     self.sequence_info.append(
-                        {'barcode': barcode, 'SEQID': seqid, 'OLNID': olnid})
+                        {'barcode': barcode, 'SEQID': seqid, 'OLNID': olnid,
+                         'Organism': organism, 'Reference': reference,
+                         'GenomeSize': ORGANISM_DEFAULTS[organism][0]})
+
+        if sorted(entry['barcode'] for entry in self.sequence_info) != sorted(self.selected_barcodes):
+            invalid_messages.append("Each selected barcode must have exactly one sample assignment.")
 
         # Generate messages for non-unique SEQIDs
         for seqid, barcodes in seqid_to_barcodes.items():
@@ -1497,12 +1531,21 @@ class MainWindow(QMainWindow):
         Creates a metadata CSV file with the barcode, SEQID, and OLNID values.
         """
         # Define the header
-        header = ['Barcode', 'SEQID', 'OLNID']
+        header = ['Barcode', 'SEQID', 'OLNID', 'Organism', 'Reference', 'GenomeSize']
 
         # Define the rows
         rows = []
         for entry in self.sequence_info:
-            rows.append([entry['barcode'], entry['SEQID'], entry['OLNID']])
+            rows.append([
+                entry['barcode'], entry['SEQID'], entry['OLNID'],
+                entry['Organism'], entry['Reference'], entry['GenomeSize'],
+            ])
+
+        if self.organism == "Mix" and self.sequence_info:
+            # The scheduler still needs a default reference in input.csv.
+            # Actual mapping uses the reference saved for each barcode.
+            self.reference_file = self.sequence_info[0]['Reference']
+            self.create_input_csv()
 
         # Update the metadata file path
         self.metadata_file = os.path.join(self.working_dir, 'metadata.csv')

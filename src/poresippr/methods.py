@@ -765,7 +765,9 @@ def main(
     # Read the organism saved by the GUI.
     # Older configuration files default to E. coli.
     organism = configuration.get('organism') or 'E. coli'
-    barcode_values = configuration['barcode_values'].split(',')
+    if organism not in (*ORGANISM_DEFAULTS, 'Mix'):
+        raise ValueError(f'Unsupported organism: {organism}')
+    barcode_values = [value.strip(' "') for value in configuration['barcode_values'].split(',')]
 
     # The organism dropdown already assigns this value.
     # Older configuration files use the original E. coli default.
@@ -773,7 +775,9 @@ def main(
 
     if genome_size <= 0:
         raise ValueError("Genome size must be greater than zero.")
-    
+    # Read each assigned database once, even when many barcodes share it.
+    reference_ids_by_path = {}
+
     # Create a dictionary to store the links for seqid:olnid:barcode
     link_dict = {}
 
@@ -781,12 +785,39 @@ def main(
     with open(metadata_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
+            barcode = int(row['Barcode'])
+            if barcode not in {int(value) for value in barcode_values}:
+                continue
+            sample_organism = row.get('Organism') or organism
+            if sample_organism not in ORGANISM_DEFAULTS:
+                raise ValueError(f'Choose an organism for barcode {barcode}.')
+            if organism != 'Mix' and sample_organism != organism:
+                raise ValueError(f'Barcode {barcode} does not match the selected organism.')
+            reference = os.path.abspath(row.get('Reference') or configuration['reference'])
+            sample_genome_size = int(row.get('GenomeSize') or (
+                ORGANISM_DEFAULTS[sample_organism][0] if organism == 'Mix' else genome_size
+            ))
+            if sample_genome_size <= 0:
+                raise ValueError(f'Genome size must be positive for barcode {barcode}.')
+            if row['SEQID'] in link_dict or any(int(value['Barcode']) == barcode for value in link_dict.values()):
+                raise ValueError('Sample IDs and barcode assignments must be unique.')
+            if reference not in reference_ids_by_path:
+                reference_ids_by_path[reference] = {
+                    record.id for record in SeqIO.parse(reference, 'fasta')
+                }
+                if not reference_ids_by_path[reference]:
+                    raise ValueError(f'No reference sequences found in {reference}')
             # Populate link_dict with seqid as the key and a nested dictionary
             # {olnid: barcode} as the value
             link_dict[row['SEQID']] = {
                 "OLNID": row['OLNID'],
-                "Barcode": row['Barcode']
+                "Barcode": row['Barcode'],
+                "Organism": sample_organism,
+                "Reference": reference,
+                "GenomeSize": sample_genome_size,
             }
+    if {int(value['Barcode']) for value in link_dict.values()} != {int(value) for value in barcode_values}:
+        raise ValueError('Every selected barcode must have a sample assignment.')
 
     # Delete the output_folder if it exists and recreate it
     if os.path.exists(output_folder):
